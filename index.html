@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Cash-flowr - Inscription</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* --- CSS existant modifié --- */
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+    /* --- CSS modifié avec nouveau fond et nouvelles polices --- */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
     
-    /* Nouveau fond avec dégradé vert/bleu très clair */
+    /* Nouveau fond avec dégradé vert/bleu plus foncé */
     body {
-      background: linear-gradient(135deg, #f0f8f0 0%, #e6f2f8 100%);
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
       color:#333;
       min-height:100vh;
       display:flex;
@@ -23,31 +24,36 @@
     .container{width:100%;max-width:480px;margin:0 auto}
     .logo-header{text-align:center;margin-bottom:20px}
     
-    /* Nouveau style pour le logo avec icône verte */
+    /* Nouveau style pour le logo avec police stylée */
     .logo{
       font-size:2.8rem;
-      font-weight:700;
+      font-weight:800;
       color:#2c3e50;
       display:flex;
       align-items:center;
       justify-content:center;
       margin-bottom:10px;
       position: relative;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
     }
     
     /* Conteneur pour les pièces superposées */
     .coin-container {
       position: relative;
-      margin-right: 10px;
+      margin-right: 12px;
       height: 50px;
       width: 50px;
     }
     
-    /* Style pour les pièces superposées avec couleur verte */
+    /* Style pour les pièces superposées avec couleur verte plus foncée */
     .coin {
       position: absolute;
-      color: #4CD964;
+      color: #2a8c5a;
       font-size: 2.2rem;
+      text-shadow: 0px 1px 2px rgba(0,0,0,0.2);
     }
     
     /* Positionnement des 4 pièces superposées */
@@ -56,12 +62,12 @@
     .coin-3 { top: 10px; left: 10px; z-index: 2; opacity: 0.6; }
     .coin-4 { top: 15px; left: 15px; z-index: 1; opacity: 0.4; }
     
-    .tagline{color:#7f8c8d;font-size:1.1rem;margin-bottom:10px}
+    .tagline{color:#5a6f7d;font-size:1.1rem;margin-bottom:10px;font-weight:500}
     
     .card{
       background-color:white;
       border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.1);
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
       overflow:hidden;
       padding:25px;
     }
@@ -92,9 +98,9 @@
     .login-link{text-align:center;margin-top:25px;font-size:0.95rem;color:#7f8c8d}
     .login-link a{color:#3498db;text-decoration:none;font-weight:500}
     .login-link a:hover{text-decoration:underline}
-    .footer{margin-top:30px;text-align:center;color:#7f8c8d;font-size:0.85rem}
+    .footer{margin-top:30px;text-align:center;color:#5a6f7d;font-size:0.85rem}
     .footer-links{margin-top:10px;display:flex;justify-content:center;gap:15px}
-    .footer-links a{color:#7f8c8d;text-decoration:none}
+    .footer-links a{color:#5a6f7d;text-decoration:none}
     .footer-links a:hover{text-decoration:underline;color:#3498db}
     .error-message{color:#e74c3c;background-color:#fde8e6;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
     .success-message{color:#2ecc71;background-color:#e8f6ef;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
@@ -237,7 +243,7 @@
 
   <div class="container">
     <div class="logo-header">
-      <!-- Nouveau logo avec 4 pièces superposées en vert -->
+      <!-- Nouveau logo avec 4 pièces superposées en vert foncé -->
       <div class="logo">
         <div class="coin-container">
           <i class="fas fa-coins coin coin-1"></i>
