@@ -220,7 +220,35 @@
         transform: scaleX(0);
       }
     }
-    
+
+    /* --- Ajustements spécifiques pour la case "Se souvenir de moi" --- */
+    /* Empêche la checkbox d'absorber 100% de largeur (règle générale input {width:100%}) */
+    .links input[type="checkbox"] {
+      width: auto;
+      padding: 0;
+      margin: 0;
+      display: inline-block;
+      height: auto;
+    }
+
+    /* Place la case et le label sur la même ligne, centrés verticalement, sans espace inutile */
+    .remember-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      /* empêche ce bloc d'étirer la largeur disponible */
+      max-width: 100%;
+    }
+
+    /* Par défaut les labels sont block; override localement pour que le label soit inline */
+    .remember-wrap label {
+      display: inline-block;
+      margin: 0;
+      font-weight: normal; /* conserve la même apparence que vous aviez */
+      color: #2c3e50;
+      font-size: 0.95rem;
+    }
+
     @media (max-width:576px){
       .card{padding:20px}
       .logo{font-size:2.2rem}
@@ -248,6 +276,9 @@
         gap: 10px;
         align-items: center;
       }
+
+      /* Dans mobile, garder case+label sur la même ligne mais bien ajustés */
+      .remember-wrap { gap: 8px; }
     }
   </style>
 </head>
@@ -298,9 +329,9 @@
         </div>
         
         <div class="links">
-          <div>
+          <div class="remember-wrap">
             <input type="checkbox" id="remember" name="remember">
-            <label for="remember" style="display: inline; font-weight: normal;">Se souvenir de moi</label>
+            <label for="remember">Se souvenir de moi</label>
           </div>
           <a href="forgot-password.html">Mot de passe oublié?</a>
         </div>
