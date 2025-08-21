@@ -158,7 +158,7 @@
             flex: 1;
         }
         
-        /* ---------- MODIFIED: Checkbox styles (only this part changed) ---------- */
+        /* ---------- Checkbox styles ---------- */
         .checkbox-group {
             display: flex;
             align-items: flex-start;
@@ -169,18 +169,12 @@
         .checkbox-group input[type="checkbox"] {
             width: 18px;
             height: 18px;
-            margin-top: 3px; /* align with first text line */
+            margin-top: 3px;
             flex-shrink: 0;
-            accent-color: #4CD964; /* green accent like the button */
+            accent-color: #4CD964;
             cursor: pointer;
         }
 
-        /* Use a block for the text so it wraps to two short lines on typical widths */
-        .terms-text {
-            font-size: 0. nine rem; /* fallback removed — keeping original scale below */
-        }
-
-        /* ensure compact readable lines, max two visible lines visually */
         .terms-text {
             font-size: 0.85rem;
             line-height: 1.35;
@@ -300,22 +294,22 @@
             
             <form id="registrationForm">
                 <div class="form-group">
-                    <label for="firstName">Prénom</label>
+                    <label for="username">Nom d'utilisateur</label>
                     <div class="input-group">
                         <div class="input-icon">
                             <i class="fas fa-user"></i>
                         </div>
-                        <input type="text" id="firstName" name="firstName" required placeholder="Votre prénom">
+                        <input type="text" id="username" name="username" required placeholder="Choisissez votre nom d'utilisateur">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="lastName">Nom</label>
+                    <label for="par">Par (Parrain)</label>
                     <div class="input-group">
                         <div class="input-icon">
-                            <i class="fas fa-user"></i>
+                            <i class="fas fa-user-friends"></i>
                         </div>
-                        <input type="text" id="lastName" name="lastName" required placeholder="Votre nom">
+                        <input type="text" id="par" name="par" placeholder="Nom d'utilisateur de votre parrain" readonly>
                     </div>
                 </div>
                 
@@ -385,15 +379,13 @@
                     </div>
                 </div>
                 
-                <!-- ---------- CHECKBOX: only this block changed to be compact and two-line ---------- -->
                 <div class="checkbox-group">
                     <input type="checkbox" id="terms" name="terms" required>
                     <div class="terms-text">
-                        En cochant cette case, j'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a> de Cash-flowr.<br>
-                        Mon compte devra être activé avec un paiement de <strong>3 100 FCFA</strong>.
+                        En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de Cash-flowr.<br>
+                        Mon compte devra être activé <strong>après mon paiement</strong>.
                     </div>
                 </div>
-                <!-- ------------------------------------------------------------------------------- -->
                 
                 <button type="submit" class="btn">
                     <i class="fas fa-user-plus"></i> S'inscrire maintenant
@@ -406,11 +398,11 @@
         </div>
         
         <div class="footer">
-            <div>© 2023 Cash-flowr. Tous droits réservés.</div>
+            <div>© 2025 Cash-flowr. Tous droits réservés.</div>
             <div class="footer-links">
-                <a href="#">Conditions d'utilisation</a>
-                <a href="#">Politique de confidentialité</a>
-                <a href="#">Support</a>
+                <a href="terms.html">Conditions d'utilisation</a>
+                <a href="privacy.html">Politique de confidentialité</a>
+                <a href="support.html">Support</a>
             </div>
         </div>
     </div>
@@ -443,6 +435,14 @@
             };
             
             return flags[countryCode] || '🇨🇮';
+        }
+        
+        // Récupérer le paramètre 'par' de l'URL et le pré-remplir dans le champ
+        function getUrlParameter(name) {
+            name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
         
         // Validation du formulaire
@@ -481,6 +481,12 @@
         // initialize default country code on load
         document.addEventListener('DOMContentLoaded', () => {
             updateCountryCode();
+            
+            // Pré-remplir le champ "Par" si un paramètre est présent dans l'URL
+            const parValue = getUrlParameter('par');
+            if (parValue) {
+                document.getElementById('par').value = parValue;
+            }
         });
     </script>
 </body>
