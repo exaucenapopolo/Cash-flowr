@@ -6,7 +6,7 @@
   <title>Cash-flowr - Inscription</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Ton CSS existant (inchangé) */
+    /* --- Ton CSS existant (inchangé) --- */
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
     body{background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);color:#333;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
     .container{width:100%;max-width:480px;margin:0 auto}
@@ -35,7 +35,7 @@
     .terms-text{font-size:0.85rem;line-height:1.35;color:#7f8c8d;max-width:calc(100% - 32px)}
     .terms-text a{color:#3498db;text-decoration:none;font-weight:500}
     .terms-text a:hover{text-decoration:underline}
-    .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:#fff;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
+    .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:white;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
     .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
     .btn:active{transform:translateY(0)}
     .login-link{text-align:center;margin-top:25px;font-size:0.95rem;color:#7f8c8d}
@@ -157,13 +157,13 @@
     </div>
   </div>
 
-  <!-- Firebase + logique d'inscription -->
+  <!-- ---------- Firebase + logique d'inscription (modulaire v9) ---------- -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-    import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+    // --- CONFIG --- (vérifie que c'est le projet où tu as déployé les règles)
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
@@ -175,44 +175,48 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Expose pour debug si besoin
-    window.firebaseAuth = auth;
-    window.firebaseDb = db;
-    window.firebaseCreateUser = createUserWithEmailAndPassword;
-    window.firebaseUpdateProfile = updateProfile;
-    window.firebaseDoc = doc;
-    window.firebaseGetDoc = getDoc;
-    window.firebaseRunTransaction = runTransaction;
-
     // Helpers UI
-    function showError(message){ const el=document.getElementById('errorMessage'); el.textContent=message; el.style.display='block'; setTimeout(()=>el.style.display='none',5000); }
-    function showSuccess(message){ const el=document.getElementById('successMessage'); el.textContent=message; el.style.display='block'; setTimeout(()=>el.style.display='none',5000); }
+    const errorEl = document.getElementById('errorMessage');
+    const successEl = document.getElementById('successMessage');
 
+    function showError(message) {
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      setTimeout(() => errorEl.style.display = 'none', 6000);
+    }
+    function showSuccess(message) {
+      successEl.textContent = message;
+      successEl.style.display = 'block';
+      setTimeout(() => successEl.style.display = 'none', 4000);
+    }
+
+    // utils
     function getFlag(countryCode){
       const flags = {'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪','tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩'};
       return flags[countryCode]||'🇨🇮';
     }
-
-    function updateCountryCode(){
+    function updateCountryCode() {
       const countrySelect = document.getElementById('country');
       const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-      const countryCode = selectedOption.getAttribute('data-code') || '+225';
-      const countryFlag = getFlag(selectedOption.value) || '🇨🇮';
-      document.getElementById('countryCode').textContent = countryCode;
-      document.getElementById('selectedFlag').textContent = countryFlag;
+      const code = selectedOption?.getAttribute('data-code') || '+225';
+      const flag = getFlag(selectedOption?.value);
+      document.getElementById('countryCode').textContent = code;
+      document.getElementById('selectedFlag').textContent = flag;
     }
 
+    // quick existence check (UI-level; final check in transaction)
     async function checkUsernameExists(username){
+      if(!username) return false;
       try {
         const ref = doc(db, 'usernames', username);
         const snap = await getDoc(ref);
         return snap.exists();
-      } catch(err){
+      } catch (err) {
         console.error('checkUsernameExists error', err);
+        // return true conservatively? we'll just return false to let transaction handle conflicts.
         return false;
       }
     }
@@ -228,14 +232,16 @@
       const phone = document.getElementById('phone').value.trim();
       const parrain = document.getElementById('par').value || null;
 
-      if(password !== confirmPassword){ showError('Les mots de passe ne correspondent pas.'); return; }
-      if(!document.getElementById('terms').checked){ showError("Veuillez accepter les conditions d'utilisation et la politique de confidentialité."); return; }
-      if(!username){ showError("Choisissez un nom d'utilisateur."); return; }
+      // basic validation
+      if (!username) { showError('Choisissez un nom d\'utilisateur.'); return; }
+      if (password !== confirmPassword) { showError('Les mots de passe ne correspondent pas.'); return; }
+      if (!document.getElementById('terms').checked) { showError('Veuillez accepter les conditions.'); return; }
 
-      // check quick existence
-      const usernameExists = await checkUsernameExists(username);
-      if(usernameExists){ showError("Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre."); return; }
+      // quick username check for UX (not a replacement for transaction)
+      const quickExists = await checkUsernameExists(username);
+      if (quickExists) { showError('Ce nom d\'utilisateur est déjà pris.'); return; }
 
+      // UI state
       const submitBtn = this.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
@@ -243,64 +249,76 @@
 
       try {
         // 1) create auth user
-        const userCredential = await window.firebaseCreateUser(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2) make sure the token is ready (avoid permission race)
+        // 2) ensure token is ready (avoid permission race)
         await user.getIdToken(true);
 
-        // Build userData
+        // 3) prepare user data
         const userData = {
           uid: user.uid,
           username,
           email,
           country,
-          phone: document.getElementById('countryCode').textContent + phone,
+          phone: document.getElementById('countryCode').textContent + (phone || ''),
           parrain,
           createdAt: new Date(),
           status: 'pending_payment'
         };
 
-        // 3) Run a transaction to atomically create both docs (prevent race on username)
+        // 4) run a transaction: check username doc doesn't exist then set both docs
         await runTransaction(db, async (tx) => {
           const usernameRef = doc(db, 'usernames', username);
           const usernameSnap = await tx.get(usernameRef);
-          if(usernameSnap.exists()){
-            // signaler pour capturer dans catch
+          if (usernameSnap.exists()) {
+            // username already taken — abort
             throw new Error('USERNAME_TAKEN_IN_TRANSACTION');
           }
           const userRef = doc(db, 'users', user.uid);
           tx.set(userRef, userData);
-          tx.set(usernameRef, { uid: user.uid });
+          tx.set(usernameRef, { uid: user.uid, createdAt: new Date() });
         });
 
-        // 4) update auth profile displayName
+        // 5) update profile displayName
         await updateProfile(user, { displayName: username });
 
-        showSuccess('Inscription réussie! Vous allez être redirigé vers la page de paiement.');
-        setTimeout(()=> window.location.href = 'paiement.html', 1500);
+        // 6) success -> redirect to paiement.html (make sure file exists at same path)
+        showSuccess('Inscription réussie ! Redirection vers la page de paiement...');
+        // small delay for UX
+        setTimeout(() => {
+          // use assign so that devtools shows navigation; keep it relative
+          window.location.assign('paiement.html');
+        }, 900);
 
-      } catch(error) {
-        console.error('Inscription erreur:', error);
-        let msg = "Une erreur s'est produite lors de l'inscription.";
-        if(error.code === 'auth/email-already-in-use') msg = "Cette adresse email est déjà utilisée par un autre compte.";
-        else if(error.code === 'auth/invalid-email') msg = "L'adresse email n'est pas valide.";
-        else if(error.code === 'auth/operation-not-allowed') msg = "L'inscription par email/mot de passe n'est pas activée.";
-        else if(error.code === 'auth/weak-password') msg = "Le mot de passe est trop faible. Il doit contenir au moins 6 caractères.";
-        else if(error.message === 'USERNAME_TAKEN_IN_TRANSACTION') msg = "Le nom d'utilisateur a été pris. Choisissez-en un autre.";
-        else msg = error.message || msg;
+      } catch (error) {
+        console.error('Registration error:', error);
 
-        showError(msg);
+        // Friendly error messages
+        let message = "Une erreur s'est produite lors de l'inscription.";
+        if (error.code === 'auth/email-already-in-use') message = "Cette adresse email est déjà utilisée par un autre compte.";
+        else if (error.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
+        else if (error.code === 'auth/operation-not-allowed') message = "L'inscription par email/mot de passe n'est pas activée dans Firebase Auth.";
+        else if (error.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
+        else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
+        else if (error.code === 'permission-denied' || /permission-denied/i.test(error.message)) {
+          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + usernames).";
+        } else {
+          // use server error message if available
+          message = error.message || message;
+        }
+
+        showError(message);
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
       }
     });
 
-    // init UI
-    document.addEventListener('DOMContentLoaded', ()=>{
+    // init UI and prefill par param
+    document.addEventListener('DOMContentLoaded', () => {
       updateCountryCode();
       const parValue = (new URLSearchParams(location.search)).get('par') || '';
-      if(parValue) document.getElementById('par').value = parValue;
+      if (parValue) document.getElementById('par').value = parValue;
     });
   </script>
 </body>
