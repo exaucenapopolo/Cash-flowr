@@ -416,13 +416,13 @@
     </div>
   </div>
 
-  <!-- ---------- Firebase + logique d'inscription (modulaire v9) ---------- -->
+<!-- ---------- Firebase + logique d'inscription (modulaire v9) ---------- -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // --- CONFIG --- (vérifie que c'est le projet où tu as déployé les règles)
+    // --- CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
@@ -440,58 +440,32 @@
     // Système de notification (toast)
     function showNotification(type, title, message, duration = 5000) {
       const notificationContainer = document.getElementById('notificationContainer');
-      
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
-      
       const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      
       notification.innerHTML = `
         <i class="fas ${icon} notification-icon"></i>
         <div class="notification-content">
           <div class="notification-title">${title}</div>
           <div class="notification-message">${message}</div>
         </div>
-        <button class="notification-close">
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="notification-close"><i class="fas fa-times"></i></button>
         <div class="notification-progress"></div>
       `;
-      
       notificationContainer.appendChild(notification);
-      
-      // Fermer la notification après la durée spécifiée
       const closeNotification = () => {
         notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => {
-          notificationContainer.removeChild(notification);
-        }, 300);
+        setTimeout(() => { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
       };
-      
-      // Bouton de fermeture
       const closeButton = notification.querySelector('.notification-close');
       closeButton.addEventListener('click', closeNotification);
-      
-      // Barre de progression
       const progressBar = notification.querySelector('.notification-progress');
       progressBar.style.animationDuration = `${duration}ms`;
-      
-      // Fermeture automatique
       setTimeout(closeNotification, duration);
     }
 
-    // Helpers UI
-    const errorEl = document.getElementById('errorMessage');
-    const successEl = document.getElementById('successMessage');
-
-    function showError(message) {
-      showNotification('error', 'Erreur', message);
-    }
-    
-    function showSuccess(message) {
-      showNotification('success', 'Succès', message);
-    }
-
+    function showError(message) { showNotification('error', 'Erreur', message); }
+    function showSuccess(message) { showNotification('success', 'Succès', message); }
     // utils
     function getFlag(countryCode){
       const flags = {
@@ -516,7 +490,7 @@
       document.getElementById('selectedFlag').textContent = flag;
     }
 
-    // quick existence check (UI-level; final check in transaction)
+// quick existence check (UI-level)
     async function checkUsernameExists(username){
       if(!username) return false;
       try {
@@ -525,7 +499,6 @@
         return snap.exists();
       } catch (err) {
         console.error('checkUsernameExists error', err);
-        // return true conservatively? we'll just return false to let transaction handle conflicts.
         return false;
       }
     }
@@ -546,7 +519,6 @@
       if (password !== confirmPassword) { showError('Les mots de passe ne correspondent pas.'); return; }
       if (!document.getElementById('terms').checked) { showError('Veuillez accepter les conditions.'); return; }
 
-      // quick username check for UX (not a replacement for transaction)
       const quickExists = await checkUsernameExists(username);
       if (quickExists) { showError('Ce nom d\'utilisateur est déjà pris.'); return; }
 
@@ -561,10 +533,10 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2) ensure token is ready (avoid permission race)
+        // 2) ensure fresh token (évite race conditions)
         await user.getIdToken(true);
 
-        // 3) prepare user data
+        // 3) prepare user data (sensible)
         const userData = {
           uid: user.uid,
           username,
@@ -572,38 +544,45 @@
           country,
           phone: document.getElementById('countryCode').textContent + (phone || ''),
           parrain,
-          createdAt: new Date(),
-          status: 'pending_payment'
+          status: 'pending_payment', // par défaut
+          // createdAt will be server timestamp set in transaction
         };
 
-        // 4) run a transaction: check username doc doesn't exist then set both docs
+        // 4) run a transaction: check username unique, then create users, usernames and user_public
         await runTransaction(db, async (tx) => {
           const usernameRef = doc(db, 'usernames', username);
           const usernameSnap = await tx.get(usernameRef);
           if (usernameSnap.exists()) {
-            // username already taken — abort
             throw new Error('USERNAME_TAKEN_IN_TRANSACTION');
           }
+
           const userRef = doc(db, 'users', user.uid);
-          tx.set(userRef, userData);
-          tx.set(usernameRef, { uid: user.uid, createdAt: new Date() });
+          const userPublicRef = doc(db, 'user_public', user.uid);
+
+          tx.set(userRef, { ...userData, createdAt: serverTimestamp() });
+          tx.set(usernameRef, { uid: user.uid, createdAt: serverTimestamp() });
+
+          // user_public contient uniquement champs non-sensibles nécessaires pour le login
+          tx.set(userPublicRef, {
+            uid: user.uid,
+            email: email,
+            status: 'pending_payment',
+            createdAt: serverTimestamp()
+          });
         });
 
-        // 5) update profile displayName
+        // 5) update profile displayName (facultatif mais utile)
         await updateProfile(user, { displayName: username });
 
-        // 6) success -> redirect to paiement.html (make sure file exists at same path)
+        // 6) success -> redirection vers paiement
         showSuccess('Votre compte a été créé avec succès ! Redirection vers la page de paiement...');
-        // small delay for UX
         setTimeout(() => {
-          // use assign so that devtools shows navigation; keep it relative
           window.location.assign('paiement.html');
-        }, 3000);
+        }, 2500);
 
       } catch (error) {
         console.error('Registration error:', error);
 
-        // Friendly error messages
         let message = "Une erreur s'est produite lors de l'inscription.";
         if (error.code === 'auth/email-already-in-use') message = "Cette adresse email est déjà utilisée par un autre compte.";
         else if (error.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
@@ -611,9 +590,8 @@
         else if (error.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
         else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
         else if (error.code === 'permission-denied' || /permission-denied/i.test(error.message)) {
-          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + usernames).";
+          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + user_public + usernames).";
         } else {
-          // use server error message if available
           message = error.message || message;
         }
 
@@ -625,10 +603,8 @@
 
     // init UI and prefill par param
     document.addEventListener('DOMContentLoaded', () => {
-      // Définir le Cameroun comme option sélectionnée par défaut
       document.getElementById('country').value = 'cm';
       updateCountryCode();
-      
       const parValue = (new URLSearchParams(location.search)).get('par') || '';
       if (parValue) document.getElementById('par').value = parValue;
     });
