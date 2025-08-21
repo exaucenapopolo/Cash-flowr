@@ -1,669 +1,307 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cash-flowr - Inscription</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Import des scripts Firebase -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            updateProfile 
-        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc,
-            getDoc
-        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-            authDomain: "cash-flowr.firebaseapp.com",
-            projectId: "cash-flowr",
-            storageBucket: "cash-flowr.firebasestorage.app",
-            messagingSenderId: "1091928501310",
-            appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-            measurementId: "G-5SF6VDLZCB"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Rendre ces variables accessibles globalement
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firebaseCreateUser = createUserWithEmailAndPassword;
-        window.firebaseUpdateProfile = updateProfile;
-        window.firebaseDoc = doc;
-        window.firebaseSetDoc = setDoc;
-        window.firebaseGetDoc = getDoc;
-    </script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-        
-        .logo-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .logo {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        
-        .logo i {
-            margin-right: 10px;
-            color: #4CD964;
-        }
-        
-        .tagline {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            padding: 25px;
-        }
-        
-        .card-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .card-header h2 {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .card-header p {
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2c3e50;
-            font-size: 0.95rem;
-        }
-        
-        .input-group {
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #ddd;
-            transition: all 0.3s ease;
-        }
-        
-        .input-group:focus-within {
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-        
-        .input-icon {
-            padding: 0 15px;
-            color: #7f8c8d;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            background: transparent;
-            color: #2c3e50;
-            font-size: 1rem;
-            outline: none;
-        }
-        
-        input::placeholder {
-            color: #95a5a6;
-        }
-        
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 15px;
-        }
-        
-        .phone-group {
-            display: flex;
-        }
-        
-        .country-code {
-            flex: 0 0 30%;
-            display: flex;
-            align-items: center;
-            background-color: #eef2f7;
-            padding: 0 15px;
-            border-right: 1px solid #ddd;
-            font-weight: 500;
-            color: #2c3e50;
-        }
-        
-        .flag {
-            margin-right: 8px;
-            font-size: 1.2rem;
-        }
-        
-        .phone-input {
-            flex: 1;
-        }
-        
-        /* ---------- Checkbox styles ---------- */
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-top: 3px;
-            flex-shrink: 0;
-            accent-color: #4CD964;
-            cursor: pointer;
-        }
-
-        .terms-text {
-            font-size: 0.85rem;
-            line-height: 1.35;
-            color: #7f8c8d;
-            max-width: calc(100% - 32px);
-        }
-        .terms-text a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .terms-text a:hover {
-            text-decoration: underline;
-        }
-        /* ---------- End checkbox modifications ---------- */
-        
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .login-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 0.95rem;
-            color: #7f8c8d;
-        }
-        
-        .login-link a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-        }
-        
-        .footer-links {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-        }
-        
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #e74c3c;
-            background-color: #fde8e6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            display: none;
-        }
-        
-        .success-message {
-            color: #2ecc71;
-            background-color: #e8f6ef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            display: none;
-        }
-        
-        @media (max-width: 576px) {
-            .card {
-                padding: 20px;
-            }
-            
-            .logo {
-                font-size: 2.2rem;
-            }
-            
-            .tagline {
-                font-size: 1rem;
-            }
-            
-            .card-header h2 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cash-flowr - Inscription</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Ton CSS existant (inchangé) */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+    body{background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);color:#333;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+    .container{width:100%;max-width:480px;margin:0 auto}
+    .logo-header{text-align:center;margin-bottom:20px}
+    .logo{font-size:2.8rem;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+    .logo i{margin-right:10px;color:#4CD964}
+    .tagline{color:rgba(255,255,255,0.8);font-size:1.1rem;margin-bottom:10px}
+    .card{background-color:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);overflow:hidden;padding:25px}
+    .card-header{text-align:center;margin-bottom:25px}
+    .card-header h2{color:#2c3e50;font-size:1.8rem;font-weight:600;margin-bottom:8px}
+    .card-header p{color:#7f8c8d;font-size:1rem}
+    .form-group{margin-bottom:20px}
+    label{display:block;margin-bottom:8px;font-weight:500;color:#2c3e50;font-size:0.95rem}
+    .input-group{display:flex;align-items:center;background-color:#f8f9fa;border-radius:8px;overflow:hidden;border:1px solid #ddd;transition:all 0.3s ease}
+    .input-group:focus-within{border-color:#3498db;box-shadow:0 0 0 2px rgba(52,152,219,0.2)}
+    .input-icon{padding:0 15px;color:#7f8c8d}
+    input,select{width:100%;padding:14px;border:none;background:transparent;color:#2c3e50;font-size:1rem;outline:none}
+    input::placeholder{color:#95a5a6}
+    select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 15px center;background-size:15px}
+    .phone-group{display:flex}
+    .country-code{flex:0 0 30%;display:flex;align-items:center;background-color:#eef2f7;padding:0 15px;border-right:1px solid #ddd;font-weight:500;color:#2c3e50}
+    .flag{margin-right:8px;font-size:1.2rem}
+    .phone-input{flex:1}
+    .checkbox-group{display:flex;align-items:flex-start;gap:12px;margin:20px 0}
+    .checkbox-group input[type="checkbox"]{width:18px;height:18px;margin-top:3px;flex-shrink:0;accent-color:#4CD964;cursor:pointer}
+    .terms-text{font-size:0.85rem;line-height:1.35;color:#7f8c8d;max-width:calc(100% - 32px)}
+    .terms-text a{color:#3498db;text-decoration:none;font-weight:500}
+    .terms-text a:hover{text-decoration:underline}
+    .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:#fff;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
+    .btn:active{transform:translateY(0)}
+    .login-link{text-align:center;margin-top:25px;font-size:0.95rem;color:#7f8c8d}
+    .login-link a{color:#3498db;text-decoration:none;font-weight:500}
+    .login-link a:hover{text-decoration:underline}
+    .footer{margin-top:30px;text-align:center;color:rgba(255,255,255,0.7);font-size:0.85rem}
+    .footer-links{margin-top:10px;display:flex;justify-content:center;gap:15px}
+    .footer-links a{color:rgba(255,255,255,0.9);text-decoration:none}
+    .footer-links a:hover{text-decoration:underline}
+    .error-message{color:#e74c3c;background-color:#fde8e6;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
+    .success-message{color:#2ecc71;background-color:#e8f6ef;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
+    @media (max-width:576px){.card{padding:20px}.logo{font-size:2.2rem}.tagline{font-size:1rem}.card-header h2{font-size:1.5rem}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-header">
-            <div class="logo">
-                <i class="fas fa-money-bill-wave"></i>
-                <span>Cash-flowr</span>
-            </div>
-            <div class="tagline">La plateforme d'affiliation gamifiée</div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2>Créer un compte</h2>
-                <p>Rejoignez notre communauté dès aujourd'hui</p>
-            </div>
-            
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
-            
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label for="username">Nom d'utilisateur</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <input type="text" id="username" name="username" required placeholder="Choisissez votre nom d'utilisateur">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="par">Par (Parrain)</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-user-friends"></i>
-                        </div>
-                        <input type="text" id="par" name="par" placeholder="Nom d'utilisateur de votre parrain" readonly>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Adresse e-mail</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <input type="email" id="email" name="email" required placeholder="exemple@email.com">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="country">Pays</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-globe"></i>
-                        </div>
-                        <select id="country" name="country" required onchange="updateCountryCode()">
-                            <option value="">Sélectionnez votre pays</option>
-                            <option value="ci" data-code="+225">Côte d'Ivoire</option>
-                            <option value="fr" data-code="+33">France</option>
-                            <option value="sn" data-code="+221">Sénégal</option>
-                            <option value="cm" data-code="+237">Cameroun</option>
-                            <option value="ml" data-code="+223">Mali</option>
-                            <option value="bf" data-code="+226">Burkina Faso</option>
-                            <option value="ne" data-code="+227">Niger</option>
-                            <option value="tg" data-code="+228">Togo</option>
-                            <option value="bj" data-code="+229">Bénin</option>
-                            <option value="cd" data-code="+243">République Démocratique du Congo</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Numéro de téléphone</label>
-                    <div class="input-group phone-group">
-                        <div class="country-code">
-                            <span id="selectedFlag" class="flag">🇨🇮</span>
-                            <span id="countryCode">+225</span>
-                        </div>
-                        <div class="input-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <input type="tel" id="phone" name="phone" required class="phone-input" placeholder="XX XXX XXX">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <input type="password" id="password" name="password" required placeholder="Créez un mot de passe sécurisé">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="confirmPassword">Confirmer le mot de passe</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirmez votre mot de passe">
-                    </div>
-                </div>
-                
-                <div class="checkbox-group">
-                    <input type="checkbox" id="terms" name="terms" required>
-                    <div class="terms-text">
-                        En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de Cash-flowr.<br>
-                        Mon compte devra être activé <strong>après mon paiement</strong>.
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn">
-                    <i class="fas fa-user-plus"></i> S'inscrire maintenant
-                </button>
-            </form>
-            
-            <div class="login-link">
-                Vous avez déjà un compte? <a href="login.html">Connectez-vous</a>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <div>© 2025 Cash-flowr. Tous droits réservés.</div>
-            <div class="footer-links">
-                <a href="terms.html">Conditions d'utilisation</a>
-                <a href="privacy.html">Politique de confidentialité</a>
-                <a href="support.html">Support</a>
-            </div>
-        </div>
+  <div class="container">
+    <div class="logo-header">
+      <div class="logo"><i class="fas fa-money-bill-wave"></i><span>Cash-flowr</span></div>
+      <div class="tagline">La plateforme d'affiliation gamifiée</div>
     </div>
 
-    <script>
-        // Mise à jour du code pays en fonction de la sélection
-        function updateCountryCode() {
-            const countrySelect = document.getElementById('country');
-            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-            const countryCode = selectedOption.getAttribute('data-code') || '+225';
-            const countryFlag = getFlag(selectedOption.value) || '🇨🇮';
-            
-            document.getElementById('countryCode').textContent = countryCode;
-            document.getElementById('selectedFlag').textContent = countryFlag;
-        }
-        
-        // Fonction pour obtenir le drapeau en fonction du code pays
-        function getFlag(countryCode) {
-            const flags = {
-                'ci': '🇨🇮',
-                'fr': '🇫🇷',
-                'sn': '🇸🇳',
-                'cm': '🇨🇲',
-                'ml': '🇲🇱',
-                'bf': '🇧🇫',
-                'ne': '🇳🇪',
-                'tg': '🇹🇬',
-                'bj': '🇧🇯',
-                'cd': '🇨🇩'
-            };
-            
-            return flags[countryCode] || '🇨🇮';
-        }
-        
-        // Récupérer le paramètre 'par' de l'URL et le pré-remplir dans le champ
-        function getUrlParameter(name) {
-            name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            const results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-        
-        // Fonction pour afficher les messages d'erreur
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            
-            // Masquer le message après 5 secondes
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Fonction pour afficher les messages de succès
-        function showSuccess(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            
-            // Masquer le message après 5 secondes
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Vérifier si un nom d'utilisateur existe déjà
-        async function checkUsernameExists(username) {
-            try {
-                const userDocRef = window.firebaseDoc(window.firebaseDb, 'usernames', username);
-                const userDocSnap = await window.firebaseGetDoc(userDocRef);
-                return userDocSnap.exists();
-            } catch (error) {
-                console.error("Erreur lors de la vérification du nom d'utilisateur:", error);
-                return false;
-            }
-        }
-        
-        // Validation du formulaire et inscription avec Firebase
-        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const country = document.getElementById('country').value;
-            const phone = document.getElementById('phone').value;
-            const parrain = document.getElementById('par').value;
-            
-            // Validation basique
-            if (password !== confirmPassword) {
-                showError('Les mots de passe ne correspondent pas.');
-                return;
-            }
+    <div class="card">
+      <div class="card-header">
+        <h2>Créer un compte</h2>
+        <p>Rejoignez notre communauté dès aujourd'hui</p>
+      </div>
 
-            if (!document.getElementById('terms').checked) {
-                showError("Veuillez accepter les conditions d'utilisation et la politique de confidentialité.");
-                return;
-            }
-            
-            // Vérifier si le nom d'utilisateur existe déjà
-            const usernameExists = await checkUsernameExists(username);
-            if (usernameExists) {
-                showError("Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre.");
-                return;
-            }
-            
-            // Changement de l'état du bouton
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-            submitBtn.disabled = true;
-            
-            try {
-                // Créer l'utilisateur avec Firebase Authentication
-                const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
-                const user = userCredential.user;
-                
-                // Mettre à jour le profil avec le nom d'utilisateur
-                await window.firebaseUpdateProfile(user, {
-                    displayName: username
-                });
-                
-                // Préparer les données utilisateur pour Firestore
-                const userData = {
-                    uid: user.uid,
-                    username: username,
-                    email: email,
-                    country: country,
-                    phone: document.getElementById('countryCode').textContent + phone,
-                    parrain: parrain || null,
-                    createdAt: new Date(),
-                    status: 'pending_payment' // Statut en attente de paiement
-                };
-                
-                // Enregistrer les informations supplémentaires dans Firestore
-                const userDocRef = window.firebaseDoc(window.firebaseDb, 'users', user.uid);
-                await window.firebaseSetDoc(userDocRef, userData);
-                
-                // Enregistrer également le nom d'utilisateur comme référence pour vérifier les doublons
-                const usernameDocRef = window.firebaseDoc(window.firebaseDb, 'usernames', username);
-                await window.firebaseSetDoc(usernameDocRef, { uid: user.uid });
-                
-                // Afficher un message de succès
-                showSuccess('Inscription réussie! Vous allez être redirigé vers la page de paiement.');
-                
-                // Redirection vers la page de paiement après un court délai
-                setTimeout(() => {
-                    window.location.href = 'paiement.html';
-                }, 2000);
-                
-            } catch (error) {
-                console.error("Erreur lors de l'inscription:", error);
-                
-                // Gestion des erreurs Firebase
-                let errorMessage = "Une erreur s'est produite lors de l'inscription.";
-                
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "Cette adresse email est déjà utilisée par un autre compte.";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "L'adresse email n'est pas valide.";
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = "L'inscription par email/mot de passe n'est pas activée.";
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = "Le mot de passe est trop faible. Il doit contenir au moins 6 caractères.";
-                        break;
-                    default:
-                        errorMessage = error.message || errorMessage;
-                }
-                
-                showError(errorMessage);
-                
-                // Réactiver le bouton
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+
+      <form id="registrationForm">
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-user"></i></div>
+            <input type="text" id="username" name="username" required placeholder="Choisissez votre nom d'utilisateur">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="par">Par (Parrain)</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-user-friends"></i></div>
+            <input type="text" id="par" name="par" placeholder="Nom d'utilisateur de votre parrain" readonly>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-envelope"></i></div>
+            <input type="email" id="email" name="email" required placeholder="exemple@email.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Pays</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-globe"></i></div>
+            <select id="country" name="country" required onchange="updateCountryCode()">
+              <option value="">Sélectionnez votre pays</option>
+              <option value="ci" data-code="+225">Côte d'Ivoire</option>
+              <option value="fr" data-code="+33">France</option>
+              <option value="sn" data-code="+221">Sénégal</option>
+              <option value="cm" data-code="+237">Cameroun</option>
+              <option value="ml" data-code="+223">Mali</option>
+              <option value="bf" data-code="+226">Burkina Faso</option>
+              <option value="ne" data-code="+227">Niger</option>
+              <option value="tg" data-code="+228">Togo</option>
+              <option value="bj" data-code="+229">Bénin</option>
+              <option value="cd" data-code="+243">République Démocratique du Congo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Numéro de téléphone</label>
+          <div class="input-group phone-group">
+            <div class="country-code"><span id="selectedFlag" class="flag">🇨🇮</span><span id="countryCode">+225</span></div>
+            <div class="input-icon"><i class="fas fa-phone"></i></div>
+            <input type="tel" id="phone" name="phone" required class="phone-input" placeholder="XX XXX XXX">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-lock"></i></div>
+            <input type="password" id="password" name="password" required placeholder="Créez un mot de passe sécurisé">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-lock"></i></div>
+            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirmez votre mot de passe">
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="terms" name="terms" required>
+          <div class="terms-text">En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de Cash-flowr.<br>Mon compte devra être activé <strong>après mon paiement</strong>.</div>
+        </div>
+
+        <button type="submit" class="btn"><i class="fas fa-user-plus"></i> S'inscrire maintenant</button>
+      </form>
+
+      <div class="login-link">Vous avez déjà un compte? <a href="login.html">Connectez-vous</a></div>
+    </div>
+
+    <div class="footer">
+      <div>© 2025 Cash-flowr. Tous droits réservés.</div>
+      <div class="footer-links">
+        <a href="terms.html">Conditions d'utilisation</a>
+        <a href="privacy.html">Politique de confidentialité</a>
+        <a href="support.html">Support</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + logique d'inscription -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.firebasestorage.app",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Expose pour debug si besoin
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.firebaseCreateUser = createUserWithEmailAndPassword;
+    window.firebaseUpdateProfile = updateProfile;
+    window.firebaseDoc = doc;
+    window.firebaseGetDoc = getDoc;
+    window.firebaseRunTransaction = runTransaction;
+
+    // Helpers UI
+    function showError(message){ const el=document.getElementById('errorMessage'); el.textContent=message; el.style.display='block'; setTimeout(()=>el.style.display='none',5000); }
+    function showSuccess(message){ const el=document.getElementById('successMessage'); el.textContent=message; el.style.display='block'; setTimeout(()=>el.style.display='none',5000); }
+
+    function getFlag(countryCode){
+      const flags = {'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪','tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩'};
+      return flags[countryCode]||'🇨🇮';
+    }
+
+    function updateCountryCode(){
+      const countrySelect = document.getElementById('country');
+      const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+      const countryCode = selectedOption.getAttribute('data-code') || '+225';
+      const countryFlag = getFlag(selectedOption.value) || '🇨🇮';
+      document.getElementById('countryCode').textContent = countryCode;
+      document.getElementById('selectedFlag').textContent = countryFlag;
+    }
+
+    async function checkUsernameExists(username){
+      try {
+        const ref = doc(db, 'usernames', username);
+        const snap = await getDoc(ref);
+        return snap.exists();
+      } catch(err){
+        console.error('checkUsernameExists error', err);
+        return false;
+      }
+    }
+
+    document.getElementById('registrationForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const country = document.getElementById('country').value;
+      const phone = document.getElementById('phone').value.trim();
+      const parrain = document.getElementById('par').value || null;
+
+      if(password !== confirmPassword){ showError('Les mots de passe ne correspondent pas.'); return; }
+      if(!document.getElementById('terms').checked){ showError("Veuillez accepter les conditions d'utilisation et la politique de confidentialité."); return; }
+      if(!username){ showError("Choisissez un nom d'utilisateur."); return; }
+
+      // check quick existence
+      const usernameExists = await checkUsernameExists(username);
+      if(usernameExists){ showError("Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre."); return; }
+
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+      submitBtn.disabled = true;
+
+      try {
+        // 1) create auth user
+        const userCredential = await window.firebaseCreateUser(auth, email, password);
+        const user = userCredential.user;
+
+        // 2) make sure the token is ready (avoid permission race)
+        await user.getIdToken(true);
+
+        // Build userData
+        const userData = {
+          uid: user.uid,
+          username,
+          email,
+          country,
+          phone: document.getElementById('countryCode').textContent + phone,
+          parrain,
+          createdAt: new Date(),
+          status: 'pending_payment'
+        };
+
+        // 3) Run a transaction to atomically create both docs (prevent race on username)
+        await runTransaction(db, async (tx) => {
+          const usernameRef = doc(db, 'usernames', username);
+          const usernameSnap = await tx.get(usernameRef);
+          if(usernameSnap.exists()){
+            // signaler pour capturer dans catch
+            throw new Error('USERNAME_TAKEN_IN_TRANSACTION');
+          }
+          const userRef = doc(db, 'users', user.uid);
+          tx.set(userRef, userData);
+          tx.set(usernameRef, { uid: user.uid });
         });
 
-        // initialize default country code on load
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCountryCode();
-            
-            // Pré-remplir le champ "Par" si un paramètre est présent dans l'URL
-            const parValue = getUrlParameter('par');
-            if (parValue) {
-                document.getElementById('par').value = parValue;
-            }
-        });
-    </script>
+        // 4) update auth profile displayName
+        await updateProfile(user, { displayName: username });
+
+        showSuccess('Inscription réussie! Vous allez être redirigé vers la page de paiement.');
+        setTimeout(()=> window.location.href = 'paiement.html', 1500);
+
+      } catch(error) {
+        console.error('Inscription erreur:', error);
+        let msg = "Une erreur s'est produite lors de l'inscription.";
+        if(error.code === 'auth/email-already-in-use') msg = "Cette adresse email est déjà utilisée par un autre compte.";
+        else if(error.code === 'auth/invalid-email') msg = "L'adresse email n'est pas valide.";
+        else if(error.code === 'auth/operation-not-allowed') msg = "L'inscription par email/mot de passe n'est pas activée.";
+        else if(error.code === 'auth/weak-password') msg = "Le mot de passe est trop faible. Il doit contenir au moins 6 caractères.";
+        else if(error.message === 'USERNAME_TAKEN_IN_TRANSACTION') msg = "Le nom d'utilisateur a été pris. Choisissez-en un autre.";
+        else msg = error.message || msg;
+
+        showError(msg);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // init UI
+    document.addEventListener('DOMContentLoaded', ()=>{
+      updateCountryCode();
+      const parValue = (new URLSearchParams(location.search)).get('par') || '';
+      if(parValue) document.getElementById('par').value = parValue;
+    });
+  </script>
 </body>
 </html>
