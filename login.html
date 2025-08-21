@@ -1,322 +1,508 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cash-flowr - Connexion</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-        
-        .logo-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .logo {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        
-        .logo i {
-            margin-right: 10px;
-            color: #4CD964;
-        }
-        
-        .tagline {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            padding: 25px;
-        }
-        
-        .card-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .card-header h2 {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .card-header p {
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2c3e50;
-            font-size: 0.95rem;
-        }
-        
-        .input-group {
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #ddd;
-            transition: all 0.3s ease;
-        }
-        
-        .input-group:focus-within {
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-        
-        .input-icon {
-            padding: 0 15px;
-            color: #7f8c8d;
-        }
-        
-        input {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            background: transparent;
-            color: #2c3e50;
-            font-size: 1rem;
-            outline: none;
-        }
-        
-        input::placeholder {
-            color: #95a5a6;
-        }
-        
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-        
-        .links a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        
-        .links a:hover {
-            text-decoration: underline;
-        }
-        
-        .signup-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 0.95rem;
-            color: #7f8c8d;
-        }
-        
-        .signup-link a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-        }
-        
-        .footer-links {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-        }
-        
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 576px) {
-            .card {
-                padding: 20px;
-            }
-            
-            .logo {
-                font-size: 2.2rem;
-            }
-            
-            .tagline {
-                font-size: 1rem;
-            }
-            
-            .card-header h2 {
-                font-size: 1.5rem;
-            }
-            
-            .links {
-                flex-direction: column;
-                gap: 10px;
-                align-items: center;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash-flowr - Connexion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS modifié avec nouveau fond et nouvelles polices --- */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+    
+    /* Nouveau fond avec dégradé vert/bleu plus foncé */
+    body {
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      color:#333;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+    
+    .container{width:100%;max-width:480px;margin:0 auto}
+    .logo-header{text-align:center;margin-bottom:20px}
+    
+    /* Nouveau style pour le logo avec police stylée */
+    .logo{
+      font-size:2.8rem;
+      font-weight:800;
+      color:#2c3e50;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:10px;
+      position: relative;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Conteneur pour les pièces superposées */
+    .coin-container {
+      position: relative;
+      margin-right: 12px;
+      height: 50px;
+      width: 50px;
+    }
+    
+    /* Style pour les pièces superposées avec couleur verte plus foncée */
+    .coin {
+      position: absolute;
+      color: #2a8c5a;
+      font-size: 2.2rem;
+      text-shadow: 0px 1px 2px rgba(0,0,0,0.2);
+    }
+    
+    /* Positionnement des 4 pièces superposées */
+    .coin-1 { top: 0; left: 0; z-index: 4; }
+    .coin-2 { top: 5px; left: 5px; z-index: 3; opacity: 0.8; }
+    .coin-3 { top: 10px; left: 10px; z-index: 2; opacity: 0.6; }
+    .coin-4 { top: 15px; left: 15px; z-index: 1; opacity: 0.4; }
+    
+    .tagline{color:#5a6f7d;font-size:1.1rem;margin-bottom:10px;font-weight:500}
+    
+    .card{
+      background-color:white;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      overflow:hidden;
+      padding:25px;
+    }
+    
+    .card-header{text-align:center;margin-bottom:25px}
+    .card-header h2{color:#2c3e50;font-size:1.8rem;font-weight:600;margin-bottom:8px}
+    .card-header p{color:#7f8c8d;font-size:1rem}
+    .form-group{margin-bottom:20px}
+    label{display:block;margin-bottom:8px;font-weight:500;color:#2c3e50;font-size:0.95rem}
+    .input-group{display:flex;align-items:center;background-color:#f8f9fa;border-radius:8px;overflow:hidden;border:1px solid #ddd;transition:all 0.3s ease}
+    .input-group:focus-within{border-color:#3498db;box-shadow:0 0 0 2px rgba(52,152,219,0.2)}
+    .input-icon{padding:0 15px;color:#7f8c8d}
+    input,select{width:100%;padding:14px;border:none;background:transparent;color:#2c3e50;font-size:1rem;outline:none}
+    input::placeholder{color:#95a5a6}
+    .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:white;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
+    .btn:active{transform:translateY(0)}
+    
+    .links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    
+    .links a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    
+    .links a:hover {
+      text-decoration: underline;
+    }
+    
+    .signup-link {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 0.95rem;
+      color: #7f8c8d;
+    }
+    
+    .signup-link a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .footer{margin-top:30px;text-align:center;color:#5a6f7d;font-size:0.85rem}
+    .footer-links{margin-top:10px;display:flex;justify-content:center;gap:15px}
+    .footer-links a{color:#5a6f7d;text-decoration:none}
+    .footer-links a:hover{text-decoration:underline;color:#3498db}
+    
+    /* --- Nouvelles règles CSS pour les notifications --- */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .notification.success {
+      background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+      color: white;
+    }
+    
+    .notification.error {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    .notification-icon {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+    
+    .notification-content {
+      flex: 1;
+    }
+    
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .notification-message {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .notification-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .notification-close:hover {
+      opacity: 1;
+    }
+    
+    .notification-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      width: 100%;
+      transform-origin: left;
+      animation: progressBar 5s linear forwards;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes progressBar {
+      from {
+        transform: scaleX(1);
+      }
+      to {
+        transform: scaleX(0);
+      }
+    }
+    
+    @media (max-width:576px){
+      .card{padding:20px}
+      .logo{font-size:2.2rem}
+      .tagline{font-size:1rem}
+      .card-header h2{font-size:1.5rem}
+      .notification-container {
+        left: 20px;
+        right: 20px;
+      }
+      .notification {
+        max-width: 100%;
+      }
+      
+      .coin-container {
+        height: 40px;
+        width: 40px;
+      }
+      
+      .coin {
+        font-size: 1.8rem;
+      }
+      
+      .links {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-header">
-            <div class="logo">
-                <i class="fas fa-money-bill-wave"></i>
-                <span>Cash-flowr</span>
-            </div>
-            <div class="tagline">La plateforme d'affiliation gamifiée</div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2>Connexion</h2>
-                <p>Accédez à votre compte</p>
-            </div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Nom d'utilisateur ou e-mail</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <input type="text" id="email" name="email" required placeholder="Votre nom d'utilisateur ou e-mail">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <div class="input-group">
-                        <div class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
-                    </div>
-                </div>
-                
-                <div class="links">
-                    <div>
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember" style="display: inline; font-weight: normal;">Se souvenir de moi</label>
-                    </div>
-                    <a href="forgot-password.html">Mot de passe oublié?</a>
-                </div>
-                
-                <button type="submit" class="btn">
-                    <i class="fas fa-sign-in-alt"></i> Se connecter
-                </button>
-            </form>
-            
-            <div class="signup-link">
-                Vous n'avez pas de compte? <a href="register.html">Inscrivez-vous</a>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <div>© 2025 Cash-flowr. Tous droits réservés.</div>
-            <div class="footer-links">
-                <a href="terms.html">Conditions d'utilisation</a>
-                <a href="privacy.html">Politique de confidentialité</a>
-                <a href="support.html">Support</a>
-            </div>
-        </div>
-    </div>
+  <!-- Container pour les notifications -->
+  <div class="notification-container" id="notificationContainer"></div>
 
-    <script>
-        // Validation du formulaire
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Simulation d'envoi du formulaire
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
-            submitBtn.disabled = true;
-            
-            // Simulation d'une requête asynchrone
+  <div class="container">
+    <div class="logo-header">
+      <!-- Nouveau logo avec 4 pièces superposées en vert foncé -->
+      <div class="logo">
+        <div class="coin-container">
+          <i class="fas fa-coins coin coin-1"></i>
+          <i class="fas fa-coins coin coin-2"></i>
+          <i class="fas fa-coins coin coin-3"></i>
+          <i class="fas fa-coins coin coin-4"></i>
+        </div>
+        <span>Cash-flowr</span>
+      </div>
+      <div class="tagline">La plateforme d'affiliation gamifiée</div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <h2>Connexion</h2>
+        <p>Accédez à votre compte</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Nom d'utilisateur ou e-mail</label>
+          <div class="input-group">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input type="text" id="email" name="email" required placeholder="Votre nom d'utilisateur ou e-mail">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <div class="input-group">
+            <div class="input-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
+          </div>
+        </div>
+        
+        <div class="links">
+          <div>
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember" style="display: inline; font-weight: normal;">Se souvenir de moi</label>
+          </div>
+          <a href="forgot-password.html">Mot de passe oublié?</a>
+        </div>
+        
+        <button type="submit" class="btn">
+          <i class="fas fa-sign-in-alt"></i> Se connecter
+        </button>
+      </form>
+      
+      <div class="signup-link">
+        Vous n'avez pas de compte? <a href="register.html">Inscrivez-vous</a>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div>© 2025 Cash-flowr. Tous droits réservés.</div>
+      <div class="footer-links">
+        <a href="terms.html">Conditions d'utilisation</a>
+        <a href="privacy.html">Politique de confidentialité</a>
+        <a href="support.html">Support</a>
+        <!-- Nouveau lien "propulsé par SHB" -->
+        <a href="https://social-boost-horizon-new-shb.vercel.app" target="_blank">Site propulsé par SHB</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Firebase + logique de connexion (modulaire v9) ---------- -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // --- CONFIG --- (même configuration que register.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.firebasestorage.app",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Système de notification (toast) - identique à register.html
+    function showNotification(type, title, message, duration = 5000) {
+      const notificationContainer = document.getElementById('notificationContainer');
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+      
+      notification.innerHTML = `
+        <i class="fas ${icon} notification-icon"></i>
+        <div class="notification-content">
+          <div class="notification-title">${title}</div>
+          <div class="notification-message">${message}</div>
+        </div>
+        <button class="notification-close">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="notification-progress"></div>
+      `;
+      
+      notificationContainer.appendChild(notification);
+      
+      // Fermer la notification après la durée spécifiée
+      const closeNotification = () => {
+        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => {
+          notificationContainer.removeChild(notification);
+        }, 300);
+      };
+      
+      // Bouton de fermeture
+      const closeButton = notification.querySelector('.notification-close');
+      closeButton.addEventListener('click', closeNotification);
+      
+      // Barre de progression
+      const progressBar = notification.querySelector('.notification-progress');
+      progressBar.style.animationDuration = `${duration}ms`;
+      
+      // Fermeture automatique
+      setTimeout(closeNotification, duration);
+    }
+
+    function showError(message) {
+      showNotification('error', 'Erreur', message);
+    }
+    
+    function showSuccess(message) {
+      showNotification('success', 'Succès', message);
+    }
+
+    // Fonction pour vérifier le statut de paiement et rediriger
+    async function checkPaymentStatusAndRedirect(uid) {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          if (userData.status === 'pending_payment') {
+            showSuccess('Connexion réussie ! Redirection vers la page de paiement...');
             setTimeout(() => {
-                alert('Connexion réussie! Vous allez être redirigé vers votre tableau de bord.');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-                // Redirection vers le tableau de bord (à implémenter)
-                // window.location.href = 'dashboard.html';
+              window.location.assign('paiement.html');
             }, 2000);
-        });
-    </script>
+          } else {
+            showSuccess('Connexion réussie ! Redirection vers votre tableau de bord...');
+            setTimeout(() => {
+              window.location.assign('dashboard.html');
+            }, 2000);
+          }
+        } else {
+          showError('Données utilisateur non trouvées.');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut:', error);
+        showError('Erreur lors de la vérification de votre compte.');
+      }
+    }
+
+    // Gestion de la soumission du formulaire de connexion
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const identifier = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('remember').checked;
+
+      // UI state
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+      submitBtn.disabled = true;
+
+      try {
+        // Définir la persistance de la session
+        const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+        await setPersistence(auth, persistence);
+        
+        // Essayer de se connecter directement avec l'identifiant (qui peut être un email ou un nom d'utilisateur)
+        // D'abord essayer comme email
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
+          const user = userCredential.user;
+          
+          // Vérifier le statut de paiement et rediriger
+          await checkPaymentStatusAndRedirect(user.uid);
+        } catch (emailError) {
+          // Si l'authentification par email échoue, vérifier si l'identifiant est un nom d'utilisateur
+          if (emailError.code === 'auth/user-not-found' || emailError.code === 'auth/invalid-email') {
+            // Chercher l'email associé à ce nom d'utilisateur
+            const usernameDoc = await getDoc(doc(db, 'usernames', identifier));
+            
+            if (usernameDoc.exists()) {
+              const uid = usernameDoc.data().uid;
+              const userDoc = await getDoc(doc(db, 'users', uid));
+              
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const userEmail = userData.email;
+                
+                // Essayer de se connecter avec l'email trouvé
+                const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
+                const user = userCredential.user;
+                
+                // Vérifier le statut de paiement et rediriger
+                await checkPaymentStatusAndRedirect(user.uid);
+              } else {
+                showError('Aucun utilisateur trouvé avec ce nom d\'utilisateur.');
+              }
+            } else {
+              showError('Identifiant ou mot de passe incorrect.');
+            }
+          } else if (emailError.code === 'auth/wrong-password') {
+            showError('Mot de passe incorrect.');
+          } else {
+            showError('Erreur de connexion: ' + emailError.message);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur de connexion:', error);
+        
+        // Messages d'erreur conviviaux
+        let message = "Une erreur s'est produite lors de la connexion.";
+        if (error.code === 'auth/user-not-found') message = "Aucun compte trouvé avec cet identifiant.";
+        else if (error.code === 'auth/wrong-password') message = "Mot de passe incorrect.";
+        else if (error.code === 'auth/invalid-email') message = "Adresse email invalide.";
+        else if (error.code === 'auth/too-many-requests') message = "Trop de tentatives de connexion. Veuillez réessayer plus tard.";
+        else {
+          message = error.message || message;
+        }
+        
+        showError(message);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
