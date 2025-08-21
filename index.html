@@ -6,7 +6,7 @@
   <title>Cash-flowr - Inscription</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* --- Ton CSS existant (inchangé) --- */
+    /* --- CSS existant --- */
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
     body{background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);color:#333;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
     .container{width:100%;max-width:480px;margin:0 auto}
@@ -47,13 +47,141 @@
     .footer-links a:hover{text-decoration:underline}
     .error-message{color:#e74c3c;background-color:#fde8e6;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
     .success-message{color:#2ecc71;background-color:#e8f6ef;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
-    @media (max-width:576px){.card{padding:20px}.logo{font-size:2.2rem}.tagline{font-size:1rem}.card-header h2{font-size:1.5rem}}
+    
+    /* --- Nouvelles règles CSS pour les notifications --- */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .notification.success {
+      background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+      color: white;
+    }
+    
+    .notification.error {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    .notification-icon {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+    
+    .notification-content {
+      flex: 1;
+    }
+    
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .notification-message {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .notification-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .notification-close:hover {
+      opacity: 1;
+    }
+    
+    .notification-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      width: 100%;
+      transform-origin: left;
+      animation: progressBar 5s linear forwards;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes progressBar {
+      from {
+        transform: scaleX(1);
+      }
+      to {
+        transform: scaleX(0);
+      }
+    }
+    
+    /* Style pour les options de pays avec drapeaux */
+    .country-option {
+      display: flex;
+      align-items: center;
+    }
+    
+    .country-flag {
+      margin-right: 8px;
+      font-size: 1.2rem;
+    }
+    
+    @media (max-width:576px){
+      .card{padding:20px}
+      .logo{font-size:2.2rem}
+      .tagline{font-size:1rem}
+      .card-header h2{font-size:1.5rem}
+      .notification-container {
+        left: 20px;
+        right: 20px;
+      }
+      .notification {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Container pour les notifications -->
+  <div class="notification-container" id="notificationContainer"></div>
+
   <div class="container">
     <div class="logo-header">
-      <div class="logo"><i class="fas fa-money-bill-wave"></i><span>Cash-flowr</span></div>
+      <!-- Nouveau logo avec des pièces superposées -->
+      <div class="logo">
+        <i class="fas fa-coins" style="color: #FFD700; text-shadow: 0px 0px 5px rgba(255, 215, 0, 0.5);"></i>
+        <span>Cash-flowr</span>
+      </div>
       <div class="tagline">La plateforme d'affiliation gamifiée</div>
     </div>
 
@@ -97,16 +225,74 @@
             <div class="input-icon"><i class="fas fa-globe"></i></div>
             <select id="country" name="country" required onchange="updateCountryCode()">
               <option value="">Sélectionnez votre pays</option>
-              <option value="ci" data-code="+225">Côte d'Ivoire</option>
-              <option value="fr" data-code="+33">France</option>
-              <option value="sn" data-code="+221">Sénégal</option>
-              <option value="cm" data-code="+237">Cameroun</option>
-              <option value="ml" data-code="+223">Mali</option>
-              <option value="bf" data-code="+226">Burkina Faso</option>
-              <option value="ne" data-code="+227">Niger</option>
-              <option value="tg" data-code="+228">Togo</option>
-              <option value="bj" data-code="+229">Bénin</option>
-              <option value="cd" data-code="+243">République Démocratique du Congo</option>
+              
+              <!-- Afrique Centrale -->
+              <optgroup label="Afrique Centrale">
+                <option value="cm" data-code="+237" selected>🇨🇲 Cameroun</option>
+                <option value="td" data-code="+235">🇹🇩 Tchad</option>
+                <option value="cf" data-code="+236">🇨🇫 République centrafricaine</option>
+                <option value="cg" data-code="+242">🇨🇬 Congo-Brazzaville</option>
+                <option value="cd" data-code="+243">🇨🇩 République démocratique du Congo</option>
+                <option value="gq" data-code="+240">🇬🇶 Guinée équatoriale</option>
+                <option value="ga" data-code="+241">🇬🇦 Gabon</option>
+                <option value="st" data-code="+239">🇸🇹 Sao Tomé-et-Principe</option>
+              </optgroup>
+              
+              <!-- Afrique de l'Ouest -->
+              <optgroup label="Afrique de l'Ouest">
+                <option value="ci" data-code="+225">🇨🇮 Côte d'Ivoire</option>
+                <option value="sn" data-code="+221">🇸🇳 Sénégal</option>
+                <option value="ml" data-code="+223">🇲🇱 Mali</option>
+                <option value="bf" data-code="+226">🇧🇫 Burkina Faso</option>
+                <option value="ne" data-code="+227">🇳🇪 Niger</option>
+                <option value="tg" data-code="+228">🇹🇬 Togo</option>
+                <option value="bj" data-code="+229">🇧🇯 Bénin</option>
+                <option value="ng" data-code="+234">🇳🇬 Nigeria</option>
+                <option value="gh" data-code="+233">🇬🇭 Ghana</option>
+                <option value="gn" data-code="+224">🇬🇳 Guinée</option>
+                <option value="gw" data-code="+245">🇬🇼 Guinée-Bissau</option>
+                <option value="lr" data-code="+231">🇱🇷 Liberia</option>
+                <option value="sl" data-code="+232">🇸🇱 Sierra Leone</option>
+                <option value="gm" data-code="+220">🇬🇲 Gambie</option>
+                <option value="mr" data-code="+222">🇲🇷 Mauritanie</option>
+              </optgroup>
+              
+              <!-- Afrique de l'Est -->
+              <optgroup label="Afrique de l'Est">
+                <option value="ke" data-code="+254">🇰🇪 Kenya</option>
+                <option value="ug" data-code="+256">🇺🇬 Ouganda</option>
+                <option value="tz" data-code="+255">🇹🇿 Tanzanie</option>
+                <option value="rw" data-code="+250">🇷🇼 Rwanda</option>
+                <option value="bi" data-code="+257">🇧🇮 Burundi</option>
+                <option value="et" data-code="+251">🇪🇹 Éthiopie</option>
+                <option value="ss" data-code="+211">🇸🇸 Soudan du Sud</option>
+                <option value="sd" data-code="+249">🇸🇩 Soudan</option>
+                <option value="so" data-code="+252">🇸🇴 Somalie</option>
+                <option value="dj" data-code="+253">🇩🇯 Djibouti</option>
+                <option value="er" data-code="+291">🇪🇷 Érythrée</option>
+              </optgroup>
+              
+              <!-- Autres pays africains -->
+              <optgroup label="Autres pays africains">
+                <option value="dz" data-code="+213">🇩🇿 Algérie</option>
+                <option value="eg" data-code="+20">🇪🇬 Égypte</option>
+                <option value="ly" data-code="+218">🇱🇾 Libye</option>
+                <option value="ma" data-code="+212">🇲🇦 Maroc</option>
+                <option value="tn" data-code="+216">🇹🇳 Tunisie</option>
+                <option value="ao" data-code="+244">🇦🇴 Angola</option>
+                <option value="mz" data-code="+258">🇲🇿 Mozambique</option>
+                <option value="zm" data-code="+260">🇿🇲 Zambie</option>
+                <option value="zw" data-code="+263">🇿🇼 Zimbabwe</option>
+                <option value="mw" data-code="+265">🇲🇼 Malawi</option>
+                <option value="na" data-code="+264">🇳🇦 Namibie</option>
+                <option value="bw" data-code="+267">🇧🇼 Botswana</option>
+                <option value="sz" data-code="+268">🇸🇿 Eswatini</option>
+                <option value="ls" data-code="+266">🇱🇸 Lesotho</option>
+                <option value="mg" data-code="+261">🇲🇬 Madagascar</option>
+                <option value="mu" data-code="+230">🇲🇺 Maurice</option>
+                <option value="sc" data-code="+248">🇸🇨 Seychelles</option>
+                <option value="cv" data-code="+238">🇨🇻 Cap-Vert</option>
+              </optgroup>
             </select>
           </div>
         </div>
@@ -114,7 +300,7 @@
         <div class="form-group">
           <label for="phone">Numéro de téléphone</label>
           <div class="input-group phone-group">
-            <div class="country-code"><span id="selectedFlag" class="flag">🇨🇮</span><span id="countryCode">+225</span></div>
+            <div class="country-code"><span id="selectedFlag" class="flag">🇨🇲</span><span id="countryCode">+237</span></div>
             <div class="input-icon"><i class="fas fa-phone"></i></div>
             <input type="tel" id="phone" name="phone" required class="phone-input" placeholder="XX XXX XXX">
           </div>
@@ -153,6 +339,8 @@
         <a href="terms.html">Conditions d'utilisation</a>
         <a href="privacy.html">Politique de confidentialité</a>
         <a href="support.html">Support</a>
+        <!-- Nouveau lien "propulsé par SHB" -->
+        <a href="https://social-boost-horizon-new-shb.vercel.app" target="_blank">Site propulsé par SHB</a>
       </div>
     </div>
   </div>
@@ -178,30 +366,80 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Système de notification (toast)
+    function showNotification(type, title, message, duration = 5000) {
+      const notificationContainer = document.getElementById('notificationContainer');
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+      
+      notification.innerHTML = `
+        <i class="fas ${icon} notification-icon"></i>
+        <div class="notification-content">
+          <div class="notification-title">${title}</div>
+          <div class="notification-message">${message}</div>
+        </div>
+        <button class="notification-close">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="notification-progress"></div>
+      `;
+      
+      notificationContainer.appendChild(notification);
+      
+      // Fermer la notification après la durée spécifiée
+      const closeNotification = () => {
+        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => {
+          notificationContainer.removeChild(notification);
+        }, 300);
+      };
+      
+      // Bouton de fermeture
+      const closeButton = notification.querySelector('.notification-close');
+      closeButton.addEventListener('click', closeNotification);
+      
+      // Barre de progression
+      const progressBar = notification.querySelector('.notification-progress');
+      progressBar.style.animationDuration = `${duration}ms`;
+      
+      // Fermeture automatique
+      setTimeout(closeNotification, duration);
+    }
+
     // Helpers UI
     const errorEl = document.getElementById('errorMessage');
     const successEl = document.getElementById('successMessage');
 
     function showError(message) {
-      errorEl.textContent = message;
-      errorEl.style.display = 'block';
-      setTimeout(() => errorEl.style.display = 'none', 6000);
+      showNotification('error', 'Erreur', message);
     }
+    
     function showSuccess(message) {
-      successEl.textContent = message;
-      successEl.style.display = 'block';
-      setTimeout(() => successEl.style.display = 'none', 4000);
+      showNotification('success', 'Succès', message);
     }
 
     // utils
     function getFlag(countryCode){
-      const flags = {'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪','tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩'};
-      return flags[countryCode]||'🇨🇮';
+      const flags = {
+        'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪',
+        'tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩','td':'🇹🇩','cf':'🇨🇫','cg':'🇨🇬','gq':'🇬🇶',
+        'ga':'🇬🇦','st':'🇸🇹','ng':'🇳🇬','gh':'🇬🇭','gn':'🇬🇳','gw':'🇬🇼','lr':'🇱🇷',
+        'sl':'🇸🇱','gm':'🇬🇲','mr':'🇲🇷','ke':'🇰🇪','ug':'🇺🇬','tz':'🇹🇿','rw':'🇷🇼',
+        'bi':'🇧🇮','et':'🇪🇹','ss':'🇸🇸','sd':'🇸🇩','so':'🇸🇴','dj':'🇩🇯','er':'🇪🇷',
+        'dz':'🇩🇿','eg':'🇪🇬','ly':'🇱🇾','ma':'🇲🇦','tn':'🇹🇳','ao':'🇦🇴','mz':'🇲🇿',
+        'zm':'🇿🇲','zw':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
+        'mg':'🇲🇬','mu':'🇲🇺','sc':'🇸🇨','cv':'🇨🇻'
+      };
+      return flags[countryCode] || '🇨🇲';
     }
+    
     function updateCountryCode() {
       const countrySelect = document.getElementById('country');
       const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-      const code = selectedOption?.getAttribute('data-code') || '+225';
+      const code = selectedOption?.getAttribute('data-code') || '+237';
       const flag = getFlag(selectedOption?.value);
       document.getElementById('countryCode').textContent = code;
       document.getElementById('selectedFlag').textContent = flag;
@@ -284,12 +522,12 @@
         await updateProfile(user, { displayName: username });
 
         // 6) success -> redirect to paiement.html (make sure file exists at same path)
-        showSuccess('Inscription réussie ! Redirection vers la page de paiement...');
+        showSuccess('Votre compte a été créé avec succès ! Redirection vers la page de paiement...');
         // small delay for UX
         setTimeout(() => {
           // use assign so that devtools shows navigation; keep it relative
           window.location.assign('paiement.html');
-        }, 900);
+        }, 3000);
 
       } catch (error) {
         console.error('Registration error:', error);
@@ -316,7 +554,10 @@
 
     // init UI and prefill par param
     document.addEventListener('DOMContentLoaded', () => {
+      // Définir le Cameroun comme option sélectionnée par défaut
+      document.getElementById('country').value = 'cm';
       updateCountryCode();
+      
       const parValue = (new URLSearchParams(location.search)).get('par') || '';
       if (parValue) document.getElementById('par').value = parValue;
     });
