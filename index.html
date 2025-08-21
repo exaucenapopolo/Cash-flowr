@@ -5,193 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash-flowr - Inscription</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #10B981; /* Vert principal */
-            --primary-dark: #047857; /* Vert foncé */
-            --primary-light: #D1FAE5; /* Vert très clair */
-            --secondary-color: #3B82F6; /* Bleu secondaire pour un accent */
-            --text-color-dark: #111827; /* Gris anthracite pour le texte */
-            --text-color-light: #6B7280; /* Gris plus clair */
-            --bg-color-light: #F9FAFB; /* Fond très clair */
-            --white: #FFFFFF;
-            --border-color: #E5E7EB; /* Gris pour les bordures */
-            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color-light);
-            color: var(--text-color-dark);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center; /* Ajout pour le centrage vertical et horizontal */
-            justify-content: center; /* Ajout pour le centrage vertical et horizontal */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
         
-        .main-content {
-            padding: 2rem 1rem;
+        .container {
             width: 100%;
-            display: flex; /* Maintient la disposition flex */
-            justify-content: center; /* Centre le contenu */
-            align-items: center; /* Centre le contenu */
+            max-width: 480px;
+            margin: 0 auto;
         }
         
-        .header {
+        .logo-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 20px;
         }
         
         .logo {
-            font-size: 2.25rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
         }
         
         .logo i {
-            margin-right: 0.5rem;
+            margin-right: 10px;
+            color: #4CD964;
         }
         
         .tagline {
-            font-size: 1rem;
-            color: var(--text-color-light);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
         }
         
-        .form-container {
-            max-width: 440px;
-            width: 100%;
-            background-color: var(--white);
+        .card {
+            background-color: white;
             border-radius: 12px;
-            box-shadow: var(--shadow-medium);
-            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 25px;
         }
         
-        .form-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .card-header {
             text-align: center;
-            margin-bottom: 1.5rem;
-            color: var(--text-color-dark);
+            margin-bottom: 25px;
+        }
+        
+        .card-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .card-header p {
+            color: #7f8c8d;
+            font-size: 1rem;
         }
         
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 20px;
         }
         
         label {
             display: block;
-            font-size: 0.875rem;
+            margin-bottom: 8px;
             font-weight: 500;
-            color: var(--text-color-dark);
-            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-size: 0.95rem;
         }
         
         .input-group {
-            position: relative;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border-color);
+            background-color: #f8f9fa;
             border-radius: 8px;
-            background-color: var(--bg-color-light);
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
         }
         
         .input-group:focus-within {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-light);
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
         .input-icon {
-            padding: 0 0.75rem;
-            color: var(--text-color-light);
+            padding: 0 15px;
+            color: #7f8c8d;
         }
         
         input, select {
             width: 100%;
-            padding: 0.75rem;
+            padding: 14px;
             border: none;
             background: transparent;
-            color: var(--text-color-dark);
-            font-size: 0.95rem;
+            color: #2c3e50;
+            font-size: 1rem;
             outline: none;
+        }
+        
+        input::placeholder {
+            color: #95a5a6;
         }
         
         select {
             appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1.25rem;
+            background-position: right 15px center;
+            background-size: 15px;
         }
-
-        .phone-input-group {
+        
+        .phone-group {
+            display: flex;
+        }
+        
+        .country-code {
+            flex: 0 0 30%;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color-light);
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: #eef2f7;
+            padding: 0 15px;
+            border-right: 1px solid #ddd;
+            font-weight: 500;
+            color: #2c3e50;
         }
         
-        .phone-input-group:focus-within {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-light);
+        .flag {
+            margin-right: 8px;
+            font-size: 1.2rem;
         }
-
-        .country-code-select {
-            flex-shrink: 0;
-            padding: 0.75rem;
-            border: none;
-            background: transparent;
-            font-size: 0.95rem;
-            outline: none;
-            color: var(--text-color-dark);
-        }
-
+        
         .phone-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            background: transparent;
-            color: var(--text-color-dark);
-            font-size: 0.95rem;
-            outline: none;
+            flex: 1;
         }
         
+        /* ---------- MODIFIED: Checkbox styles (only this part changed) ---------- */
         .checkbox-group {
             display: flex;
             align-items: flex-start;
-            margin-top: 1.5rem;
-            gap: 0.75rem; /* Réduit l'espace entre la case et le texte */
+            gap: 12px;
+            margin: 20px 0;
         }
-        
+
         .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px; /* align with first text line */
             flex-shrink: 0;
-            margin-top: 0.2rem;
-            accent-color: var(--primary-color);
+            accent-color: #4CD964; /* green accent like the button */
+            cursor: pointer;
         }
-        
+
+        /* Use a block for the text so it wraps to two short lines on typical widths */
+        .terms-text {
+            font-size: 0. nine rem; /* fallback removed — keeping original scale below */
+        }
+
+        /* ensure compact readable lines, max two visible lines visually */
         .terms-text {
             font-size: 0.85rem;
-            line-height: 1.5;
-            color: var(--text-color-light);
+            line-height: 1.35;
+            color: #7f8c8d;
+            max-width: calc(100% - 32px);
         }
-        
         .terms-text a {
-            color: var(--primary-color);
+            color: #3498db;
             text-decoration: none;
             font-weight: 500;
         }
@@ -199,44 +196,42 @@
         .terms-text a:hover {
             text-decoration: underline;
         }
+        /* ---------- End checkbox modifications ---------- */
         
         .btn {
             display: block;
             width: 100%;
-            padding: 0.875rem;
-            background-color: var(--primary-color);
-            color: var(--white);
+            padding: 16px;
+            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
         }
         
         .btn:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
         }
         
         .btn:active {
             transform: translateY(0);
         }
         
-        .btn i {
-            margin-right: 0.5rem;
-        }
-        
         .login-link {
             text-align: center;
-            font-size: 0.875rem;
-            margin-top: 1rem;
-            color: var(--text-color-light);
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: #7f8c8d;
         }
         
         .login-link a {
-            color: var(--primary-color);
+            color: #3498db;
             text-decoration: none;
             font-weight: 500;
         }
@@ -246,41 +241,63 @@
         }
         
         .footer {
-            padding: 1rem;
+            margin-top: 30px;
             text-align: center;
-            color: var(--text-color-light);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
         }
-
-        @media (max-width: 640px) {
-            body {
-                justify-content: flex-start; /* Réajuste le centrage sur mobile pour éviter que le contenu ne soit trop bas */
+        
+        .footer-links {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 576px) {
+            .card {
+                padding: 20px;
             }
-            .form-container {
-                box-shadow: none;
-                border-radius: 0;
-                padding: 1.5rem;
+            
+            .logo {
+                font-size: 2.2rem;
             }
-
-            .main-content {
-                padding: 0;
+            
+            .tagline {
+                font-size: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="main-content">
-        <div class="form-container">
-            <div class="header">
-                <div class="logo">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span>Cash-flowr</span>
-                </div>
-                <div class="tagline">La plateforme d'affiliation gamifiée</div>
+    <div class="container">
+        <div class="logo-header">
+            <div class="logo">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Cash-flowr</span>
+            </div>
+            <div class="tagline">La plateforme d'affiliation gamifiée</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Créer un compte</h2>
+                <p>Rejoignez notre communauté dès aujourd'hui</p>
             </div>
             
-            <h2 class="form-title">Créer un compte</h2>
-
             <form id="registrationForm">
                 <div class="form-group">
                     <label for="firstName">Prénom</label>
@@ -319,26 +336,32 @@
                             <i class="fas fa-globe"></i>
                         </div>
                         <select id="country" name="country" required onchange="updateCountryCode()">
-                            <option value="" data-code="" data-flag="">Sélectionnez votre pays</option>
-                            <option value="ci" data-code="+225" data-flag="🇨🇮">Côte d'Ivoire 🇨🇮</option>
-                            <option value="fr" data-code="+33" data-flag="🇫🇷">France 🇫🇷</option>
-                            <option value="sn" data-code="+221" data-flag="🇸🇳">Sénégal 🇸🇳</option>
-                            <option value="cm" data-code="+237" data-flag="🇨🇲">Cameroun 🇨🇲</option>
-                            <option value="ml" data-code="+223" data-flag="🇲🇱">Mali 🇲🇱</option>
-                            <option value="bf" data-code="+226" data-flag="🇧🇫">Burkina Faso 🇧🇫</option>
-                            <option value="ne" data-code="+227" data-flag="🇳🇪">Niger 🇳🇪</option>
-                            <option value="tg" data-code="+228" data-flag="🇹🇬">Togo 🇹🇬</option>
-                            <option value="bj" data-code="+229" data-flag="🇧🇯">Bénin 🇧🇯</option>
-                            <option value="cd" data-code="+243" data-flag="🇨🇩">Rép. Dém. du Congo 🇨🇩</option>
+                            <option value="">Sélectionnez votre pays</option>
+                            <option value="ci" data-code="+225">Côte d'Ivoire</option>
+                            <option value="fr" data-code="+33">France</option>
+                            <option value="sn" data-code="+221">Sénégal</option>
+                            <option value="cm" data-code="+237">Cameroun</option>
+                            <option value="ml" data-code="+223">Mali</option>
+                            <option value="bf" data-code="+226">Burkina Faso</option>
+                            <option value="ne" data-code="+227">Niger</option>
+                            <option value="tg" data-code="+228">Togo</option>
+                            <option value="bj" data-code="+229">Bénin</option>
+                            <option value="cd" data-code="+243">République Démocratique du Congo</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="phone">Numéro de téléphone</label>
-                    <div class="phone-input-group">
-                        <span class="country-code-select" id="countryCode">+225</span>
-                        <input type="tel" id="phone" name="phone" required placeholder="XX XXX XXX">
+                    <div class="input-group phone-group">
+                        <div class="country-code">
+                            <span id="selectedFlag" class="flag">🇨🇮</span>
+                            <span id="countryCode">+225</span>
+                        </div>
+                        <div class="input-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <input type="tel" id="phone" name="phone" required class="phone-input" placeholder="XX XXX XXX">
                     </div>
                 </div>
                 
@@ -362,28 +385,34 @@
                     </div>
                 </div>
                 
+                <!-- ---------- CHECKBOX: only this block changed to be compact and two-line ---------- -->
                 <div class="checkbox-group">
                     <input type="checkbox" id="terms" name="terms" required>
-                    <label for="terms" class="terms-text">
-                        En m'inscrivant, j'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a>.
-                        <br>
-                        Le compte est activé avec un paiement de 3 100 FCFA.
-                    </label>
+                    <div class="terms-text">
+                        En cochant cette case, j'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a> de Cash-flowr.<br>
+                        Mon compte devra être activé avec un paiement de <strong>3 100 FCFA</strong>.
+                    </div>
                 </div>
+                <!-- ------------------------------------------------------------------------------- -->
                 
                 <button type="submit" class="btn">
-                    <i class="fas fa-user-plus"></i> S'inscrire
+                    <i class="fas fa-user-plus"></i> S'inscrire maintenant
                 </button>
             </form>
             
             <div class="login-link">
-                Vous avez déjà un compte ? <a href="login.html">Connectez-vous</a>
+                Vous avez déjà un compte? <a href="login.html">Connectez-vous</a>
             </div>
         </div>
-    </div>
-    
-    <div class="footer">
-        © 2023 Cash-flowr. Tous droits réservés.
+        
+        <div class="footer">
+            <div>© 2023 Cash-flowr. Tous droits réservés.</div>
+            <div class="footer-links">
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Politique de confidentialité</a>
+                <a href="#">Support</a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -392,10 +421,30 @@
             const countrySelect = document.getElementById('country');
             const selectedOption = countrySelect.options[countrySelect.selectedIndex];
             const countryCode = selectedOption.getAttribute('data-code') || '+225';
+            const countryFlag = getFlag(selectedOption.value) || '🇨🇮';
             
             document.getElementById('countryCode').textContent = countryCode;
+            document.getElementById('selectedFlag').textContent = countryFlag;
         }
-
+        
+        // Fonction pour obtenir le drapeau en fonction du code pays
+        function getFlag(countryCode) {
+            const flags = {
+                'ci': '🇨🇮',
+                'fr': '🇫🇷',
+                'sn': '🇸🇳',
+                'cm': '🇨🇲',
+                'ml': '🇲🇱',
+                'bf': '🇧🇫',
+                'ne': '🇳🇪',
+                'tg': '🇹🇬',
+                'bj': '🇧🇯',
+                'cd': '🇨🇩'
+            };
+            
+            return flags[countryCode] || '🇨🇮';
+        }
+        
         // Validation du formulaire
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -407,23 +456,29 @@
                 alert('Les mots de passe ne correspondent pas.');
                 return;
             }
+
+            if (!document.getElementById('terms').checked) {
+                alert("Veuillez accepter les conditions d'utilisation et la politique de confidentialité.");
+                return;
+            }
             
+            // Simulation d'envoi du formulaire
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
             submitBtn.disabled = true;
             
+            // Simulation d'une requête asynchrone
             setTimeout(() => {
-                alert('Inscription réussie ! Redirection vers la page de paiement.');
+                alert('Inscription réussie! Vous allez être redirigé vers la page de paiement.');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                // Redirection
+                // Redirection vers la page de paiement (à implémenter)
                 // window.location.href = 'paiement.html';
             }, 2000);
         });
 
-        // Appeler la fonction au chargement initial de la page pour définir le code par défaut
+        // initialize default country code on load
         document.addEventListener('DOMContentLoaded', () => {
             updateCountryCode();
         });
