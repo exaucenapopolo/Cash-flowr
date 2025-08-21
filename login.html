@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash-flowr - Connexion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        
+        .logo-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: #4CD964;
+        }
+        
+        .tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 25px;
+        }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .card-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .card-header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group:focus-within {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .input-icon {
+            padding: 0 15px;
+            color: #7f8c8d;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            color: #2c3e50;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        input::placeholder {
+            color: #95a5a6;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: #7f8c8d;
+        }
+        
+        .signup-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+        
+        .footer-links {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 576px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .links {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-header">
+            <div class="logo">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Cash-flowr</span>
+            </div>
+            <div class="tagline">La plateforme d'affiliation gamifiée</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Connexion</h2>
+                <p>Accédez à votre compte</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Nom d'utilisateur ou e-mail</label>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <input type="text" id="email" name="email" required placeholder="Votre nom d'utilisateur ou e-mail">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
+                    </div>
+                </div>
+                
+                <div class="links">
+                    <div>
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember" style="display: inline; font-weight: normal;">Se souvenir de moi</label>
+                    </div>
+                    <a href="forgot-password.html">Mot de passe oublié?</a>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+            
+            <div class="signup-link">
+                Vous n'avez pas de compte? <a href="register.html">Inscrivez-vous</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>© 2025 Cash-flowr. Tous droits réservés.</div>
+            <div class="footer-links">
+                <a href="terms.html">Conditions d'utilisation</a>
+                <a href="privacy.html">Politique de confidentialité</a>
+                <a href="support.html">Support</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validation du formulaire
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulation d'envoi du formulaire
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+            submitBtn.disabled = true;
+            
+            // Simulation d'une requête asynchrone
+            setTimeout(() => {
+                alert('Connexion réussie! Vous allez être redirigé vers votre tableau de bord.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                // Redirection vers le tableau de bord (à implémenter)
+                // window.location.href = 'dashboard.html';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

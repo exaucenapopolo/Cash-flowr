@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - Cash-flowr</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: #4CD964;
+        }
+        
+        .tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4CD964;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            padding: 15px;
+            display: none;
+            background-color: white;
+        }
+        
+        .faq-active .faq-answer {
+            display: block;
+        }
+        
+        .contact-form {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .contact-method {
+            flex: 1;
+            min-width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .contact-method i {
+            font-size: 2rem;
+            color: #4CD964;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            padding: 20px 0;
+        }
+        
+        .footer-links {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 576px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .contact-method {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-header">
+            <div class="logo">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Cash-flowr</span>
+            </div>
+            <div class="tagline">La plateforme d'affiliation gamifiée</div>
+        </div>
+        
+        <div class="card">
+            <h1>Centre d'aide et support</h1>
+            <p>Nous sommes là pour vous aider à réussir avec Cash-flowr. Consultez notre FAQ ou contactez-nous directement.</p>
+            
+            <h2>Questions fréquentes</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Comment puis-je m'inscrire sur Cash-flowr?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Pour vous inscrire, rendez-vous sur notre page d'accueil et cliquez sur "S'inscrire". Vous devrez remplir le formulaire d'inscription et effectuer le paiement de 3100 FCFA pour activer votre compte.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Comment fonctionne le système de parrainage?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Notre système de parrainage comporte 3 niveaux :</p>
+                    <ul>
+                        <li>Niveau 1 : 1500 FCFA par filleul direct</li>
+                        <li>Niveau 2 : 700 FCFA par filleul de vos filleuls</li>
+                        <li>Niveau 3 : 300 FCFA au troisième niveau</li>
+                    </ul>
+                    <p>Vos gains sont crédités instantanément dans votre tableau de bord.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Comment recevrai-je ma liste de contacts WhatsApp?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Dès que votre paiement de 3100 FCFA est confirmé, vous recevrez un lien de téléchargement dans votre tableau de bord pour accéder à la liste exclusive de 33 000 contacts WhatsApp. Vous pourrez les importer directement dans votre téléphone.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Comment puis-je retirer mes gains?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Vous pouvez retirer vos gains dès que vous atteignez le seuil minimum de 2000 FCFA. Rendez-vous dans votre tableau de bord, section "Retraits", et suivez les instructions. Les retraits sont traités dans un délai de 72 heures maximum.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Que faire si je rencontre des problèmes techniques?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Si vous rencontrez des problèmes techniques, contactez-nous via le formulaire ci-dessous ou par WhatsApp. Notre équice technique vous répondra dans les plus brefs délais.</p>
+                </div>
+            </div>
+            
+            <h2>Contactez-nous</h2>
+            
+            <div class="contact-info">
+                <div class="contact-method">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>WhatsApp</h3>
+                    <p>+225 07 08 09 10 11</p>
+                    <p>Réponse sous 24h</p>
+                </div>
+                
+                <div class="contact-method">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>support@cash-flowr.com</p>
+                    <p>Réponse sous 48h</p>
+                </div>
+                
+                <div class="contact-method">
+                    <i class="fas fa-clock"></i>
+                    <h3>Horaires</h3>
+                    <p>Lun-Ven: 8h-18h</p>
+                    <p>Sam: 9h-13h</p>
+                </div>
+            </div>
+            
+            <div class="contact-form">
+                <form id="supportForm">
+                    <div class="form-group">
+                        <label for="name">Nom complet</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Adresse email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Sujet</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Sélectionnez un sujet</option>
+                            <option value="technical">Problème technique</option>
+                            <option value="payment">Problème de paiement</option>
+                            <option value="withdrawal">Demande de retrait</option>
+                            <option value="affiliation">Question sur l'affiliation</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Envoyer le message</button>
+                </form>
+            </div>
+            
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour à l'accueil
+            </a>
+        </div>
+        
+        <div class="footer">
+            <div>© 2025 Cash-flowr. Tous droits réservés.</div>
+            <div>Site propulsé par <a href="https://social-boost-horizon-new-shb.vercel.app" target="_blank">Social Boost Horizon</a></div>
+            <div class="footer-links">
+                <a href="terms.html">Conditions d'utilisation</a>
+                <a href="privacy.html">Politique de confidentialité</a>
+                <a href="support.html">Support</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script pour les FAQ
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('faq-active');
+                
+                const icon = question.querySelector('i');
+                if (item.classList.contains('faq-active')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+        
+        // Script pour le formulaire de contact
+        document.getElementById('supportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+            submitBtn.disabled = true;
+            
+            // Simulation d'envoi
+            setTimeout(() => {
+                alert('Votre message a été envoyé! Notre équipe vous répondra dans les plus brefs délais.');
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
