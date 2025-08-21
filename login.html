@@ -222,7 +222,6 @@
     }
 
     /* --- Ajustements spécifiques pour la case "Se souvenir de moi" --- */
-    /* Empêche la checkbox d'absorber 100% de largeur (règle générale input {width:100%}) */
     .links input[type="checkbox"] {
       width: auto;
       padding: 0;
@@ -231,20 +230,17 @@
       height: auto;
     }
 
-    /* Place la case et le label sur la même ligne, centrés verticalement, sans espace inutile */
     .remember-wrap {
       display: flex;
       align-items: center;
       gap: 10px;
-      /* empêche ce bloc d'étirer la largeur disponible */
       max-width: 100%;
     }
 
-    /* Par défaut les labels sont block; override localement pour que le label soit inline */
     .remember-wrap label {
       display: inline-block;
       margin: 0;
-      font-weight: normal; /* conserve la même apparence que vous aviez */
+      font-weight: normal;
       color: #2c3e50;
       font-size: 0.95rem;
     }
@@ -277,7 +273,6 @@
         align-items: center;
       }
 
-      /* Dans mobile, garder case+label sur la même ligne mais bien ajustés */
       .remember-wrap { gap: 8px; }
     }
   </style>
@@ -358,7 +353,12 @@
     </div>
   </div>
 
-  <!-- ---------- Firebase + logique de connexion (modulaire v9) ---------- -->
+  <!-- ---------- Firebase + logique de connexion (modulaire v9) ----------
+       IMPORTANT :
+       - Ces règles JS supposent que tu as déployé en base la collection "user_public/{uid}"
+         avec au minimum le champ "email" (champ non-sensible autorisé en lecture publique).
+       - Ne lire JAMAIS /users/{uid} avant que l'utilisateur soit authentifié.
+  -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -406,7 +406,7 @@
       const closeNotification = () => {
         notification.style.animation = 'slideIn 0.3s ease reverse forwards';
         setTimeout(() => {
-          notificationContainer.removeChild(notification);
+          if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification);
         }, 300);
       };
       
@@ -430,14 +430,21 @@
       showNotification('success', 'Succès', message);
     }
 
-    // Fonction pour vérifier le statut de paiement et rediriger
+    // -------------------------------
+    // Nouvelle fonction: vérifie user_public/{uid} (lecture publique prévue par tes règles)
+    // et redirige en conséquence.
+    // -------------------------------
     async function checkPaymentStatusAndRedirect(uid) {
       try {
-        const userDoc = await getDoc(doc(db, 'users', uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          
-          if (userData.status === 'pending_payment') {
+        // Lire le document public user_public/{uid} (doit être lisible sans authentification)
+        const publicDocRef = doc(db, 'user_public', uid);
+        const publicSnapshot = await getDoc(publicDocRef);
+
+        if (publicSnapshot.exists()) {
+          const publicData = publicSnapshot.data();
+
+          // Exemple: publicData.status peut être 'pending_payment' ou autre
+          if (publicData.status === 'pending_payment') {
             showSuccess('Connexion réussie ! Redirection vers la page de paiement...');
             setTimeout(() => {
               window.location.assign('paiement.html');
@@ -449,7 +456,11 @@
             }, 2000);
           }
         } else {
-          showError('Données utilisateur non trouvées.');
+          // Si user_public n'existe pas, on peut soit :
+          // - essayer de lire /users/{uid} (seulement si l'utilisateur est authentifié)
+          // - afficher une erreur invitant à contacter le support
+          // Ici on choisit la seconde option pour rester sécurisé.
+          showError('Informations publiques du compte introuvables. Merci de contacter le support.');
         }
       } catch (error) {
         console.error('Erreur lors de la vérification du statut:', error);
@@ -476,44 +487,81 @@
         const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
         await setPersistence(auth, persistence);
         
-        // Essayer de se connecter directement avec l'identifiant (qui peut être un email ou un nom d'utilisateur)
-        // D'abord essayer comme email
+        // Essayer de se connecter directement avec l'identifiant (qui peut être un email)
         try {
           const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
           const user = userCredential.user;
           
-          // Vérifier le statut de paiement et rediriger
+          // Vérifier le statut public et rediriger
           await checkPaymentStatusAndRedirect(user.uid);
         } catch (emailError) {
-          // Si l'authentification par email échoue, vérifier si l'identifiant est un nom d'utilisateur
+          // Si l'authentification par email échoue, traiter l'identifiant comme un possible nom d'utilisateur
           if (emailError.code === 'auth/user-not-found' || emailError.code === 'auth/invalid-email') {
-            // Chercher l'email associé à ce nom d'utilisateur
-            const usernameDoc = await getDoc(doc(db, 'usernames', identifier));
-            
-            if (usernameDoc.exists()) {
-              const uid = usernameDoc.data().uid;
-              const userDoc = await getDoc(doc(db, 'users', uid));
+            try {
+              // Chercher l'uid associé au nom d'utilisateur (collection usernames) - lecture publique
+              const usernameDoc = await getDoc(doc(db, 'usernames', identifier));
               
-              if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const userEmail = userData.email;
-                
-                // Essayer de se connecter avec l'email trouvé
-                const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
-                const user = userCredential.user;
-                
-                // Vérifier le statut de paiement et rediriger
-                await checkPaymentStatusAndRedirect(user.uid);
+              if (usernameDoc.exists()) {
+                const uid = usernameDoc.data().uid;
+
+                // Lire la petite collection publique user_public/{uid} (doit exister et contenir email)
+                const publicDoc = await getDoc(doc(db, 'user_public', uid));
+
+                if (publicDoc.exists()) {
+                  const publicData = publicDoc.data();
+                  const userEmail = publicData.email;
+
+                  if (!userEmail) {
+                    showError('Adresse e-mail publique introuvable pour cet utilisateur.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                  }
+
+                  // Essayer de se connecter avec l'email trouvé
+                  try {
+                    const userCredential2 = await signInWithEmailAndPassword(auth, userEmail, password);
+                    const user2 = userCredential2.user;
+                    // Vérifier le statut public et rediriger
+                    await checkPaymentStatusAndRedirect(user2.uid);
+                  } catch (signinErr) {
+                    // Erreurs de mot de passe ou autres
+                    console.error('Erreur de signin avec email depuis user_public:', signinErr);
+                    if (signinErr.code === 'auth/wrong-password') showError('Mot de passe incorrect.');
+                    else showError('Erreur de connexion: ' + signinErr.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                  }
+                } else {
+                  showError('Données publiques du compte introuvables. Contactez le support.');
+                  submitBtn.innerHTML = originalText;
+                  submitBtn.disabled = false;
+                  return;
+                }
               } else {
-                showError('Aucun utilisateur trouvé avec ce nom d\'utilisateur.');
+                showError('Identifiant ou mot de passe incorrect.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
               }
-            } else {
-              showError('Identifiant ou mot de passe incorrect.');
+            } catch (err) {
+              console.error('Erreur lors de la recherche du nom d\'utilisateur:', err);
+              showError('Erreur lors de la recherche du compte.');
+              submitBtn.innerHTML = originalText;
+              submitBtn.disabled = false;
+              return;
             }
           } else if (emailError.code === 'auth/wrong-password') {
             showError('Mot de passe incorrect.');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            return;
           } else {
             showError('Erreur de connexion: ' + emailError.message);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            return;
           }
         }
       } catch (error) {
