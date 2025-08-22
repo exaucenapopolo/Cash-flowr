@@ -288,7 +288,7 @@
     }
 
     .small-stat-card {
-      background: linear-gradient(135deg, #ffd8d8 0%, #ff9e9e 100%);
+      background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
       border-radius: 10px;
       padding: 15px;
       box-shadow: var(--shadow);
@@ -306,7 +306,7 @@
     }
 
     .small-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #c9f7c9 0%, #8ce78c 100%);
+      background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
     }
 
     .small-stat-title {
@@ -362,6 +362,9 @@
       font-size: 0.9rem;
       margin-bottom: 10px;
       opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .large-stat-value {
@@ -371,12 +374,8 @@
     }
 
     .large-stat-icon {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 3rem;
-      opacity: 0.3;
+      font-size: 2rem;
+      opacity: 0.7;
     }
 
     /* Medium stats cards */
@@ -420,6 +419,9 @@
       color: white;
       font-size: 0.9rem;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .medium-stat-value {
@@ -429,12 +431,8 @@
     }
 
     .medium-stat-icon {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 2.5rem;
-      opacity: 0.3;
+      font-size: 2rem;
+      opacity: 0.7;
     }
 
     /* Small gain cards */
@@ -541,7 +539,12 @@
       letter-spacing: 1px;
     }
 
-    .copy-key-btn {
+    .key-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .copy-key-btn, .send-key-btn {
       background-color: var(--primary-color);
       color: white;
       border: none;
@@ -552,6 +555,10 @@
       display: flex;
       align-items: center;
       gap: 5px;
+    }
+
+    .send-key-btn {
+      background-color: #25D366;
     }
 
     /* Referral section */
@@ -858,6 +865,10 @@
       .gain-stats {
         grid-template-columns: repeat(2, 1fr);
       }
+      
+      .key-buttons {
+        flex-direction: column;
+      }
     }
 
     @media (max-width: 576px) {
@@ -872,6 +883,10 @@
       .task-table {
         display: block;
         overflow-x: auto;
+      }
+      
+      .user-name {
+        display: none;
       }
     }
 
@@ -964,9 +979,6 @@
       
       <div class="user-profile" id="userProfile">
         <div class="avatar">M</div>
-        <div class="user-info">
-          <div class="user-name">McExau</div>
-        </div>
       </div>
     </div>
   </header>
@@ -1140,42 +1152,50 @@
       <!-- Large stat (Solde) -->
       <div class="large-stats">
         <div class="large-stat-card">
-          <div class="large-stat-title">SOLDE</div>
+          <div class="large-stat-title">
+            <i class="fas fa-piggy-bank large-stat-icon"></i>
+            SOLDE
+          </div>
           <div class="large-stat-value">XAF 1,505</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
-          <i class="fas fa-piggy-bank large-stat-icon"></i>
         </div>
       </div>
       
       <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) -->
       <div class="medium-stats">
         <div class="medium-stat-card">
-          <div class="medium-stat-title">Retiré</div>
+          <div class="medium-stat-title">
+            <i class="fas fa-download medium-stat-icon"></i>
+            Retiré
+          </div>
           <div class="medium-stat-value">XAF 88,350</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
-          <i class="fas fa-money-bill-wave medium-stat-icon"></i>
         </div>
         
         <div class="medium-stat-card">
-          <div class="medium-stat-title">Gains de parrainage</div>
+          <div class="medium-stat-title">
+            <i class="fas fa-users medium-stat-icon"></i>
+            Gains de parrainage
+          </div>
           <div class="medium-stat-value">XAF 66,000</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
-          <i class="fas fa-users medium-stat-icon"></i>
         </div>
         
         <div class="medium-stat-card">
-          <div class="medium-stat-title">Bonus d'agent</div>
+          <div class="medium-stat-title">
+            <i class="fas fa-gift medium-stat-icon"></i>
+            Bonus d'agent
+          </div>
           <div class="medium-stat-value">XAF 735</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
-          <i class="fas fa-gift medium-stat-icon"></i>
         </div>
       </div>
       
@@ -1187,10 +1207,16 @@
         <div class="fidelity-key">
           <i class="fas fa-key key-icon"></i>
           <div class="key-text" id="fidelityKey">MULA-McExau-2024-5678-90AB</div>
-          <button class="copy-key-btn" id="copyKeyBtn">
-            <i class="fas fa-copy"></i>
-            <span>Copier</span>
-          </button>
+          <div class="key-buttons">
+            <button class="copy-key-btn" id="copyKeyBtn">
+              <i class="fas fa-copy"></i>
+              <span>Copier</span>
+            </button>
+            <button class="send-key-btn" id="sendKeyBtn">
+              <i class="fab fa-whatsapp"></i>
+              <span>Envoyer</span>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -1439,6 +1465,7 @@
     const calendarMonth = document.querySelector('.calendar-month');
     const copyKeyBtn = document.getElementById('copyKeyBtn');
     const fidelityKey = document.getElementById('fidelityKey');
+    const sendKeyBtn = document.getElementById('sendKeyBtn');
     
     // Current date for calendar
     let currentDate = new Date();
@@ -1485,6 +1512,12 @@
         .catch(err => {
           showNotification('error', 'Erreur', 'Impossible de copier la clé: ' + err);
         });
+    });
+    
+    // Send fidelity key via WhatsApp
+    sendKeyBtn.addEventListener('click', () => {
+      const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
+      window.open(`https://wa.me/?text=${message}`, '_blank');
     });
     
     // Share referral link on social media with promotional message
