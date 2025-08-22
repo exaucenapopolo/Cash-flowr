@@ -202,6 +202,18 @@
     .menu-item i {
       width: 20px;
       text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      animation: dance 0.5s ease infinite;
+    }
+
+    @keyframes dance {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      25% { transform: translateY(-3px) rotate(-5deg); }
+      50% { transform: translateY(0) rotate(0); }
+      75% { transform: translateY(-3px) rotate(5deg); }
     }
 
     .menu-badge {
@@ -276,13 +288,17 @@
     }
 
     .small-stat-card {
-      background-color: var(--card-bg);
+      background: linear-gradient(135deg, #ffd8d8 0%, #ff9e9e 100%);
       border-radius: 10px;
       padding: 15px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       height: 100px;
+    }
+
+    .small-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #c9f7c9 0%, #8ce78c 100%);
     }
 
     .small-stat-title {
@@ -310,7 +326,7 @@
     }
 
     .large-stat-card {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+      background: linear-gradient(135deg, #a2d2ff 0%, #5c9ce6 100%);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
@@ -341,13 +357,24 @@
     }
 
     .medium-stat-card {
-      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 20px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       min-height: 130px;
+    }
+
+    .medium-stat-card:nth-child(1) {
+      background: linear-gradient(135deg, #ffc7a2 0%, #ff9a5c 100%);
+    }
+
+    .medium-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #c2a2ff 0%, #8c5ce7 100%);
+    }
+
+    .medium-stat-card:nth-child(3) {
+      background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
     }
 
     .medium-stat-title {
@@ -359,15 +386,7 @@
     .medium-stat-value {
       font-size: 1.6rem;
       font-weight: 700;
-      color: var(--purple-color);
-    }
-
-    .medium-stat-card:nth-child(2) .medium-stat-value {
-      color: var(--teal-color);
-    }
-
-    .medium-stat-card:nth-child(3) .medium-stat-value {
-      color: var(--orange-color);
+      color: white;
     }
 
     /* Small gain cards */
@@ -379,13 +398,31 @@
     }
 
     .gain-stat-card {
-      background-color: var(--card-bg);
       border-radius: 10px;
       padding: 15px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       height: 110px;
+    }
+
+    .gain-stat-card:nth-child(1) {
+      background: linear-gradient(135deg, #d4ffd4 0%, #a0f0a0 100%);
+    }
+    .gain-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #ffd4f0 0%, #f0a0d4 100%);
+    }
+    .gain-stat-card:nth-child(3) {
+      background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
+    }
+    .gain-stat-card:nth-child(4) {
+      background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
+    }
+    .gain-stat-card:nth-child(5) {
+      background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
+    }
+    .gain-stat-card:nth-child(6) {
+      background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
     }
 
     .gain-stat-header {
@@ -405,7 +442,7 @@
       width: 30px;
       height: 30px;
       border-radius: 8px;
-      background-color: rgba(94, 129, 172, 0.2);
+      background-color: rgba(255, 255, 255, 0.3);
       color: var(--primary-color);
       display: flex;
       align-items: center;
@@ -416,19 +453,12 @@
     .gain-stat-value {
       font-size: 1.2rem;
       font-weight: 700;
-      color: var(--primary-color);
+      color: var(--text-color);
     }
-
-    .gain-stat-card:nth-child(1) .gain-stat-value { color: var(--success-color); }
-    .gain-stat-card:nth-child(2) .gain-stat-value { color: var(--pink-color); }
-    .gain-stat-card:nth-child(3) .gain-stat-value { color: var(--warning-color); }
-    .gain-stat-card:nth-child(4) .gain-stat-value { color: var(--danger-color); }
-    .gain-stat-card:nth-child(5) .gain-stat-value { color: var(--purple-color); }
-    .gain-stat-card:nth-child(6) .gain-stat-value { color: var(--teal-color); }
 
     /* Referral section */
     .referral-section {
-      background-color: var(--card-bg);
+      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
@@ -516,7 +546,7 @@
 
     /* User info section */
     .user-info-section {
-      background-color: var(--card-bg);
+      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
@@ -548,7 +578,7 @@
 
     /* Task calendar */
     .task-calendar {
-      background-color: var(--card-bg);
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
@@ -560,6 +590,11 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+    }
+
+    .calendar-month {
+      font-weight: 600;
+      color: var(--text-color);
     }
 
     .calendar-nav {
@@ -579,18 +614,25 @@
       cursor: pointer;
     }
 
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+
+    .day-header {
+      text-align: center;
+      padding: 10px;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
-    }
-
-    .calendar-day {
-      text-align: center;
-      font-weight: 600;
-      color: var(--text-light);
-      padding: 10px 0;
-      font-size: 0.9rem;
     }
 
     .calendar-date {
@@ -601,6 +643,7 @@
       border-radius: 8px;
       cursor: pointer;
       position: relative;
+      background-color: rgba(255, 255, 255, 0.5);
     }
 
     .calendar-date:hover {
@@ -622,49 +665,33 @@
       border-radius: 50%;
     }
 
-    .task-list {
+    .task-table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 20px;
     }
 
-    .task-item {
+    .task-table th, .task-table td {
       padding: 12px 15px;
-      border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0.03);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
 
-    .task-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      background-color: var(--primary-light);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .task-content {
-      flex: 1;
-    }
-
-    .task-title {
-      font-weight: 500;
-      margin-bottom: 3px;
-    }
-
-    .task-time {
-      font-size: 0.8rem;
+    .task-table th {
+      background-color: rgba(0, 0, 0, 0.05);
+      font-weight: 600;
       color: var(--text-light);
     }
 
+    .task-table tr:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+
     .task-status {
-      font-size: 0.8rem;
+      display: inline-block;
       padding: 3px 8px;
       border-radius: 10px;
+      font-size: 0.8rem;
       background-color: var(--success-color);
       color: white;
     }
@@ -733,15 +760,6 @@
       .gain-stats {
         grid-template-columns: repeat(2, 1fr);
       }
-      
-      .calendar-grid {
-        grid-template-columns: repeat(7, 1fr);
-        overflow-x: auto;
-      }
-      
-      .calendar-date {
-        min-width: 40px;
-      }
     }
 
     @media (max-width: 576px) {
@@ -751,6 +769,11 @@
       
       .user-info-grid {
         grid-template-columns: 1fr;
+      }
+      
+      .task-table {
+        display: block;
+        overflow-x: auto;
       }
     }
 
@@ -1157,12 +1180,12 @@
           
           <div class="info-item">
             <div class="info-label">Email</div>
-            <div class="info-value">mcexau@example.com</div>
+            <div class="info-value">exaucenapopolo2@gmail.com</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Téléphone</div>
-            <div class="info-value">+237 6XX XXX XXX</div>
+            <div class="info-value">237652205768</div>
           </div>
           
           <div class="info-item">
@@ -1172,7 +1195,7 @@
           
           <div class="info-item">
             <div class="info-label">Parrainage actif</div>
-            <div class="info-value">12 personnes</div>
+            <div class="info-value">44 personnes</div>
           </div>
         </div>
       </div>
@@ -1193,82 +1216,82 @@
           </div>
         </div>
         
-        <div class="calendar-grid">
-          <div class="calendar-day">Lun</div>
-          <div class="calendar-day">Mar</div>
-          <div class="calendar-day">Mer</div>
-          <div class="calendar-day">Jeu</div>
-          <div class="calendar-day">Ven</div>
-          <div class="calendar-day">Sam</div>
-          <div class="calendar-day">Dim</div>
-          
-          <!-- Calendar dates will be populated by JavaScript -->
-          <div class="calendar-date">1</div>
-          <div class="calendar-date">2</div>
-          <div class="calendar-date">3</div>
-          <div class="calendar-date">4</div>
-          <div class="calendar-date">5</div>
-          <div class="calendar-date">6</div>
-          <div class="calendar-date">7</div>
-          <div class="calendar-date">8</div>
-          <div class="calendar-date active">9</div>
-          <div class="calendar-date has-task">10</div>
-          <div class="calendar-date">11</div>
-          <div class="calendar-date">12</div>
-          <div class="calendar-date">13</div>
-          <div class="calendar-date">14</div>
-          <div class="calendar-date">15</div>
-          <div class="calendar-date has-task">16</div>
-          <div class="calendar-date">17</div>
-          <div class="calendar-date">18</div>
-          <div class="calendar-date">19</div>
-          <div class="calendar-date">20</div>
-          <div class="calendar-date has-task">21</div>
-          <div class="calendar-date">22</div>
-          <div class="calendar-date">23</div>
-          <div class="calendar-date">24</div>
-          <div class="calendar-date">25</div>
-          <div class="calendar-date">26</div>
-          <div class="calendar-date has-task">27</div>
-          <div class="calendar-date">28</div>
-          <div class="calendar-date">29</div>
-          <div class="calendar-date">30</div>
+        <div class="calendar-days">
+          <div class="day-header">Lun</div>
+          <div class="day-header">Mar</div>
+          <div class="day-header">Mer</div>
+          <div class="day-header">Jeu</div>
+          <div class="day-header">Ven</div>
+          <div class="day-header">Sam</div>
+          <div class="day-header">Dim</div>
         </div>
         
-        <div class="task-list">
-          <div class="task-item">
-            <div class="task-icon">
-              <i class="fab fa-whatsapp"></i>
-            </div>
-            <div class="task-content">
-              <div class="task-title">Partager 5 messages sur WhatsApp</div>
-              <div class="task-time">À faire avant 18:00</div>
-            </div>
-            <div class="task-status">En cours</div>
-          </div>
-          
-          <div class="task-item">
-            <div class="task-icon">
-              <i class="fas fa-question-circle"></i>
-            </div>
-            <div class="task-content">
-              <div class="task-title">Répondre au quiz du jour</div>
-              <div class="task-time">À faire avant 20:00</div>
-            </div>
-            <div class="task-status">En cours</div>
-          </div>
-          
-          <div class="task-item">
-            <div class="task-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="task-content">
-              <div class="task-title">Parrainer un nouvel utilisateur</div>
-              <div class="task-time">À faire avant minuit</div>
-            </div>
-            <div class="task-status">En cours</div>
-          </div>
+        <div class="calendar-grid">
+          <!-- Calendar dates will be populated by JavaScript -->
         </div>
+        
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Day1</th>
+              <th>Day2</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Youtube</td>
+              <td>Saturday</td>
+              <td>Sunday</td>
+              <td><span class="task-status">Active</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>triviatz</td>
+              <td>Tuesday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Tiktok</td>
+              <td>Tuesday</td>
+              <td>Wednesday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>whatsapp</td>
+              <td>Monday</td>
+              <td>Wednesday</td>
+              <td><span class="task-status">Pending</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>trivia</td>
+              <td>Tuesday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>ads</td>
+              <td>Monday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Pending</span></td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>blogs</td>
+              <td>Monday</td>
+              <td>Friday</td>
+              <td><span class="task-status">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
@@ -1287,6 +1310,13 @@
     const shareFacebook = document.getElementById('shareFacebook');
     const shareTwitter = document.getElementById('shareTwitter');
     const shareTelegram = document.getElementById('shareTelegram');
+    const prevMonth = document.getElementById('prevMonth');
+    const nextMonth = document.getElementById('nextMonth');
+    const calendarGrid = document.querySelector('.calendar-grid');
+    const calendarMonth = document.querySelector('.calendar-month');
+    
+    // Current date for calendar
+    let currentDate = new Date();
     
     // Toggle sidebar on mobile
     hamburgerMenu.addEventListener('click', () => {
@@ -1321,25 +1351,28 @@
         });
     });
     
-    // Share referral link on social media
+    // Share referral link on social media with promotional message
+    const promoMessage = "Tu veux gagner de l'argent en ligne? Tu fais quoi avec ton téléphone sans gagner de l'argent? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
+    
     shareWhatsApp.addEventListener('click', () => {
-      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR! " + referralLink.textContent);
+      const text = encodeURIComponent(promoMessage + referralLink.textContent);
       window.open(`https://wa.me/?text=${text}`, '_blank');
     });
     
     shareFacebook.addEventListener('click', () => {
+      const quote = encodeURIComponent(promoMessage);
       const url = encodeURIComponent(referralLink.textContent);
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
     });
     
     shareTwitter.addEventListener('click', () => {
-      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR!");
+      const text = encodeURIComponent(promoMessage);
       const url = encodeURIComponent(referralLink.textContent);
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
     });
     
     shareTelegram.addEventListener('click', () => {
-      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR! " + referralLink.textContent);
+      const text = encodeURIComponent(promoMessage + referralLink.textContent);
       window.open(`https://t.me/share/url?url=${text}`, '_blank');
     });
     
@@ -1350,13 +1383,66 @@
     });
     
     // Calendar navigation
-    document.getElementById('prevMonth').addEventListener('click', () => {
-      showNotification('info', 'Calendrier', 'Mois précédent');
+    function updateCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      // Set month and year in header
+      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+      ];
+      calendarMonth.textContent = `${monthNames[month]} ${year}`;
+      
+      // Clear previous calendar
+      calendarGrid.innerHTML = '';
+      
+      // Get first day of month and number of days
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      // Adjust for Monday as first day of week
+      let startDay = firstDay === 0 ? 6 : firstDay - 1;
+      
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < startDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-date';
+        calendarGrid.appendChild(emptyCell);
+      }
+      
+      // Add cells for each day of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateCell = document.createElement('div');
+        dateCell.className = 'calendar-date';
+        dateCell.textContent = day;
+        
+        // Mark current day
+        const today = new Date();
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          dateCell.classList.add('active');
+        }
+        
+        // Randomly mark some days as having tasks
+        if (Math.random() > 0.7) {
+          dateCell.classList.add('has-task');
+        }
+        
+        calendarGrid.appendChild(dateCell);
+      }
+    }
+    
+    prevMonth.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      updateCalendar();
     });
     
-    document.getElementById('nextMonth').addEventListener('click', () => {
-      showNotification('info', 'Calendrier', 'Mois suivant');
+    nextMonth.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      updateCalendar();
     });
+    
+    // Initialize calendar
+    updateCalendar();
     
     // Notification function
     function showNotification(type, title, message, duration = 3000) {
