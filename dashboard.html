@@ -279,83 +279,42 @@
       font-size: 0.9rem;
     }
 
-    /* Main stats cards (Dépense and Profit) */
-    .main-stats {
+    /* Small stats cards */
+    .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 15px;
       margin-bottom: 20px;
     }
 
-    .main-stat-card {
-      border-radius: 12px;
-      padding: 20px;
+    .small-stat-card {
+      background: linear-gradient(135deg, #ffd8d8 0%, #ff9e9e 100%);
+      border-radius: 10px;
+      padding: 15px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      min-height: 140px;
+      height: 100px;
     }
 
-    .main-stat-card:nth-child(1) {
-      background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
+    .small-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #c9f7c9 0%, #8ce78c 100%);
     }
 
-    .main-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #4cd964 0%, #2ab32a 100%);
+    .small-stat-title {
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
     }
 
-    .main-stat-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .main-stat-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      background-color: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-      font-size: 1.8rem;
-      color: white;
-    }
-
-    .main-stat-title {
-      color: white;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .main-stat-value {
-      font-size: 1.8rem;
+    .small-stat-value {
+      font-size: 1.4rem;
       font-weight: 700;
-      color: white;
-      margin-bottom: 5px;
+      color: var(--danger-color);
     }
 
-    .main-stat-change {
-      display: flex;
-      align-items: center;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.9rem;
-    }
-
-    .stat-arrow {
-      margin-right: 5px;
-      font-size: 1.2rem;
-    }
-
-    .down {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .up {
-      color: rgba(255, 255, 255, 0.9);
+    .small-stat-card:nth-child(2) .small-stat-value {
+      color: var(--success-color);
     }
 
     /* Large stats cards */
@@ -375,42 +334,18 @@
       flex-direction: column;
       color: white;
       min-height: 150px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .large-stat-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .large-stat-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      background-color: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-      font-size: 1.8rem;
-      color: white;
     }
 
     .large-stat-title {
-      font-size: 1rem;
+      font-size: 0.9rem;
       margin-bottom: 10px;
       opacity: 0.9;
-      color: white;
-      font-weight: 600;
     }
 
     .large-stat-value {
       font-size: 2rem;
       font-weight: 700;
       margin-bottom: 5px;
-      color: white;
     }
 
     /* Medium stats cards */
@@ -427,9 +362,7 @@
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      min-height: 150px;
-      position: relative;
-      overflow: hidden;
+      min-height: 130px;
     }
 
     .medium-stat-card:nth-child(1) {
@@ -444,45 +377,16 @@
       background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
     }
 
-    .medium-stat-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .medium-stat-icon {
-      width: 45px;
-      height: 45px;
-      border-radius: 10px;
-      background-color: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-      font-size: 1.5rem;
-      color: white;
-    }
-
     .medium-stat-title {
-      color: white;
+      color: var(--text-light);
       font-size: 0.9rem;
-      font-weight: 600;
+      margin-bottom: 10px;
     }
 
     .medium-stat-value {
       font-size: 1.6rem;
       font-weight: 700;
       color: white;
-    }
-
-    /* Section title for detailed gains */
-    .section-title {
-      font-size: 1.3rem;
-      margin: 30px 0 20px;
-      color: var(--secondary-color);
-      font-weight: 600;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--primary-light);
     }
 
     /* Small gain cards */
@@ -500,13 +404,25 @@
       display: flex;
       flex-direction: column;
       height: 110px;
-      background-color: var(--card-bg);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .gain-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    .gain-stat-card:nth-child(1) {
+      background: linear-gradient(135deg, #d4ffd4 0%, #a0f0a0 100%);
+    }
+    .gain-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #ffd4f0 0%, #f0a0d4 100%);
+    }
+    .gain-stat-card:nth-child(3) {
+      background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
+    }
+    .gain-stat-card:nth-child(4) {
+      background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
+    }
+    .gain-stat-card:nth-child(5) {
+      background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
+    }
+    .gain-stat-card:nth-child(6) {
+      background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
     }
 
     .gain-stat-header {
@@ -526,7 +442,7 @@
       width: 30px;
       height: 30px;
       border-radius: 8px;
-      background-color: rgba(94, 129, 172, 0.2);
+      background-color: rgba(255, 255, 255, 0.3);
       color: var(--primary-color);
       display: flex;
       align-items: center;
@@ -540,13 +456,6 @@
       color: var(--text-color);
     }
 
-    .gain-stat-card:nth-child(1) .gain-stat-value { color: var(--success-color); }
-    .gain-stat-card:nth-child(2) .gain-stat-value { color: var(--pink-color); }
-    .gain-stat-card:nth-child(3) .gain-stat-value { color: var(--warning-color); }
-    .gain-stat-card:nth-child(4) .gain-stat-value { color: var(--danger-color); }
-    .gain-stat-card:nth-child(5) .gain-stat-value { color: var(--purple-color); }
-    .gain-stat-card:nth-child(6) .gain-stat-value { color: var(--teal-color); }
-
     /* Referral section */
     .referral-section {
       background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
@@ -554,6 +463,13 @@
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+      font-weight: 600;
     }
 
     .referral-content {
@@ -844,10 +760,6 @@
       .gain-stats {
         grid-template-columns: repeat(2, 1fr);
       }
-      
-      .main-stats {
-        grid-template-columns: 1fr;
-      }
     }
 
     @media (max-width: 576px) {
@@ -862,13 +774,6 @@
       .task-table {
         display: block;
         overflow-x: auto;
-      }
-      
-      .main-stat-icon, .large-stat-icon, .medium-stat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
-        margin-right: 10px;
       }
     }
 
@@ -1115,48 +1020,25 @@
         <a href="#" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
-      <!-- Main stats (Dépense and Profit) -->
-      <div class="main-stats">
-        <div class="main-stat-card">
-          <div class="main-stat-header">
-            <div class="main-stat-icon">
-              <i class="fas fa-arrow-trend-down"></i>
-            </div>
-            <div class="main-stat-title">Dépense</div>
-          </div>
-          <div class="main-stat-value">XAF 3,000</div>
-          <div class="main-stat-change">
-            <span class="stat-arrow down"><i class="fas fa-arrow-down"></i></span>
-            <span>2.5% ce mois</span>
-          </div>
+      <!-- Small stats (Dépense and Profit) -->
+      <div class="small-stats">
+        <div class="small-stat-card">
+          <div class="small-stat-title">Dépense:</div>
+          <div class="small-stat-value">XAF 3,000</div>
         </div>
         
-        <div class="main-stat-card">
-          <div class="main-stat-header">
-            <div class="main-stat-icon">
-              <i class="fas fa-arrow-trend-up"></i>
-            </div>
-            <div class="main-stat-title">Profit</div>
-          </div>
-          <div class="main-stat-value">XAF 97,278</div>
-          <div class="main-stat-change">
-            <span class="stat-arrow up"><i class="fas fa-arrow-up"></i></span>
-            <span>15.3% ce mois</span>
-          </div>
+        <div class="small-stat-card">
+          <div class="small-stat-title">Profit:</div>
+          <div class="small-stat-value">XAF 97,278</div>
         </div>
       </div>
       
       <!-- Large stat (Solde) -->
       <div class="large-stats">
         <div class="large-stat-card">
-          <div class="large-stat-header">
-            <div class="large-stat-icon">
-              <i class="fas fa-wallet"></i>
-            </div>
-            <div class="large-stat-title">SOLDE</div>
-          </div>
+          <div class="large-stat-title">SOLDE</div>
           <div class="large-stat-value">XAF 1,505</div>
-          <div class="main-stat-change">
+          <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
@@ -1165,47 +1047,29 @@
       <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) -->
       <div class="medium-stats">
         <div class="medium-stat-card">
-          <div class="medium-stat-header">
-            <div class="medium-stat-icon">
-              <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <div class="medium-stat-title">Retiré</div>
-          </div>
+          <div class="medium-stat-title">Retiré</div>
           <div class="medium-stat-value">XAF 88,350</div>
-          <div class="main-stat-change">
+          <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
         
         <div class="medium-stat-card">
-          <div class="medium-stat-header">
-            <div class="medium-stat-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="medium-stat-title">Gains de parrainage</div>
-          </div>
+          <div class="medium-stat-title">Gains de parrainage</div>
           <div class="medium-stat-value">XAF 66,000</div>
-          <div class="main-stat-change">
+          <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
         
         <div class="medium-stat-card">
-          <div class="medium-stat-header">
-            <div class="medium-stat-icon">
-              <i class="fas fa-star"></i>
-            </div>
-            <div class="medium-stat-title">Bonus d'agent</div>
-          </div>
+          <div class="medium-stat-title">Bonus d'agent</div>
           <div class="medium-stat-value">XAF 735</div>
-          <div class="main-stat-change">
+          <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
       </div>
-      
-      <!-- Section title for detailed gains -->
-      <h2 class="section-title">Gains détaillés</h2>
       
       <!-- Gain stats (WhatsApp, Trivia, etc.) -->
       <div class="gain-stats">
