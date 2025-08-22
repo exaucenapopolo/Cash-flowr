@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Helasmart - Dashboard</title>
+  <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -18,9 +18,13 @@
       --card-bg: #ffffff;
       --text-color: #2e3440;
       --text-light: #4c566a;
-      --success-color: #a3be8c;
-      --warning-color: #ebcb8b;
-      --danger-color: #bf616a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
     }
@@ -36,9 +40,13 @@
       --card-bg: #434c5e;
       --text-color: #eceff4;
       --text-light: #d8dee9;
-      --success-color: #a3be8c;
-      --warning-color: #ebcb8b;
-      --danger-color: #bf616a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
@@ -51,7 +59,7 @@
     }
 
     body {
-      background: linear-gradient(135deg, var(--background-light) 0%, var(--background-dark) 100%);
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
       color: var(--text-color);
       min-height: 100vh;
       padding: 0;
@@ -259,98 +267,164 @@
       font-size: 0.9rem;
     }
 
-    /* Stats summary */
-    .stats-summary {
+    /* Small stats cards */
+    .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .small-stat-card {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 100px;
+    }
+
+    .small-stat-title {
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .small-stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--danger-color);
+    }
+
+    .small-stat-card:nth-child(2) .small-stat-value {
+      color: var(--success-color);
+    }
+
+    /* Large stats cards */
+    .large-stats {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .large-stat-card {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      color: white;
+      min-height: 150px;
+    }
+
+    .large-stat-title {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .large-stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    /* Medium stats cards */
+    .medium-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
       margin-bottom: 30px;
     }
 
-    .summary-card {
+    .medium-stat-card {
       background-color: var(--card-bg);
       border-radius: 12px;
       padding: 20px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
+      min-height: 130px;
     }
 
-    .summary-title {
+    .medium-stat-title {
       color: var(--text-light);
       font-size: 0.9rem;
       margin-bottom: 10px;
     }
 
-    .summary-value {
-      font-size: 1.5rem;
+    .medium-stat-value {
+      font-size: 1.6rem;
       font-weight: 700;
-      color: var(--primary-color);
+      color: var(--purple-color);
     }
 
-    /* Stats cards */
-    .stats-grid {
+    .medium-stat-card:nth-child(2) .medium-stat-value {
+      color: var(--teal-color);
+    }
+
+    .medium-stat-card:nth-child(3) .medium-stat-value {
+      color: var(--orange-color);
+    }
+
+    /* Small gain cards */
+    .gain-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
       margin-bottom: 30px;
     }
 
-    .stat-card {
+    .gain-stat-card {
       background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 10px;
+      padding: 15px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
+      height: 110px;
     }
 
-    .stat-header {
+    .gain-stat-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
-    .stat-title {
+    .gain-stat-title {
       color: var(--text-light);
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
-    .stat-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .gain-stat-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       background-color: rgba(94, 129, 172, 0.2);
       color: var(--primary-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1rem;
     }
 
-    .stat-value {
-      font-size: 1.5rem;
+    .gain-stat-value {
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--primary-color);
-      margin-bottom: 5px;
     }
 
-    .stat-change {
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .positive {
-      color: var(--success-color);
-    }
-
-    .negative {
-      color: var(--danger-color);
-    }
+    .gain-stat-card:nth-child(1) .gain-stat-value { color: var(--success-color); }
+    .gain-stat-card:nth-child(2) .gain-stat-value { color: var(--pink-color); }
+    .gain-stat-card:nth-child(3) .gain-stat-value { color: var(--warning-color); }
+    .gain-stat-card:nth-child(4) .gain-stat-value { color: var(--danger-color); }
+    .gain-stat-card:nth-child(5) .gain-stat-value { color: var(--purple-color); }
+    .gain-stat-card:nth-child(6) .gain-stat-value { color: var(--teal-color); }
 
     /* Referral section */
     .referral-section {
@@ -412,10 +486,197 @@
       gap: 5px;
     }
 
+    .social-share {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .social-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .social-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .whatsapp { background-color: #25D366; }
+    .facebook { background-color: #3b5998; }
+    .twitter { background-color: #1DA1F2; }
+    .telegram { background-color: #0088cc; }
+
+    /* User info section */
+    .user-info-section {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .user-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    /* Task calendar */
+    .task-calendar {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .calendar-day {
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-light);
+      padding: 10px 0;
+      font-size: 0.9rem;
+    }
+
+    .calendar-date {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .calendar-date:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .calendar-date.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .calendar-date.has-task::after {
+      content: "";
+      position: absolute;
+      bottom: 5px;
+      width: 6px;
+      height: 6px;
+      background-color: var(--success-color);
+      border-radius: 50%;
+    }
+
+    .task-list {
+      margin-top: 20px;
+    }
+
+    .task-item {
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.03);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .task-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background-color: var(--primary-light);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .task-time {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .task-status {
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background-color: var(--success-color);
+      color: white;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 992px) {
       .sidebar {
         width: 230px;
+      }
+      
+      .medium-stats {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -425,10 +686,32 @@
       }
       
       .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        top: 0;
+        width: 50%;
+        height: 100vh;
+        position: fixed;
+        top: 80px;
+        left: -50%;
+        z-index: 99;
+        transition: left 0.3s ease;
+      }
+      
+      .sidebar.active {
+        left: 0;
+      }
+      
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 98;
+      }
+      
+      .overlay.active {
+        display: block;
       }
       
       .header {
@@ -443,16 +726,31 @@
         padding: 20px;
       }
       
-      .stats-grid {
+      .medium-stats {
         grid-template-columns: 1fr;
       }
       
-      .stats-summary {
+      .gain-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        overflow-x: auto;
+      }
+      
+      .calendar-date {
+        min-width: 40px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .gain-stats {
         grid-template-columns: 1fr;
       }
       
-      .referral-content {
-        flex-direction: column;
+      .user-info-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -468,14 +766,6 @@
 
     @media (max-width: 768px) {
       .hamburger-menu {
-        display: block;
-      }
-      
-      .sidebar {
-        display: none;
-      }
-      
-      .sidebar.active {
         display: block;
       }
     }
@@ -504,12 +794,12 @@
     }
 
     .notification.success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #87a96b 100%);
+      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
       color: white;
     }
 
     .notification.error {
-      background: linear-gradient(135deg, var(--danger-color) 0%, #a54b56 100%);
+      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
       color: white;
     }
 
@@ -536,7 +826,7 @@
     </button>
     
     <div class="logo">
-      <span>Helasmart</span>
+      <span>MULAFLOWR</span>
     </div>
     
     <div class="header-controls">
@@ -560,12 +850,15 @@
     </div>
   </header>
 
+  <!-- Overlay for mobile sidebar -->
+  <div class="overlay" id="overlay"></div>
+
   <!-- Main content -->
   <div class="main-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">Dashboard >> Helasmart</div>
+        <div class="welcome-text">Dashboard >> MULAFLOWR</div>
         <div class="username">McExau</div>
       </div>
       
@@ -578,48 +871,30 @@
       
       <a href="#" class="menu-item">
         <i class="fas fa-wallet"></i>
-        <span>Dépôt</span>
+        <span>Dépôt 💵</span>
         <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
-        <i class="fas fa-money-bill"></i>
-        <span>Payer pour le client</span>
-        <span class="menu-badge">☒</span>
-      </a>
-      
-      <a href="#" class="menu-item">
         <i class="fas fa-gift"></i>
-        <span>Bon 2</span>
-        <span class="menu-badge">☒</span>
-      </a>
-      
-      <a href="#" class="menu-item">
-        <i class="fas fa-star"></i>
         <span>Bonus de bienvenue</span>
-        <span class="menu-badge">☒</span>
-      </a>
-      
-      <a href="#" class="menu-item">
-        <i class="fab fa-whatsapp"></i>
-        <span>Whatsapp</span>
         <span class="menu-badge">☒</span>
       </a>
       
       <div class="menu-category">COMPTES</div>
       <a href="#" class="menu-item">
         <i class="fas fa-money-bill-wave"></i>
-        <span>Retirer</span>
+        <span>Retrait</span>
         <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
         <i class="fas fa-users"></i>
-        <span>Équipe 3</span>
+        <span>Équipe</span>
         <span class="menu-badge">☒</span>
       </a>
       
-      <div class="menu-category">PRODUITS</div>
+      <div class="menu-category">PRODUIT / TACHE</div>
       <a href="#" class="menu-item">
         <i class="fab fa-whatsapp"></i>
         <span>Gagner via Whatsapp</span>
@@ -629,37 +904,80 @@
       <a href="#" class="menu-item">
         <i class="fas fa-film"></i>
         <span>Movies</span>
-        <span class="menu-badge nouveau">nouveau</span>
+        <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
         <i class="fab fa-facebook"></i>
         <span>Meta ADS</span>
-        <span class="menu-badge nouveau">nouveau</span>
+        <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
         <i class="fas fa-newspaper"></i>
-        <span>Articles</span>
-        <span class="menu-badge nouveau">nouveau</span>
+        <span>Article</span>
+        <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
         <i class="fas fa-chart-line"></i>
         <span>Paris fixes</span>
-        <span class="menu-badge nouveau">nouveau</span>
-      </a>
-      
-      <a href="#" class="menu-item">
-        <i class="fas fa-chart-bar"></i>
-        <span>Leçons de Forex</span>
         <span class="menu-badge">☐</span>
       </a>
       
       <a href="#" class="menu-item">
-        <i class="fas fa-plane"></i>
-        <span>Prédictif de l'aviateur</span>
-        <span class="menu-badge nouveau">nouveau</span>
+        <i class="fas fa-chart-bar"></i>
+        <span>Leçon de forex</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fas fa-ad"></i>
+        <span>Gains publicitaires</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fas fa-trophy"></i>
+        <span>Tourner et gagner 🏆</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fas fa-gamepad"></i>
+        <span>Jeux</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>Gagner via TikTok</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fab fa-youtube"></i>
+        <span>Gagner via YouTube</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>Défi de culture générale</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <div class="menu-category">BONUS</div>
+      <a href="#" class="menu-item">
+        <i class="fas fa-address-book"></i>
+        <span>Liste de contacts gratuit 🆓</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="#" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>Booster ma visibilité</span>
+        <span class="menu-badge">☐</span>
       </a>
     </aside>
 
@@ -667,180 +985,129 @@
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-home"></i>
-        <span>Dashboard >> Helasmart</span>
+        <span>Dashboard >> MULAFLOWR</span>
       </h1>
       
       <!-- Banner -->
       <div class="banner">
-        <div class="banner-title">HELASMART</div>
+        <div class="banner-title">MULAFLOWR</div>
         <div class="banner-text">
-          Débloquez plus de 10 outils numériques avec HELASMART, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
+          Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
         </div>
-        <a href="#" class="banner-link">CLICK HERE to get android app</a>
+        <a href="#" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
-      <!-- Stats summary -->
-      <div class="stats-summary">
-        <div class="summary-card">
-          <div class="summary-title">Dépense:</div>
-          <div class="summary-value">XAF 3,000</div>
+      <!-- Small stats (Dépense and Profit) -->
+      <div class="small-stats">
+        <div class="small-stat-card">
+          <div class="small-stat-title">Dépense:</div>
+          <div class="small-stat-value">XAF 3,000</div>
         </div>
         
-        <div class="summary-card">
-          <div class="summary-title">Profit:</div>
-          <div class="summary-value">XAF 97,278</div>
+        <div class="small-stat-card">
+          <div class="small-stat-title">Profit:</div>
+          <div class="small-stat-value">XAF 97,278</div>
         </div>
       </div>
       
-      <!-- Stats grid -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">TOTAL EARNINGS</div>
-            <div class="stat-icon">
-              <i class="fas fa-coins"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 97,278</div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">SOLDE</div>
-            <div class="stat-icon">
-              <i class="fas fa-wallet"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 1,505</div>
-          <div class="stat-change">
-            <span>Vol:(100%)</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Retiré</div>
-            <div class="stat-icon">
-              <i class="fas fa-money-bill-wave"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 88,350</div>
-          <div class="stat-change">
-            <span>Vol:(100%)</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains de parrainage</div>
-            <div class="stat-icon">
-              <i class="fas fa-users"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 66,000</div>
-          <div class="stat-change">
-            <span>Vol:(100%)</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Bonus d'agent</div>
-            <div class="stat-icon">
-              <i class="fas fa-star"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 735</div>
+      <!-- Large stat (Solde) -->
+      <div class="large-stats">
+        <div class="large-stat-card">
+          <div class="large-stat-title">SOLDE</div>
+          <div class="large-stat-value">XAF 1,505</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
       </div>
       
-      <!-- Additional stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains Whatsapp</div>
-            <div class="stat-icon">
+      <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) -->
+      <div class="medium-stats">
+        <div class="medium-stat-card">
+          <div class="medium-stat-title">Retiré</div>
+          <div class="medium-stat-value">XAF 88,350</div>
+          <div class="stat-change">
+            <span>Vol:(100%)</span>
+          </div>
+        </div>
+        
+        <div class="medium-stat-card">
+          <div class="medium-stat-title">Gains de parrainage</div>
+          <div class="medium-stat-value">XAF 66,000</div>
+          <div class="stat-change">
+            <span>Vol:(100%)</span>
+          </div>
+        </div>
+        
+        <div class="medium-stat-card">
+          <div class="medium-stat-title">Bonus d'agent</div>
+          <div class="medium-stat-value">XAF 735</div>
+          <div class="stat-change">
+            <span>Vol:(100%)</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Gain stats (WhatsApp, Trivia, etc.) -->
+      <div class="gain-stats">
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains WhatsApp</div>
+            <div class="gain-stat-icon">
               <i class="fab fa-whatsapp"></i>
             </div>
           </div>
-          <div class="stat-value">XAF 1,103</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>0.25%</span>
-          </div>
+          <div class="gain-stat-value">XAF 1,103</div>
         </div>
         
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Solde du dépôt</div>
-            <div class="stat-icon">
-              <i class="fas fa-piggy-bank"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 0</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>0.25%</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains publicitaires</div>
-            <div class="stat-icon">
-              <i class="fas fa-ad"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 1,029</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>0.14%</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains TikTok</div>
-            <div class="stat-icon">
-              <i class="fab fa-tiktok"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 1,225</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>1.57%</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains YouTube</div>
-            <div class="stat-icon">
-              <i class="fab fa-youtube"></i>
-            </div>
-          </div>
-          <div class="stat-value">XAF 1,617</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>0.34%</span>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-title">Gains de trivia</div>
-            <div class="stat-icon">
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains Trivia</div>
+            <div class="gain-stat-icon">
               <i class="fas fa-question-circle"></i>
             </div>
           </div>
-          <div class="stat-value">XAF 980</div>
-          <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>0.25%</span>
+          <div class="gain-stat-value">XAF 980</div>
+        </div>
+        
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains publicitaires</div>
+            <div class="gain-stat-icon">
+              <i class="fas fa-ad"></i>
+            </div>
           </div>
+          <div class="gain-stat-value">XAF 1,029</div>
+        </div>
+        
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains TikTok</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-tiktok"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 1,225</div>
+        </div>
+        
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains YouTube</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-youtube"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 1,617</div>
+        </div>
+        
+        <div class="gain-stat-card">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Solde du dépôt</div>
+            <div class="gain-stat-icon">
+              <i class="fas fa-piggy-bank"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
         </div>
       </div>
       
@@ -851,14 +1118,155 @@
         <div class="referral-content">
           <div class="referral-link-container">
             <div class="link-box">
-              <div class="link-text" id="referralLink">helasmart.com/?ref=McExau245X8</div>
+              <div class="link-text" id="referralLink">mulaflowr.com/?ref=McExau245X8</div>
               <button class="copy-btn" id="copyLinkBtn">
                 <i class="fas fa-copy"></i>
                 <span>Copier</span>
               </button>
             </div>
             
+            <div class="social-share">
+              <div class="social-btn whatsapp" id="shareWhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </div>
+              <div class="social-btn facebook" id="shareFacebook">
+                <i class="fab fa-facebook-f"></i>
+              </div>
+              <div class="social-btn twitter" id="shareTwitter">
+                <i class="fab fa-twitter"></i>
+              </div>
+              <div class="social-btn telegram" id="shareTelegram">
+                <i class="fab fa-telegram-plane"></i>
+              </div>
+            </div>
+            
             <p>Partagez ce lien avec vos amis et gagnez des commissions sur leurs activités.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User info section -->
+      <div class="user-info-section">
+        <h2 class="section-title">INFORMATIONS UTILISATEUR</h2>
+        
+        <div class="user-info-grid">
+          <div class="info-item">
+            <div class="info-label">Nom d'utilisateur</div>
+            <div class="info-value">McExau</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">mcexau@example.com</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Téléphone</div>
+            <div class="info-value">+237 6XX XXX XXX</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Pays</div>
+            <div class="info-value">Cameroun</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Parrainage actif</div>
+            <div class="info-value">12 personnes</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Task calendar -->
+      <div class="task-calendar">
+        <h2 class="section-title">CALENDRIER DES TÂCHES</h2>
+        
+        <div class="calendar-header">
+          <div class="calendar-month">Septembre 2025</div>
+          <div class="calendar-nav">
+            <div class="nav-btn" id="prevMonth">
+              <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="nav-btn" id="nextMonth">
+              <i class="fas fa-chevron-right"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="calendar-grid">
+          <div class="calendar-day">Lun</div>
+          <div class="calendar-day">Mar</div>
+          <div class="calendar-day">Mer</div>
+          <div class="calendar-day">Jeu</div>
+          <div class="calendar-day">Ven</div>
+          <div class="calendar-day">Sam</div>
+          <div class="calendar-day">Dim</div>
+          
+          <!-- Calendar dates will be populated by JavaScript -->
+          <div class="calendar-date">1</div>
+          <div class="calendar-date">2</div>
+          <div class="calendar-date">3</div>
+          <div class="calendar-date">4</div>
+          <div class="calendar-date">5</div>
+          <div class="calendar-date">6</div>
+          <div class="calendar-date">7</div>
+          <div class="calendar-date">8</div>
+          <div class="calendar-date active">9</div>
+          <div class="calendar-date has-task">10</div>
+          <div class="calendar-date">11</div>
+          <div class="calendar-date">12</div>
+          <div class="calendar-date">13</div>
+          <div class="calendar-date">14</div>
+          <div class="calendar-date">15</div>
+          <div class="calendar-date has-task">16</div>
+          <div class="calendar-date">17</div>
+          <div class="calendar-date">18</div>
+          <div class="calendar-date">19</div>
+          <div class="calendar-date">20</div>
+          <div class="calendar-date has-task">21</div>
+          <div class="calendar-date">22</div>
+          <div class="calendar-date">23</div>
+          <div class="calendar-date">24</div>
+          <div class="calendar-date">25</div>
+          <div class="calendar-date">26</div>
+          <div class="calendar-date has-task">27</div>
+          <div class="calendar-date">28</div>
+          <div class="calendar-date">29</div>
+          <div class="calendar-date">30</div>
+        </div>
+        
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-icon">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="task-content">
+              <div class="task-title">Partager 5 messages sur WhatsApp</div>
+              <div class="task-time">À faire avant 18:00</div>
+            </div>
+            <div class="task-status">En cours</div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="task-content">
+              <div class="task-title">Répondre au quiz du jour</div>
+              <div class="task-time">À faire avant 20:00</div>
+            </div>
+            <div class="task-status">En cours</div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="task-content">
+              <div class="task-title">Parrainer un nouvel utilisateur</div>
+              <div class="task-time">À faire avant minuit</div>
+            </div>
+            <div class="task-status">En cours</div>
           </div>
         </div>
       </div>
@@ -869,15 +1277,26 @@
     // DOM elements
     const hamburgerMenu = document.getElementById('hamburgerMenu');
     const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
     const themeToggle = document.getElementById('themeToggle');
     const userProfile = document.getElementById('userProfile');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const referralLink = document.getElementById('referralLink');
     const languageSelector = document.getElementById('languageSelector');
+    const shareWhatsApp = document.getElementById('shareWhatsApp');
+    const shareFacebook = document.getElementById('shareFacebook');
+    const shareTwitter = document.getElementById('shareTwitter');
+    const shareTelegram = document.getElementById('shareTelegram');
     
     // Toggle sidebar on mobile
     hamburgerMenu.addEventListener('click', () => {
       sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+    
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
     });
     
     // Toggle dark mode
@@ -902,10 +1321,41 @@
         });
     });
     
+    // Share referral link on social media
+    shareWhatsApp.addEventListener('click', () => {
+      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR! " + referralLink.textContent);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+    
+    shareFacebook.addEventListener('click', () => {
+      const url = encodeURIComponent(referralLink.textContent);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    });
+    
+    shareTwitter.addEventListener('click', () => {
+      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR!");
+      const url = encodeURIComponent(referralLink.textContent);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    });
+    
+    shareTelegram.addEventListener('click', () => {
+      const text = encodeURIComponent("Rejoignez-moi sur MULAFLOWR! " + referralLink.textContent);
+      window.open(`https://t.me/share/url?url=${text}`, '_blank');
+    });
+    
     // Language selector functionality
     languageSelector.addEventListener('click', () => {
       // This would toggle between language options in a real implementation
       showNotification('success', 'Language', 'Fonctionnalité de langue à venir!');
+    });
+    
+    // Calendar navigation
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      showNotification('info', 'Calendrier', 'Mois précédent');
+    });
+    
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      showNotification('info', 'Calendrier', 'Mois suivant');
     });
     
     // Notification function
