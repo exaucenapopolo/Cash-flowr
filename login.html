@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moula-flowr - Connexion</title>
+  <title>MULAFLOWR - Connexion</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -291,7 +291,7 @@
           <i class="fas fa-coins coin coin-3"></i>
           <i class="fas fa-coins coin coin-4"></i>
         </div>
-        <span>Moula-flowr</span>
+        <span>MULAFLOWR</span>
       </div>
       <div class="tagline">Chaque partage génère du cash.</div>
     </div>
@@ -342,7 +342,7 @@
     </div>
     
     <div class="footer">
-      <div>© 2025 Moula-flowr. Tous droits réservés.</div>
+      <div>© 2025 MULAFLOWR. Tous droits réservés.</div>
       <div class="footer-links">
         <a href="terms.html">Conditions d'utilisation</a>
         <a href="privacy.html">Politique de confidentialité</a>
@@ -353,12 +353,7 @@
     </div>
   </div>
 
-  <!-- ---------- Firebase + logique de connexion (modulaire v9) ----------
-       IMPORTANT :
-       - Ces règles JS supposent que tu as déployé en base la collection "user_public/{uid}"
-         avec au minimum le champ "email" (champ non-sensible autorisé en lecture publique).
-       - Ne lire JAMAIS /users/{uid} avant que l'utilisateur soit authentifié.
-  -->
+  <!-- ---------- Firebase + logique de connexion (modulaire v9) ---------- -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -431,20 +426,20 @@
     }
 
     // -------------------------------
-    // Nouvelle fonction: vérifie user_public/{uid} (lecture publique prévue par tes règles)
-    // et redirige en conséquence.
+    // Fonction pour vérifier le statut de paiement dans le document utilisateur
+    // et rediriger en conséquence.
     // -------------------------------
     async function checkPaymentStatusAndRedirect(uid) {
       try {
-        // Lire le document public user_public/{uid} (doit être lisible sans authentification)
-        const publicDocRef = doc(db, 'user_public', uid);
-        const publicSnapshot = await getDoc(publicDocRef);
+        // Lire le document utilisateur dans la collection "users"
+        const userDocRef = doc(db, 'users', uid);
+        const userSnapshot = await getDoc(userDocRef);
 
-        if (publicSnapshot.exists()) {
-          const publicData = publicSnapshot.data();
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
 
-          // Exemple: publicData.status peut être 'pending_payment' ou autre
-          if (publicData.status === 'pending_payment') {
+          // Vérifier le statut de paiement
+          if (userData.status === 'pending_payment') {
             showSuccess('Connexion réussie ! Redirection vers la page de paiement...');
             setTimeout(() => {
               window.location.assign('paiement.html');
@@ -456,11 +451,7 @@
             }, 2000);
           }
         } else {
-          // Si user_public n'existe pas, on peut soit :
-          // - essayer de lire /users/{uid} (seulement si l'utilisateur est authentifié)
-          // - afficher une erreur invitant à contacter le support
-          // Ici on choisit la seconde option pour rester sécurisé.
-          showError('Informations publiques du compte introuvables. Merci de contacter le support.');
+          showError('Document utilisateur introuvable. Merci de contacter le support.');
         }
       } catch (error) {
         console.error('Erreur lors de la vérification du statut:', error);
@@ -492,7 +483,7 @@
           const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
           const user = userCredential.user;
           
-          // Vérifier le statut public et rediriger
+          // Vérifier le statut de paiement et rediriger
           await checkPaymentStatusAndRedirect(user.uid);
         } catch (emailError) {
           // Si l'authentification par email échoue, traiter l'identifiant comme un possible nom d'utilisateur
@@ -504,7 +495,7 @@
               if (usernameDoc.exists()) {
                 const uid = usernameDoc.data().uid;
 
-                // Lire la petite collection publique user_public/{uid} (doit exister et contenir email)
+                // Lire la collection publique user_public/{uid} pour obtenir l'email
                 const publicDoc = await getDoc(doc(db, 'user_public', uid));
 
                 if (publicDoc.exists()) {
@@ -512,7 +503,7 @@
                   const userEmail = publicData.email;
 
                   if (!userEmail) {
-                    showError('Adresse e-mail publique introuvable pour cet utilisateur.');
+                    showError('Adresse e-mail introuvable pour cet utilisateur.');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                     return;
@@ -522,7 +513,7 @@
                   try {
                     const userCredential2 = await signInWithEmailAndPassword(auth, userEmail, password);
                     const user2 = userCredential2.user;
-                    // Vérifier le statut public et rediriger
+                    // Vérifier le statut de paiement et rediriger
                     await checkPaymentStatusAndRedirect(user2.uid);
                   } catch (signinErr) {
                     // Erreurs de mot de passe ou autres
