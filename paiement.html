@@ -276,12 +276,7 @@
     <div class="left">
       <div class="card" aria-live="polite">
         <div class="logo">
-          <div class="coin-container" style="height: 30px; width: 30px;">
-            <i class="fas fa-coins coin coin-1" style="font-size: 1.4rem;"></i>
-            <i class="fas fa-coins coin coin-2" style="font-size: 1.4rem; top: 3px; left: 3px;"></i>
-            <i class="fas fa-coins coin coin-3" style="font-size: 1.4rem; top: 6px; left: 6px;"></i>
-            <i class="fas fa-coins coin coin-4" style="font-size: 1.4rem; top: 9px; left: 9px;"></i>
-          </div>
+          <i class="fas fa-coins" style="font-size: 28px; color: #2a8c5a;"></i>
           <div>
             <div class="name">MULAFLOWR</div>
             <div class="small">Activation de compte — paiement requis</div>
@@ -505,16 +500,17 @@
         return;
       }
 
-      // Message préformaté pour WhatsApp
+      // Message préformaté pour WhatsApp avec demande de capture
       const message = `Bonjour, j'ai effectué mon paiement pour activer mon compte MULAFLOWR.%0A%0A` +
                     `Nom d'utilisateur: ${username}%0A` +
                     `Email: ${email}%0A` +
                     `Pays: ${country}%0A` +
                     `Montant payé: ${amount}%0A%0A` +
+                    `Je joins la capture d'écran de mon paiement.%0A` +
                     `Veuillez activer mon compte. Merci !`;
 
-      // Ouvrir WhatsApp avec le message prérempli
-      window.open(`https://wa.me/?text=${message}`, '_blank');
+      // Ouvrir WhatsApp avec le numéro spécifique et le message prérempli
+      window.open(`https://wa.me/237699853665?text=${message}`, '_blank');
     });
 
     // logout button
