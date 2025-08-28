@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Moula-flowr - Inscription</title>
+  <title>MULAFLOWR - Inscription</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -251,9 +251,9 @@
           <i class="fas fa-coins coin coin-3"></i>
           <i class="fas fa-coins coin coin-4"></i>
         </div>
-        <span>Moula-flowr</span>
+        <span>MULAFLOWR</span>
       </div>
-      <div class="tagline">Chaque partage génère du cash.</div>
+      <div class="tagline">Chaque action génère du cash.</div>
     </div>
 
     <div class="card">
@@ -395,7 +395,7 @@
 
         <div class="checkbox-group">
           <input type="checkbox" id="terms" name="terms" required>
-          <div class="terms-text">En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de Moula-flowr.<br>Mon compte devra être activé <strong>après mon paiement</strong>.</div>
+          <div class="terms-text">En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de MULAFLOWR.<br>Mon compte devra être activé <strong>après mon paiement</strong>.</div>
         </div>
 
         <button type="submit" class="btn"><i class="fas fa-user-plus"></i> S'inscrire maintenant</button>
@@ -405,7 +405,7 @@
     </div>
 
     <div class="footer">
-      <div>© 2025 Moula-flowr. Tous droits réservés.</div>
+      <div>© 2025 MULAFLOWR. Tous droits réservés.</div>
       <div class="footer-links">
         <a href="terms.html">Conditions d'utilisation</a>
         <a href="privacy.html">Politique de confidentialité</a>
@@ -544,8 +544,9 @@
           country,
           phone: document.getElementById('countryCode').textContent + (phone || ''),
           parrain,
-          status: 'pending_payment', // par défaut
-          // createdAt will be server timestamp set in transaction
+          status: 'pending_payment', // par défaut - non payé
+          fidelityKey: false, // par défaut - pas encore éligible
+          createdAt: serverTimestamp()
         };
 
         // 4) run a transaction: check username unique, then create users, usernames and user_public
@@ -559,7 +560,7 @@
           const userRef = doc(db, 'users', user.uid);
           const userPublicRef = doc(db, 'user_public', user.uid);
 
-          tx.set(userRef, { ...userData, createdAt: serverTimestamp() });
+          tx.set(userRef, userData);
           tx.set(usernameRef, { uid: user.uid, createdAt: serverTimestamp() });
 
           // user_public contient uniquement champs non-sensibles nécessaires pour le login
