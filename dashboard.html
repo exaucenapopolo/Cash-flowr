@@ -74,6 +74,41 @@
       flex-direction: column;
     }
 
+    /* Loader pour éviter le flash blanc */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(#0000 10%, var(--primary-color));
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+
     /* Header styles */
     .header {
       background-color: var(--card-bg);
@@ -260,18 +295,41 @@
       box-shadow: var(--shadow);
       margin-bottom: 30px;
       color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
     }
 
     .banner-title {
       font-size: 1.2rem;
       margin-bottom: 10px;
       font-weight: 600;
+      position: relative;
+      z-index: 1;
     }
 
     .banner-text {
       font-size: 0.9rem;
       margin-bottom: 15px;
       opacity: 0.9;
+      position: relative;
+      z-index: 1;
     }
 
     .banner-link {
@@ -283,9 +341,17 @@
       font-weight: 600;
       text-decoration: none;
       font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Small stats cards */
+    .banner-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Small stats cards - MODIFIÉ pour être plus petites avec barres de progression */
     .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -306,9 +372,38 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .small-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .small-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.8);
+      width: 20%; /* Valeur par défaut, sera modifiée par JS */
+      transition: width 1s ease-in-out;
+    }
+
+    .small-stat-card:nth-child(1)::after {
+      width: 20%; /* Dépenses à 20% */
+    }
+
+    .small-stat-card:nth-child(2)::after {
+      width: 98%; /* Profit à 98% */
+    }
+
     .small-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
     .small-stat-card:nth-child(2) {
@@ -337,6 +432,23 @@
       font-size: 1.2rem;
     }
 
+    /* Progress bar container */
+    .progress-container {
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.8);
+      width: 0;
+      transition: width 1s ease-in-out;
+    }
+
     /* Large stats cards */
     .large-stats {
       display: grid;
@@ -359,9 +471,25 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .large-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     .large-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .large-stat-card:hover::before {
+      opacity: 1;
     }
 
     .large-stat-title {
@@ -404,9 +532,25 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .medium-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     .medium-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .medium-stat-card:hover::before {
+      opacity: 1;
     }
 
     .medium-stat-card:nth-child(1) {
@@ -457,11 +601,29 @@
       flex-direction: column;
       height: 90px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gain-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .gain-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .gain-stat-card:hover::before {
+      opacity: 1;
     }
 
     .gain-stat-card:nth-child(1) {
@@ -477,7 +639,7 @@
       background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
     }
     .gain-stat-card:nth-child(5) {
-      background: linear-gradient(135dex, #e6d4ff 0%, #c8a0f0 100%);
+      background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
     }
     .gain-stat-card:nth-child(6) {
       background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
@@ -521,6 +683,20 @@
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fidelity-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
     }
 
     .fidelity-key {
@@ -531,6 +707,8 @@
       border-radius: 8px;
       padding: 15px;
       margin-top: 15px;
+      position: relative;
+      z-index: 1;
     }
 
     .key-icon {
@@ -561,6 +739,12 @@
       display: flex;
       align-items: center;
       gap: 5px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .copy-key-btn:hover, .send-key-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .send-key-btn {
@@ -574,6 +758,20 @@
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .referral-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
     }
 
     .section-title {
@@ -581,6 +779,8 @@
       margin-bottom: 20px;
       color: var(--secondary-color);
       font-weight: 600;
+      position: relative;
+      z-index: 1;
     }
 
     .referral-content {
@@ -602,6 +802,8 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
     }
 
     .link-text {
@@ -622,9 +824,15 @@
       padding: 8px 12px;
       cursor: pointer;
       font-size: 0.85rem;
-      display: flexible;
+      display: flex;
       align-items: center;
       gap: 5px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .social-share {
@@ -644,6 +852,8 @@
       font-size: 1.2rem;
       cursor: pointer;
       transition: transform 0.2s;
+      position: relative;
+      z-index: 1;
     }
 
     .social-btn:hover {
@@ -662,6 +872,20 @@
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-info-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
     }
 
     .user-info-grid {
@@ -673,6 +897,8 @@
     .info-item {
       display: flex;
       flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
 
     .info-label {
@@ -694,6 +920,20 @@
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-calendar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
     }
 
     .calendar-header {
@@ -701,6 +941,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     .calendar-month {
@@ -709,7 +951,7 @@
     }
 
     .calendar-nav {
-      display: flexible;
+      display: flex;
       gap: 10px;
     }
 
@@ -723,6 +965,12 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .calendar-days {
@@ -755,15 +1003,18 @@
       cursor: pointer;
       position: relative;
       background-color: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
     }
 
     .calendar-date:hover {
       background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.05);
     }
 
     .calendar-date.active {
       background-color: var(--primary-color);
       color: white;
+      transform: scale(1.05);
     }
 
     .calendar-date.has-task::after {
@@ -794,8 +1045,13 @@
       color: var(--text-light);
     }
 
+    .task-table tr {
+      transition: background-color 0.2s ease;
+    }
+
     .task-table tr:hover {
       background-color: rgba(0, 0, 0, 0.03);
+      transform: scale(1.01);
     }
 
     .task-status {
@@ -833,15 +1089,28 @@
       color: var(--primary-color);
       text-decoration: none;
       font-weight: 500;
+      transition: color 0.2s ease;
     }
 
     .footer-link:hover {
       text-decoration: underline;
+      color: var(--primary-dark);
     }
 
     .footer-text {
       color: var(--text-light);
       font-size: 0.9rem;
+    }
+
+    /* Pulse animation for important elements */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
     }
 
     /* Responsive adjustments */
@@ -1000,6 +1269,11 @@
   </style>
 </head>
 <body>
+  <!-- Loader pour éviter le flash blanc -->
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+  </div>
+
   <!-- Notifications container -->
   <div class="notification-container" id="notificationContainer"></div>
 
@@ -1191,7 +1465,7 @@
         <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
-      <!-- Small stats (Dépense and Profit) -->
+      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
           <div class="small-stat-title">
@@ -1199,6 +1473,10 @@
             Dépense:
           </div>
           <div class="small-stat-value">XAF 0</div>
+          <!-- Barre de progression pour dépenses -->
+          <div class="progress-container">
+            <div class="progress-bar" id="depense-progress" style="width: 20%"></div>
+          </div>
         </div>
         
         <div class="small-stat-card" id="profit-card">
@@ -1207,6 +1485,10 @@
             Profit:
           </div>
           <div class="small-stat-value">XAF 0</div>
+          <!-- Barre de progression pour profit -->
+          <div class="progress-container">
+            <div class="progress-bar" id="profit-progress" style="width: 98%"></div>
+          </div>
         </div>
       </div>
       
@@ -1567,6 +1849,9 @@
     const infoCountry = document.getElementById('info-country');
     const infoParrain = document.getElementById('info-parrain');
     const infoParrainage = document.getElementById('info-parrainage');
+    const loader = document.getElementById('loader');
+    const depenseProgress = document.getElementById('depense-progress');
+    const profitProgress = document.getElementById('profit-progress');
 
     /******** Variables d'état ********/
     let currentDate = new Date();
@@ -1794,6 +2079,19 @@
         if (tkt) tkt.textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
         if (yt) yt.textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
         if (depSol) depSol.textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
+
+        // Mettre à jour les barres de progression
+        if (depenseProgress) {
+          // Calculer le pourcentage pour les dépenses (exemple: 20%)
+          const depensePercent = userData.depense > 0 ? Math.min(100, (userData.depense / (userData.depense + userData.profit)) * 100) : 0;
+          depenseProgress.style.width = `${depensePercent}%`;
+        }
+        
+        if (profitProgress) {
+          // Calculer le pourcentage pour le profit (exemple: 98%)
+          const profitPercent = userData.profit > 0 ? Math.min(100, (userData.profit / (userData.depense + userData.profit)) * 100) : 0;
+          profitProgress.style.width = `${profitPercent}%`;
+        }
       } catch (e) {
         console.error('updateDashboardUI error', e);
       }
@@ -1851,8 +2149,9 @@
             // on ne révèle pas la page si on redirige vers paiement
             return;
           }
-          // tout va bien -> rendre visible l'UI
+          // tout va bien -> rendre visible l'UI et masquer le loader
           document.documentElement.style.visibility = 'visible';
+          loader.classList.add('hidden');
           showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
         } else {
           // non connecté -> rediriger vers login (éviter double redirect)
