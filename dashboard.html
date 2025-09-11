@@ -6,6 +6,12 @@
   <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Intégration de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
   <style>
     :root {
       --primary-color: #3a8ee6;
@@ -40,6 +46,13 @@
       --card-bg: #434c5e;
       --text-color: #eceff4;
       --text-light: #d8dee9;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
@@ -223,25 +236,6 @@
     .content {
       flex: 1;
       padding: 30px;
-    }
-    
-    /* Footer */
-    .footer {
-        background-color: var(--card-bg);
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-        padding: 15px 30px;
-        text-align: center;
-        color: var(--text-light);
-        font-size: 0.9rem;
-        margin-top: auto; /* Pushes footer to the bottom */
-    }
-    .footer a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .footer p {
-        margin: 5px 0;
     }
 
     .page-title {
@@ -813,6 +807,43 @@
       color: white;
     }
 
+    /* Footer */
+    .footer {
+      background-color: var(--card-bg);
+      padding: 20px 30px;
+      text-align: center;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 992px) {
       .sidebar {
@@ -880,6 +911,11 @@
       
       .key-buttons {
         flex-direction: column;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 10px;
       }
     }
 
@@ -964,8 +1000,10 @@
   </style>
 </head>
 <body>
+  <!-- Notifications container -->
   <div class="notification-container" id="notificationContainer"></div>
 
+  <!-- Header -->
   <header class="header">
     <button class="hamburger-menu" id="hamburgerMenu">
       <i class="fas fa-bars"></i>
@@ -988,18 +1026,21 @@
       </button>
       
       <div class="user-profile" id="userProfile">
-        <div class="avatar" id="user-avatar">?</div>
+        <div class="avatar" id="userAvatar">M</div>
       </div>
     </div>
   </header>
 
+  <!-- Overlay for mobile sidebar -->
   <div class="overlay" id="overlay"></div>
 
+  <!-- Main content -->
   <div class="main-container">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
         <div class="welcome-text">Dashboard >> MULAFLOWR</div>
-        <div class="username" id="sidebar-username">Chargement...</div>
+        <div class="username" id="sidebarUsername">McExau</div>
       </div>
       
       <div class="menu-category">PRINCIPAL</div>
@@ -1033,24 +1074,26 @@
         <span>Équipe</span>
         <span class="menu-badge">☒</span>
       </a>
-      
+
       <div class="menu-category">SPÉCIAL</div>
       <a href="love_earn.html" class="menu-item">
         <i class="fas fa-heart"></i>
         <span>LoveEarn</span>
         <span class="menu-badge">☐</span>
       </a>
-      <a href="https://social-boost-horizon-new-sbh.vercel.app" target="_blank" class="menu-item">
+      
+      <a href="social_boost.html" class="menu-item">
         <i class="fas fa-rocket"></i>
-        <span>SBH (social boost horizon)</span>
+        <span>SBH</span>
         <span class="menu-badge">☐</span>
       </a>
+      
       <a href="challenge_reward.html" class="menu-item">
         <i class="fas fa-medal"></i>
         <span>Challenge and Reward</span>
         <span class="menu-badge">☐</span>
       </a>
-
+      
       <div class="menu-category">PRODUIT / TACHE</div>
       <a href="whatsapp_earn.html" class="menu-item">
         <i class="fab fa-whatsapp"></i>
@@ -1107,16 +1150,6 @@
       </a>
       
       <div class="menu-category">BONUS</div>
-      <a href="canva_pro.html" class="menu-item">
-        <i class="fas fa-palette"></i>
-        <span>Canva Pro</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="vpn_pro.html" class="menu-item">
-        <i class="fas fa-shield-alt"></i>
-        <span>Connexion gratuite</span> <span class="menu-badge">☐</span>
-      </a>
       <a href="liste_contacts.html" class="menu-item">
         <i class="fas fa-address-book"></i>
         <span>Liste de contacts gratuit 🆓</span>
@@ -1128,29 +1161,44 @@
         <span>Booster ma visibilité</span>
         <span class="menu-badge">☐</span>
       </a>
+
+      <a href="canva_pro.html" class="menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Canva Pro</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="connexion_gratuite.html" class="menu-item">
+        <i class="fas fa-shield-alt"></i>
+        <span>Connexion gratuite</span>
+        <span class="menu-badge">☐</span>
+      </a>
     </aside>
 
+    <!-- Content -->
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-home"></i>
         <span>Dashboard >> MULAFLOWR</span>
       </h1>
       
+      <!-- Banner -->
       <div class="banner">
         <div class="banner-title">MULAFLOWR</div>
         <div class="banner-text">
           Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
         </div>
-        <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link" target="_blank">CLIQUEZ ICI pour obtenir l'application Android</a>
+        <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
+      <!-- Small stats (Dépense and Profit) -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
           <div class="small-stat-title">
             <i class="fas fa-arrow-down arrow-icon"></i>
             Dépense:
           </div>
-          <div class="small-stat-value" id="depense-value">XAF 0</div>
+          <div class="small-stat-value">XAF 3,000</div>
         </div>
         
         <div class="small-stat-card" id="profit-card">
@@ -1158,30 +1206,32 @@
             <i class="fas fa-arrow-up arrow-icon"></i>
             Profit:
           </div>
-          <div class="small-stat-value" id="profit-value">XAF 0</div>
+          <div class="small-stat-value">XAF 97,278</div>
         </div>
       </div>
       
+      <!-- Large stat (Solde) -->
       <div class="large-stats">
         <div class="large-stat-card" id="solde-card">
           <div class="large-stat-title">
             <i class="fas fa-piggy-bank large-stat-icon"></i>
             SOLDE
           </div>
-          <div class="large-stat-value" id="solde-value">XAF 0</div>
+          <div class="large-stat-value">XAF 1,505</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
       </div>
       
+      <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) -->
       <div class="medium-stats">
         <div class="medium-stat-card" id="retire-card">
           <div class="medium-stat-title">
             <i class="fas fa-download medium-stat-icon"></i>
             Retiré
           </div>
-          <div class="medium-stat-value" id="retire-value">XAF 0</div>
+          <div class="medium-stat-value">XAF 88,350</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
@@ -1192,7 +1242,7 @@
             <i class="fas fa-users medium-stat-icon"></i>
             Gains de parrainage
           </div>
-          <div class="medium-stat-value" id="parrainage-value">XAF 0</div>
+          <div class="medium-stat-value">XAF 66,000</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
@@ -1203,20 +1253,21 @@
             <i class="fas fa-gift medium-stat-icon"></i>
             Bonus d'agent
           </div>
-          <div class="medium-stat-value" id="bonus-agent-value">XAF 0</div>
+          <div class="medium-stat-value">XAF 735</div>
           <div class="stat-change">
             <span>Vol:(100%)</span>
           </div>
         </div>
       </div>
       
+      <!-- Fidelity key section -->
       <div class="fidelity-section">
         <h2 class="section-title">CLÉ DE FIDÉLITÉ</h2>
         <p>Utilisez votre clé de fidélité pour accéder à des avantages exclusifs et des bonus supplémentaires.</p>
         
         <div class="fidelity-key">
           <i class="fas fa-key key-icon"></i>
-          <div class="key-text" id="fidelityKey">Chargement...</div>
+          <div class="key-text" id="fidelityKey">MULA-McExau-2024-5678-90AB</div>
           <div class="key-buttons">
             <button class="copy-key-btn" id="copyKeyBtn">
               <i class="fas fa-copy"></i>
@@ -1230,6 +1281,7 @@
         </div>
       </div>
       
+      <!-- Gain stats (WhatsApp, Trivia, etc.) -->
       <div class="gain-stats">
         <div class="gain-stat-card" id="whatsapp-gains">
           <div class="gain-stat-header">
@@ -1238,7 +1290,7 @@
               <i class="fab fa-whatsapp"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="whatsapp-gains-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 1,103</div>
         </div>
         
         <div class="gain-stat-card" id="trivia-gains">
@@ -1248,7 +1300,7 @@
               <i class="fas fa-question-circle"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="trivia-gains-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 980</div>
         </div>
         
         <div class="gain-stat-card" id="publicite-gains">
@@ -1258,7 +1310,7 @@
               <i class="fas fa-ad"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="publicite-gains-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 1,029</div>
         </div>
         
         <div class="gain-stat-card" id="tiktok-gains">
@@ -1268,7 +1320,7 @@
               <i class="fab fa-tiktok"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="tiktok-gains-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 1,225</div>
         </div>
         
         <div class="gain-stat-card" id="youtube-gains">
@@ -1278,7 +1330,7 @@
               <i class="fab fa-youtube"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="youtube-gains-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 1,617</div>
         </div>
         
         <div class="gain-stat-card" id="depot-solde">
@@ -1288,17 +1340,18 @@
               <i class="fas fa-piggy-bank"></i>
             </div>
           </div>
-          <div class="gain-stat-value" id="depot-solde-value">XAF 0</div>
+          <div class="gain-stat-value">XAF 0</div>
         </div>
       </div>
       
+      <!-- Referral section -->
       <div class="referral-section">
         <h2 class="section-title">LIEN DE PARRAINAGE</h2>
         
         <div class="referral-content">
           <div class="referral-link-container">
             <div class="link-box">
-              <div class="link-text" id="referralLink">Chargement...</div>
+              <div class="link-text" id="referralLink">mulaflowr.com/?ref=McExau245X8</div>
               <button class="copy-btn" id="copyLinkBtn">
                 <i class="fas fa-copy"></i>
                 <span>Copier</span>
@@ -1325,42 +1378,44 @@
         </div>
       </div>
       
+      <!-- User info section -->
       <div class="user-info-section">
         <h2 class="section-title">INFORMATIONS UTILISATEUR</h2>
         
         <div class="user-info-grid">
           <div class="info-item">
             <div class="info-label">Nom d'utilisateur</div>
-            <div class="info-value" id="info-username">...</div>
+            <div class="info-value" id="info-username">McExau</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Email</div>
-            <div class="info-value" id="info-email">...</div>
+            <div class="info-value" id="info-email">exaucenapopolo2@gmail.com</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Téléphone</div>
-            <div class="info-value" id="info-phone">...</div>
+            <div class="info-value" id="info-phone">237652205768</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Pays</div>
-            <div class="info-value" id="info-country">...</div>
+            <div class="info-value" id="info-country">Cameroun</div>
           </div>
-
+          
           <div class="info-item">
             <div class="info-label">Parrain</div>
-            <div class="info-value" id="info-referrer">...</div>
+            <div class="info-value" id="info-parrain">Aucun</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Parrainage actif</div>
-            <div class="info-value" id="info-referrals">...</div>
+            <div class="info-value" id="info-parrainage">44 personnes</div>
           </div>
         </div>
       </div>
       
+      <!-- Task calendar -->
       <div class="task-calendar">
         <h2 class="section-title">CALENDRIER DES TÂCHES</h2>
         
@@ -1387,7 +1442,8 @@
         </div>
         
         <div class="calendar-grid">
-          </div>
+          <!-- Calendar dates will be populated by JavaScript -->
+        </div>
         
         <table class="task-table">
           <thead>
@@ -1454,23 +1510,27 @@
       </div>
     </main>
   </div>
-  
+
+  <!-- Footer -->
   <footer class="footer">
-    <p>&copy; 2025 <a href="https://social-boost-horizon-new-sbh.vercel.app" target="_blank">pro tech management</a>. Tous droits réservés.</p>
-    <p>Site propulsé par <a href="https://social-boost-horizon-new-sbh.vercel.app" target="_blank">social boost horizon</a>.</p>
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      <div class="footer-text">
+        © 2025 MULAFLOWR. Tous droits réservés.
+      </div>
+    </div>
   </footer>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
   <script>
-    // --- CONFIGURATION FIREBASE ---
+    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
       projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com", // Correction du domaine
+      storageBucket: "cash-flowr.firebasestorage.app",
       messagingSenderId: "1091928501310",
       appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
       measurementId: "G-5SF6VDLZCB"
@@ -1478,18 +1538,18 @@
 
     // Initialisation de Firebase
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.firestore();
-    let currentUser = null; // Variable pour stocker l'utilisateur courant
+    const auth = firebase.auth();
 
-    // --- SÉLECTEURS DOM ---
-    // (Cette partie reste majoritairement la même, j'ai juste ajouté les nouveaux éléments)
+    // DOM elements
     const hamburgerMenu = document.getElementById('hamburgerMenu');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
     const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const referralLink = document.getElementById('referralLink');
+    const languageSelector = document.getElementById('languageSelector');
     const shareWhatsApp = document.getElementById('shareWhatsApp');
     const shareFacebook = document.getElementById('shareFacebook');
     const shareTwitter = document.getElementById('shareTwitter');
@@ -1502,142 +1562,38 @@
     const fidelityKey = document.getElementById('fidelityKey');
     const sendKeyBtn = document.getElementById('sendKeyBtn');
     
-    // --- GESTION DE L'AUTHENTIFICATION ET DES DONNÉES ---
-
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            // L'utilisateur est connecté
-            currentUser = user;
-            const userRef = db.collection('Users').doc(user.uid);
-            const doc = await userRef.get();
-
-            if (!doc.exists) {
-                // Si l'utilisateur n'a pas de document, on en crée un avec les valeurs par défaut.
-                console.log('Nouvel utilisateur, création du document...');
-                const defaultData = {
-                    uid: user.uid,
-                    displayName: user.displayName || 'Nouvel Utilisateur',
-                    email: user.email,
-                    phoneNumber: user.phoneNumber || 'Non fourni',
-                    country: 'Non fourni',
-                    referrer: 'Aucun',
-                    activeReferrals: 0,
-                    depense: 0,
-                    profit: 0,
-                    solde: 0,
-                    retire: 0,
-                    parrainage: 0,
-                    bonusAgent: 0,
-                    whatsappGains: 0,
-                    triviaGains: 0,
-                    publiciteGains: 0,
-                    tiktokGains: 0,
-                    youtubeGains: 0,
-                    depotSolde: 0,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                await userRef.set(defaultData);
-                updateUI(defaultData); // Met à jour l'interface avec les données par défaut
-                showNotification('success', 'Bienvenue !', `Content de vous voir, ${defaultData.displayName}!`);
-            } else {
-                // L'utilisateur existe, on met à jour l'interface avec ses données.
-                const userData = doc.data();
-                updateUI(userData);
-                showNotification('success', 'Bienvenue !', `Content de vous revoir, ${userData.displayName}!`);
-            }
-             // Lancer la sauvegarde périodique uniquement si un utilisateur est connecté
-            setInterval(saveDashboardData, 30000); // Toutes les 30 secondes
-        } else {
-            // L'utilisateur n'est pas connecté.
-            // Rediriger vers la page de connexion.
-            console.log("Aucun utilisateur connecté. Redirection...");
-            // window.location.href = '/login.html'; // Décommentez pour une redirection réelle
-        }
-    });
-
-    // --- FONCTION POUR METTRE À JOUR L'INTERFACE ---
-    function updateUI(userData) {
-        if (!userData) return;
-
-        const formatCurrency = (value) => `XAF ${Number(value).toLocaleString('fr-FR')}`;
-
-        // Met à jour les informations de l'utilisateur
-        document.getElementById('sidebar-username').textContent = userData.displayName || 'Utilisateur';
-        document.getElementById('info-username').textContent = userData.displayName || 'N/A';
-        document.getElementById('info-email').textContent = userData.email || 'N/A';
-        document.getElementById('info-phone').textContent = userData.phoneNumber || 'N/A';
-        document.getElementById('info-country').textContent = userData.country || 'N/A';
-        document.getElementById('info-referrer').textContent = userData.referrer || 'N/A';
-        document.getElementById('info-referrals').textContent = `${userData.activeReferrals || 0} personnes`;
-        document.getElementById('user-avatar').textContent = (userData.displayName || '?').charAt(0).toUpperCase();
-
-        // Met à jour les cartes financières
-        document.getElementById('depense-value').textContent = formatCurrency(userData.depense);
-        document.getElementById('profit-value').textContent = formatCurrency(userData.profit);
-        document.getElementById('solde-value').textContent = formatCurrency(userData.solde);
-        document.getElementById('retire-value').textContent = formatCurrency(userData.retire);
-        document.getElementById('parrainage-value').textContent = formatCurrency(userData.parrainage);
-        document.getElementById('bonus-agent-value').textContent = formatCurrency(userData.bonusAgent);
-        
-        // Met à jour les cartes de gains
-        document.getElementById('whatsapp-gains-value').textContent = formatCurrency(userData.whatsappGains);
-        document.getElementById('trivia-gains-value').textContent = formatCurrency(userData.triviaGains);
-        document.getElementById('publicite-gains-value').textContent = formatCurrency(userData.publiciteGains);
-        document.getElementById('tiktok-gains-value').textContent = formatCurrency(userData.tiktokGains);
-        document.getElementById('youtube-gains-value').textContent = formatCurrency(userData.youtubeGains);
-        document.getElementById('depot-solde-value').textContent = formatCurrency(userData.depotSolde);
-
-        // Met à jour la clé de fidélité et le lien de parrainage
-        const username_simple = (userData.displayName || 'user').replace(/\s+/g, '');
-        fidelityKey.textContent = `MULA-${username_simple}-2024-${user.uid.substring(0, 8).toUpperCase()}`;
-        referralLink.textContent = `mulaflowr.com/?ref=${username_simple}${user.uid.substring(0,6)}`;
-    }
-
-    // --- FONCTION POUR SAUVEGARDER LES DONNÉES ---
-    async function saveDashboardData() {
-        if (!currentUser) {
-            console.log("Impossible de sauvegarder : aucun utilisateur connecté.");
-            return;
-        }
-
-        const userRef = db.collection('Users').doc(currentUser.uid);
-        
-        // Fonction pour extraire le nombre d'une chaîne "XAF 1,234" -> 1234
-        const parseCurrency = (text) => {
-            return parseFloat(text.replace(/XAF\s*|\s|,/g, '').replace(',', '.')) || 0;
-        };
-
-        const dashboardData = {
-            depense: parseCurrency(document.getElementById('depense-value').textContent),
-            profit: parseCurrency(document.getElementById('profit-value').textContent),
-            solde: parseCurrency(document.getElementById('solde-value').textContent),
-            retire: parseCurrency(document.getElementById('retire-value').textContent),
-            parrainage: parseCurrency(document.getElementById('parrainage-value').textContent),
-            bonusAgent: parseCurrency(document.getElementById('bonus-agent-value').textContent),
-            whatsappGains: parseCurrency(document.getElementById('whatsapp-gains-value').textContent),
-            triviaGains: parseCurrency(document.getElementById('trivia-gains-value').textContent),
-            publiciteGains: parseCurrency(document.getElementById('publicite-gains-value').textContent),
-            tiktokGains: parseCurrency(document.getElementById('tiktok-gains-value').textContent),
-            youtubeGains: parseCurrency(document.getElementById('youtube-gains-value').textContent),
-            depotSolde: parseCurrency(document.getElementById('depot-solde-value').textContent),
-            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        try {
-            await userRef.update(dashboardData);
-            console.log("Données du dashboard sauvegardées sur Firestore.");
-            // Optionnel: afficher une notification discrète de sauvegarde
-            // showNotification('success', 'Sauvegarde', 'Données enregistrées !');
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde des données: ", error);
-            showNotification('error', 'Erreur', 'Impossible de sauvegarder les données.');
-        }
-    }
+    // Éléments pour les informations utilisateur
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const infoUsername = document.getElementById('info-username');
+    const infoEmail = document.getElementById('info-email');
+    const infoPhone = document.getElementById('info-phone');
+    const infoCountry = document.getElementById('info-country');
+    const infoParrain = document.getElementById('info-parrain');
+    const infoParrainage = document.getElementById('info-parrainage');
     
-    // --- AUTRES FONCTIONNALITÉS (le code existant) ---
-    
+    // Current date for calendar
     let currentDate = new Date();
     
+    // Données utilisateur
+    let userData = {
+      depense: 0,
+      profit: 0,
+      solde: 0,
+      retire: 0,
+      parrainage: 0,
+      bonusAgent: 0,
+      whatsappGains: 0,
+      triviaGains: 0,
+      publiciteGains: 0,
+      tiktokGains: 0,
+      youtubeGains: 0,
+      depotSolde: 0
+    };
+    
+    // Current user
+    let currentUser = null;
+
     // Toggle sidebar on mobile
     hamburgerMenu.addEventListener('click', () => {
       sidebar.classList.toggle('active');
@@ -1658,6 +1614,9 @@
       } else {
         themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Mode nuit</span>';
       }
+      
+      // Enregistrer le préférence de thème
+      saveUserData('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
     
     // Copy referral link
@@ -1713,36 +1672,53 @@
       window.open(`https://t.me/share/url?url=${text}`, '_blank');
     });
     
+    // Language selector functionality
+    languageSelector.addEventListener('click', () => {
+      // This would toggle between language options in a real implementation
+      showNotification('success', 'Language', 'Fonctionnalité de langue à venir!');
+    });
+    
     // Calendar navigation
     function updateCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       
-      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+      // Set month and year in header
+      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+      ];
       calendarMonth.textContent = `${monthNames[month]} ${year}`;
+      
+      // Clear previous calendar
       calendarGrid.innerHTML = '';
       
+      // Get first day of month and number of days
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       
+      // Adjust for Monday as first day of week
       let startDay = firstDay === 0 ? 6 : firstDay - 1;
       
+      // Add empty cells for days before the first day of the month
       for (let i = 0; i < startDay; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-date';
         calendarGrid.appendChild(emptyCell);
       }
       
+      // Add cells for each day of the month
       for (let day = 1; day <= daysInMonth; day++) {
         const dateCell = document.createElement('div');
         dateCell.className = 'calendar-date';
         dateCell.textContent = day;
         
+        // Mark current day
         const today = new Date();
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
           dateCell.classList.add('active');
         }
         
+        // Randomly mark some days as having tasks
         if (Math.random() > 0.7) {
           dateCell.classList.add('has-task');
         }
@@ -1782,6 +1758,7 @@
       
       notificationContainer.appendChild(notification);
       
+      // Remove notification after duration
       setTimeout(() => {
         notification.style.animation = 'slideIn 0.3s ease reverse forwards';
         setTimeout(() => {
@@ -1791,9 +1768,126 @@
         }, 300);
       }, duration);
     }
-
-    window.addEventListener('beforeunload', saveDashboardData);
-
+    
+    // Fonction pour enregistrer les données utilisateur dans Firestore
+    async function saveUserData() {
+      if (!currentUser) return;
+      
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await userRef.set({
+          ...userData,
+          lastUpdate: new Date(),
+          username: currentUser.displayName || currentUser.email,
+          email: currentUser.email,
+          phone: currentUser.phoneNumber || '',
+          country: 'Cameroun', // Valeur par défaut
+          parrain: 'Aucun', // Valeur par défaut
+          parrainageActif: 44 // Valeur par défaut
+        }, { merge: true });
+        
+        console.log('Données utilisateur enregistrées avec succès');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement des données:', error);
+      }
+    }
+    
+    // Fonction pour charger les données utilisateur depuis Firestore
+    async function loadUserData() {
+      if (!currentUser) return;
+      
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userRef.get();
+        
+        if (doc.exists) {
+          const data = doc.data();
+          userData = { ...userData, ...data };
+          
+          // Mettre à jour l'interface avec les données
+          updateDashboardUI();
+        } else {
+          // Créer un document avec des valeurs par défaut
+          await saveUserData();
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+      }
+    }
+    
+    // Fonction pour mettre à jour l'interface avec les données utilisateur
+    function updateDashboardUI() {
+      // Mettre à jour les cartes de statistiques
+      document.querySelector('#depense-card .small-stat-value').textContent = `XAF ${userData.depense.toLocaleString()}`;
+      document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${userData.profit.toLocaleString()}`;
+      document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${userData.solde.toLocaleString()}`;
+      document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${userData.retire.toLocaleString()}`;
+      document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${userData.parrainage.toLocaleString()}`;
+      document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${userData.bonusAgent.toLocaleString()}`;
+      document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${userData.whatsappGains.toLocaleString()}`;
+      document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${userData.triviaGains.toLocaleString()}`;
+      document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${userData.publiciteGains.toLocaleString()}`;
+      document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${userData.tiktokGains.toLocaleString()}`;
+      document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${userData.youtubeGains.toLocaleString()}`;
+      document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${userData.depotSolde.toLocaleString()}`;
+    }
+    
+    // Fonction pour mettre à jour les informations utilisateur dans l'interface
+    function updateUserInfoUI(user) {
+      const displayName = user.displayName || user.email || 'Utilisateur';
+      const email = user.email || 'Non spécifié';
+      const phone = user.phoneNumber || 'Non spécifié';
+      
+      // Mettre à jour le sidebar
+      sidebarUsername.textContent = displayName;
+      
+      // Mettre à jour l'avatar
+      userAvatar.textContent = displayName.charAt(0).toUpperCase();
+      
+      // Mettre à jour la section informations utilisateur
+      infoUsername.textContent = displayName;
+      infoEmail.textContent = email;
+      infoPhone.textContent = phone;
+      
+      // Mettre à jour la clé de fidélité avec le nom d'utilisateur
+      fidelityKey.textContent = `MULA-${displayName}-2024-5678-90AB`;
+      
+      // Mettre à jour le lien de parrainage
+      referralLink.textContent = `mulaflowr.com/?ref=${displayName}245X8`;
+    }
+    
+    // Gestion de l'authentification
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        console.log('Utilisateur connecté:', user);
+        
+        // Mettre à jour l'interface avec les informations utilisateur
+        updateUserInfoUI(user);
+        
+        // Charger les données utilisateur
+        await loadUserData();
+        
+        // Afficher une notification de bienvenue
+        showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
+      } else {
+        // Rediriger vers la page de connexion si non authentifié
+        window.location.href = 'login.html';
+      }
+    });
+    
+    // Enregistrer les données du dashboard périodiquement
+    setInterval(saveUserData, 30000); // Toutes les 30 secondes
+    
+    // Simulate loading user data
+    document.addEventListener('DOMContentLoaded', () => {
+      // Vérifier si l'utilisateur est connecté
+      if (auth.currentUser) {
+        currentUser = auth.currentUser;
+        updateUserInfoUI(currentUser);
+        loadUserData();
+      }
+    });
   </script>
 </body>
 </html>
