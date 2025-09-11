@@ -13,6 +13,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
+    /* Style initial pour éviter le flash blanc */
+    body:not(.loaded) {
+      visibility: hidden;
+      opacity: 0;
+      overflow: hidden;
+    }
+
     :root {
       --primary-color: #3a8ee6;
       --primary-light: #4da6ff;
@@ -72,6 +79,9 @@
       margin: 0;
       display: flex;
       flex-direction: column;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
     }
 
     /* Loader pour éviter le flash blanc */
@@ -351,7 +361,7 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Small stats cards - MODIFIÉ avec barres de progression en bas */
+    /* Small stats cards - MODIFIÉ avec barres de progression au milieu */
     .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -388,6 +398,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      z-index: 2;
     }
 
     .small-stat-value {
@@ -398,42 +409,63 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 5px;
+      z-index: 2;
     }
 
     .arrow-icon {
       font-size: 1.2rem;
     }
 
-    /* Barre de progression en bas pour Dépense/Profit */
-    .progress-bottom-container {
+    /* Barre de progression au milieu pour Dépense/Profit */
+    .progress-mid-container {
       position: absolute;
-      bottom: 0;
+      top: 50%;
       left: 0;
       width: 100%;
-      height: 6px;
+      height: 8px;
+      transform: translateY(-50%);
       background: rgba(0, 0, 0, 0.2);
       overflow: hidden;
+      z-index: 1;
+      border-radius: 4px;
     }
 
-    .progress-bottom-bar {
+    .progress-mid-bar {
       height: 100%;
-      border-radius: 0 3px 3px 0;
+      border-radius: 4px;
       width: 0;
       transition: width 1s ease-in-out;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
-    #depense-card .progress-bottom-bar {
+    #depense-card .progress-mid-bar {
       background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
       width: 20%;
     }
 
-    #profit-card .progress-bottom-bar {
+    #profit-card .progress-mid-bar {
       background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
-      width: 98%;
+      width: 70%;
     }
 
-    /* Large stats cards - Groupe 2: Animations différentes */
+    /* Animation spéciale pour les cartes Dépense/Profit */
+    .small-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .small-stat-card:hover::after {
+      opacity: 1;
+    }
+
+    /* Large stats cards - Groupe 2: Animations vagues */
     .large-stats {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
@@ -455,6 +487,7 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    /* Animation vagues pour les grandes cartes */
     .large-stat-card::before {
       content: '';
       position: absolute;
@@ -462,7 +495,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 25%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 25%);
       opacity: 0;
       transition: opacity 0.5s ease;
     }
@@ -476,6 +511,27 @@
       opacity: 1;
     }
 
+    /* Effet vague animé */
+    .large-stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 10px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        transparent 100%);
+      animation: wave 3s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(-50%); }
+      100% { transform: translateX(0%); }
+    }
+
     .large-stat-title {
       font-size: 0.9rem;
       margin-bottom: 10px;
@@ -483,20 +539,23 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      z-index: 2;
     }
 
     .large-stat-value {
       font-size: 2rem;
       font-weight: 700;
       margin-bottom: 5px;
+      z-index: 2;
     }
 
     .large-stat-icon {
       font-size: 2rem;
       opacity: 0.7;
+      z-index: 2;
     }
 
-    /* Medium stats cards - Groupe 2: Animations différentes */
+    /* Medium stats cards - Groupe 2: Animations vagues différentes */
     .medium-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -516,6 +575,7 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    /* Animation vagues pour les cartes moyennes */
     .medium-stat-card::before {
       content: '';
       position: absolute;
@@ -523,7 +583,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      background: 
+        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 30%);
       opacity: 0;
       transition: opacity 0.5s ease;
     }
@@ -535,6 +597,22 @@
 
     .medium-stat-card:hover::before {
       opacity: 1;
+    }
+
+    /* Effet vague animé différent */
+    .medium-stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 8px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 100%);
+      animation: wave 2s linear infinite;
+      z-index: 1;
     }
 
     .medium-stat-card:nth-child(1) {
@@ -556,20 +634,23 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      z-index: 2;
     }
 
     .medium-stat-value {
       font-size: 1.6rem;
       font-weight: 700;
       color: white;
+      z-index: 2;
     }
 
     .medium-stat-icon {
       font-size: 2rem;
       opacity: 0.7;
+      z-index: 2;
     }
 
-    /* Small gain cards - Groupe 3: Animations différentes */
+    /* Small gain cards - Groupe 3: Animations différentes (rotation) */
     .gain-stats {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -599,8 +680,10 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
       opacity: 0;
       transition: opacity 0.4s ease;
+      z-index: 1;
     }
 
+    /* Animation de rotation au survol */
     .gain-stat-card:hover {
       transform: translateY(-5px) rotate(1deg);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -608,6 +691,11 @@
 
     .gain-stat-card:hover::before {
       opacity: 1;
+    }
+
+    /* Effet de pulsation pour les icônes */
+    .gain-stat-card:hover .gain-stat-icon {
+      animation: pulse 1s infinite;
     }
 
     .gain-stat-card:nth-child(1) {
@@ -634,12 +722,14 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      z-index: 2;
     }
 
     .gain-stat-title {
       color: var(--text-light);
       font-size: 0.75rem;
       font-weight: 500;
+      z-index: 2;
     }
 
     .gain-stat-icon {
@@ -652,12 +742,14 @@
       align-items: center;
       justify-content: center;
       font-size: 0.9rem;
+      z-index: 2;
     }
 
     .gain-stat-value {
       font-size: 1rem;
       font-weight: 700;
       color: var(--text-color);
+      z-index: 2;
     }
 
     /* Fidelity key section */
@@ -1449,7 +1541,7 @@
         <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
-      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression en bas -->
+      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression au milieu -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
           <div class="small-stat-title">
@@ -1457,9 +1549,9 @@
             Dépense:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression en bas -->
-          <div class="progress-bottom-container">
-            <div class="progress-bottom-bar"></div>
+          <!-- Barre de progression au milieu -->
+          <div class="progress-mid-container">
+            <div class="progress-mid-bar"></div>
           </div>
         </div>
         
@@ -1469,9 +1561,9 @@
             Profit:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression en bas -->
-          <div class="progress-bottom-container">
-            <div class="progress-bottom-bar"></div>
+          <!-- Barre de progression au milieu -->
+          <div class="progress-mid-container">
+            <div class="progress-mid-bar"></div>
           </div>
         </div>
       </div>
@@ -2121,6 +2213,8 @@
           // tout va bien -> rendre visible l'UI et masquer le loader
           document.documentElement.style.visibility = 'visible';
           loader.classList.add('hidden');
+          // Ajouter la classe loaded au body pour révéler le contenu
+          document.body.classList.add('loaded');
           showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
         } else {
           // non connecté -> rediriger vers login (éviter double redirect)
