@@ -351,7 +351,7 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Small stats cards - MODIFIÉ pour être plus petites avec barres de progression */
+    /* Small stats cards - MODIFIÉ avec barres de progression en bas */
     .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -372,42 +372,13 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .small-stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .small-stat-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.8);
-      width: 20%; /* Valeur par défaut, sera modifiée par JS */
-      transition: width 1s ease-in-out;
-    }
-
-    .small-stat-card:nth-child(1)::after {
-      width: 20%; /* Dépenses à 20% */
-    }
-
-    .small-stat-card:nth-child(2)::after {
-      width: 98%; /* Profit à 98% */
+    .small-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
     }
 
     .small-stat-card:hover {
       transform: translateY(-5px) scale(1.02);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .small-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
     }
 
     .small-stat-title {
@@ -426,30 +397,43 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-bottom: 5px;
     }
 
     .arrow-icon {
       font-size: 1.2rem;
     }
 
-    /* Progress bar container */
-    .progress-container {
-      margin-top: 10px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 5px;
+    /* Barre de progression en bas pour Dépense/Profit */
+    .progress-bottom-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       height: 6px;
+      background: rgba(0, 0, 0, 0.2);
       overflow: hidden;
     }
 
-    .progress-bar {
+    .progress-bottom-bar {
       height: 100%;
-      border-radius: 5px;
-      background: rgba(255, 255, 255, 0.8);
+      border-radius: 0 3px 3px 0;
       width: 0;
       transition: width 1s ease-in-out;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
-    /* Large stats cards */
+    #depense-card .progress-bottom-bar {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+      width: 20%;
+    }
+
+    #profit-card .progress-bottom-bar {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+      width: 98%;
+    }
+
+    /* Large stats cards - Groupe 2: Animations différentes */
     .large-stats {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
@@ -478,14 +462,14 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.5s ease;
     }
 
     .large-stat-card:hover {
-      transform: translateY(-5px) scale(1.01);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
     .large-stat-card:hover::before {
@@ -512,7 +496,7 @@
       opacity: 0.7;
     }
 
-    /* Medium stats cards */
+    /* Medium stats cards - Groupe 2: Animations différentes */
     .medium-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -539,14 +523,14 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.5s ease;
     }
 
     .medium-stat-card:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
     .medium-stat-card:hover::before {
@@ -585,7 +569,7 @@
       opacity: 0.7;
     }
 
-    /* Small gain cards */
+    /* Small gain cards - Groupe 3: Animations différentes */
     .gain-stats {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -600,7 +584,7 @@
       display: flex;
       flex-direction: column;
       height: 90px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.4s ease;
       position: relative;
       overflow: hidden;
     }
@@ -614,12 +598,12 @@
       bottom: 0;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.4s ease;
     }
 
     .gain-stat-card:hover {
-      transform: translateY(-5px) scale(1.03);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px) rotate(1deg);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     .gain-stat-card:hover::before {
@@ -1465,7 +1449,7 @@
         <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
-      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression -->
+      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression en bas -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
           <div class="small-stat-title">
@@ -1473,9 +1457,9 @@
             Dépense:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression pour dépenses -->
-          <div class="progress-container">
-            <div class="progress-bar" id="depense-progress" style="width: 20%"></div>
+          <!-- Barre de progression en bas -->
+          <div class="progress-bottom-container">
+            <div class="progress-bottom-bar"></div>
           </div>
         </div>
         
@@ -1485,14 +1469,14 @@
             Profit:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression pour profit -->
-          <div class="progress-container">
-            <div class="progress-bar" id="profit-progress" style="width: 98%"></div>
+          <!-- Barre de progression en bas -->
+          <div class="progress-bottom-container">
+            <div class="progress-bottom-bar"></div>
           </div>
         </div>
       </div>
       
-      <!-- Large stat (Solde) -->
+      <!-- Large stat (Solde) - Groupe 2 -->
       <div class="large-stats">
         <div class="large-stat-card" id="solde-card">
           <div class="large-stat-title">
@@ -1506,7 +1490,7 @@
         </div>
       </div>
       
-      <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) -->
+      <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) - Groupe 2 -->
       <div class="medium-stats">
         <div class="medium-stat-card" id="retire-card">
           <div class="medium-stat-title">
@@ -1563,7 +1547,7 @@
         </div>
       </div>
       
-      <!-- Gain stats (WhatsApp, Trivia, etc.) -->
+      <!-- Gain stats (WhatsApp, Trivia, etc.) - Groupe 3 -->
       <div class="gain-stats">
         <div class="gain-stat-card" id="whatsapp-gains">
           <div class="gain-stat-header">
@@ -1850,8 +1834,6 @@
     const infoParrain = document.getElementById('info-parrain');
     const infoParrainage = document.getElementById('info-parrainage');
     const loader = document.getElementById('loader');
-    const depenseProgress = document.getElementById('depense-progress');
-    const profitProgress = document.getElementById('profit-progress');
 
     /******** Variables d'état ********/
     let currentDate = new Date();
@@ -2079,19 +2061,6 @@
         if (tkt) tkt.textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
         if (yt) yt.textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
         if (depSol) depSol.textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
-
-        // Mettre à jour les barres de progression
-        if (depenseProgress) {
-          // Calculer le pourcentage pour les dépenses (exemple: 20%)
-          const depensePercent = userData.depense > 0 ? Math.min(100, (userData.depense / (userData.depense + userData.profit)) * 100) : 0;
-          depenseProgress.style.width = `${depensePercent}%`;
-        }
-        
-        if (profitProgress) {
-          // Calculer le pourcentage pour le profit (exemple: 98%)
-          const profitPercent = userData.profit > 0 ? Math.min(100, (userData.profit / (userData.depense + userData.profit)) * 100) : 0;
-          profitProgress.style.width = `${profitPercent}%`;
-        }
       } catch (e) {
         console.error('updateDashboardUI error', e);
       }
