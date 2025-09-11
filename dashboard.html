@@ -1525,7 +1525,7 @@
   </footer>
 
   <script>
-    // Configuration Firebase
+/******** CONFIG FIREBASE ********/
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
@@ -1535,13 +1535,11 @@
       appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
       measurementId: "G-5SF6VDLZCB"
     };
-
-    // Initialisation de Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // DOM elements
+    /******** DOM Elements ********/
     const hamburgerMenu = document.getElementById('hamburgerMenu');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -1561,8 +1559,6 @@
     const copyKeyBtn = document.getElementById('copyKeyBtn');
     const fidelityKey = document.getElementById('fidelityKey');
     const sendKeyBtn = document.getElementById('sendKeyBtn');
-    
-    // Éléments pour les informations utilisateur
     const sidebarUsername = document.getElementById('sidebarUsername');
     const userAvatar = document.getElementById('userAvatar');
     const infoUsername = document.getElementById('info-username');
@@ -1571,188 +1567,26 @@
     const infoCountry = document.getElementById('info-country');
     const infoParrain = document.getElementById('info-parrain');
     const infoParrainage = document.getElementById('info-parrainage');
-    
-    // Current date for calendar
-    let currentDate = new Date();
-    
-    // Données utilisateur avec des valeurs par défaut à 0
-    let userData = {
-      depense: 0,
-      profit: 0,
-      solde: 0,
-      retire: 0,
-      parrainage: 0,
-      bonusAgent: 0,
-      whatsappGains: 0,
-      triviaGains: 0,
-      publiciteGains: 0,
-      tiktokGains: 0,
-      youtubeGains: 0,
-      depotSolde: 0,
-      paid: false,
-      phoneNumber: "",
-      country: "",
-      referrer: "",
-      activeReferrals: 0
-    };
-    
-    // Current user
-    let currentUser = null;
 
-    // Toggle sidebar on mobile
-    hamburgerMenu.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-    });
-    
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    });
-    
-    // Toggle dark mode
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      
-      if (document.body.classList.contains('dark-mode')) {
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Mode jour</span>';
-      } else {
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-      }
-      
-      // Enregistrer le préférence de thème
-      saveUserData('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    });
-    
-    // Copy referral link
-    copyLinkBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(referralLink.textContent)
-        .then(() => {
-          showNotification('success', 'Succès', 'Lien copié dans le presse-papier!');
-        })
-        .catch(err => {
-          showNotification('error', 'Erreur', 'Impossible de copier le lien: ' + err);
-        });
-    });
-    
-    // Copy fidelity key
-    copyKeyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(fidelityKey.textContent)
-        .then(() => {
-          showNotification('success', 'Succès', 'Clé de fidélité copiée dans le presse-papier!');
-        })
-        .catch(err => {
-          showNotification('error', 'Erreur', 'Impossible de copier la clé: ' + err);
-        });
-    });
-    
-    // Send fidelity key via WhatsApp
-    sendKeyBtn.addEventListener('click', () => {
-      const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
-      window.open(`https://wa.me/?text=${message}`, '_blank');
-    });
-    
-    // Share referral link on social media with promotional message
-    const promoMessage = "Tu veux gagner de l'argent en ligne? Tu fais quoi avec ton téléphone sans gagner de l'argent? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
-    
-    shareWhatsApp.addEventListener('click', () => {
-      const text = encodeURIComponent(promoMessage + referralLink.textContent);
-      window.open(`https://wa.me/?text=${text}`, '_blank');
-    });
-    
-    shareFacebook.addEventListener('click', () => {
-      const quote = encodeURIComponent(promoMessage);
-      const url = encodeURIComponent(referralLink.textContent);
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
-    });
-    
-    shareTwitter.addEventListener('click', () => {
-      const text = encodeURIComponent(promoMessage);
-      const url = encodeURIComponent(referralLink.textContent);
-      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-    });
-    
-    shareTelegram.addEventListener('click', () => {
-      const text = encodeURIComponent(promoMessage + referralLink.textContent);
-      window.open(`https://t.me/share/url?url=${text}`, '_blank');
-    });
-    
-    // Language selector functionality
-    languageSelector.addEventListener('click', () => {
-      // This would toggle between language options in a real implementation
-      showNotification('success', 'Language', 'Fonctionnalité de langue à venir!');
-    });
-    
-    // Calendar navigation
-    function updateCalendar() {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      
-      // Set month and year in header
-      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-      ];
-      calendarMonth.textContent = `${monthNames[month]} ${year}`;
-      
-      // Clear previous calendar
-      calendarGrid.innerHTML = '';
-      
-      // Get first day of month and number of days
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
-      // Adjust for Monday as first day of week
-      let startDay = firstDay === 0 ? 6 : firstDay - 1;
-      
-      // Add empty cells for days before the first day of the month
-      for (let i = 0; i < startDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'calendar-date';
-        calendarGrid.appendChild(emptyCell);
-      }
-      
-      // Add cells for each day of the month
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateCell = document.createElement('div');
-        dateCell.className = 'calendar-date';
-        dateCell.textContent = day;
-        
-        // Mark current day
-        const today = new Date();
-        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-          dateCell.classList.add('active');
-        }
-        
-        // Randomly mark some days as having tasks
-        if (Math.random() > 0.7) {
-          dateCell.classList.add('has-task');
-        }
-        
-        calendarGrid.appendChild(dateCell);
-      }
-    }
-    
-    prevMonth.addEventListener('click', () => {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      updateCalendar();
-    });
-    
-    nextMonth.addEventListener('click', () => {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      updateCalendar();
-    });
-    
-    // Initialize calendar
-    updateCalendar();
-    
-    // Notification function
+    /******** Variables d'état ********/
+    let currentDate = new Date();
+    let userData = {
+      depense: 0, profit: 0, solde: 0, retire: 0, parrainage: 0, bonusAgent: 0,
+      whatsappGains: 0, triviaGains: 0, publiciteGains: 0, tiktokGains: 0, youtubeGains: 0, depotSolde: 0,
+      paid: false, phoneNumber: "", country: "", referrer: "", activeReferrals: 0
+    };
+    let currentUser = null;
+    let hasRedirected = false; // évite redirections en double
+
+    /******** Prévenir flash : masquer page tant que l'auth n'est pas confirmée ********/
+    document.documentElement.style.visibility = 'hidden';
+
+    /******** UI helpers ********/
     function showNotification(type, title, message, duration = 3000) {
-      const notificationContainer = document.getElementById('notificationContainer');
+      const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
-      
       const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      
       notification.innerHTML = `
         <i class="fas ${icon} notification-icon"></i>
         <div class="notification-content">
@@ -1760,160 +1594,292 @@
           <div class="notification-message">${message}</div>
         </div>
       `;
-      
-      notificationContainer.appendChild(notification);
-      
-      // Remove notification after duration
+      container.appendChild(notification);
       setTimeout(() => {
         notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => {
-          if (notificationContainer.contains(notification)) {
-            notificationContainer.removeChild(notification);
-          }
-        }, 300);
+        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
       }, duration);
     }
-    
-    // Fonction pour enregistrer les données utilisateur dans Firestore
-    async function saveUserData() {
+
+    /******** Sidebar mobile toggle ********/
+    hamburgerMenu.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+
+    /******** Theme toggle (sauvegarde possible) ********/
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Mode jour</span>';
+      } else {
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+      }
+      // Sauvegarde optionnelle
+      saveUserData('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    /******** Copy / share actions (inchangés) ********/
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(referralLink.textContent)
+          .then(() => showNotification('success', 'Succès', 'Lien copié dans le presse-papier!'))
+          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier le lien: ' + err));
+      });
+    }
+    if (copyKeyBtn) {
+      copyKeyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(fidelityKey.textContent)
+          .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
+          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier la clé: ' + err));
+      });
+    }
+    if (sendKeyBtn) {
+      sendKeyBtn.addEventListener('click', () => {
+        const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+      });
+    }
+    const promoMessage = "Tu veux gagner de l'argent en ligne? Tu fais quoi avec ton téléphone sans gagner de l'argent? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
+    if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
+    if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
+    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
+    if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
+
+    /******** Calendrier (inchangé, mais safe) ********/
+    function updateCalendar() {
+      if (!calendarGrid || !calendarMonth) return;
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+      calendarMonth.textContent = `${monthNames[month]} ${year}`;
+      calendarGrid.innerHTML = '';
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDay = firstDay === 0 ? 6 : firstDay - 1;
+      for (let i=0;i<startDay;i++){ const emptyCell = document.createElement('div'); emptyCell.className='calendar-date'; calendarGrid.appendChild(emptyCell); }
+      for (let day=1; day<=daysInMonth; day++){
+        const dateCell = document.createElement('div');
+        dateCell.className = 'calendar-date';
+        dateCell.textContent = day;
+        const today = new Date();
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
+        if (Math.random() > 0.7) dateCell.classList.add('has-task');
+        calendarGrid.appendChild(dateCell);
+      }
+    }
+    if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
+    if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
+    updateCalendar();
+
+    /******** Fonction utilitaire pour déterminer si un utilisateur est 'payé' ********/
+    function isPaidFlag(value) {
+      // accepte boolean, string, number
+      if (value === true) return true;
+      if (typeof value === 'string') {
+        const v = value.toLowerCase().trim();
+        return (v === 'true' || v === 'yes' || v === 'paid' || v === 'payé' || v === 'complete' || v === 'completed' || v === '1');
+      }
+      if (typeof value === 'number') return value === 1;
+      return false;
+    }
+    function isUserPaidFromDoc(docData) {
+      // Rechercher différents champs possibles
+      if (!docData) return false;
+      const candidates = [
+        docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
+        docData.status, docData.statut, docData.payment, docData.paidStatus
+      ];
+      for (const c of candidates) {
+        if (c !== undefined && c !== null) {
+          if (isPaidFlag(c)) return true;
+        }
+      }
+      return false;
+    }
+
+    /******** Sauvegarde des données utilisateur (accept un key/value optionnel) ********/
+    async function saveUserData(key=null, value=null) {
       if (!currentUser) return;
-      
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
-        await userRef.set({
-          ...userData,
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName || currentUser.email,
-          lastUpdate: new Date()
-        }, { merge: true });
-        
-        console.log('Données utilisateur enregistrées avec succès');
+        if (key !== null) {
+          // Mettre à jour un champ spécifique
+          const updateObj = { [key]: value, lastUpdate: new Date() };
+          await userRef.set(updateObj, { merge: true });
+        } else {
+          // Sauvegarder tout userData (merge)
+          await userRef.set({ ...userData, uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email, lastUpdate: new Date() }, { merge: true });
+        }
+        console.log('Données utilisateur enregistrées');
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement des données:', error);
       }
     }
-    
-    // Fonction pour charger les données utilisateur depuis Firestore
+
+    /******** Chargement / mapping des données utilisateur depuis Firestore ********/
     async function loadUserData() {
       if (!currentUser) return;
-      
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
         const doc = await userRef.get();
-        
         if (doc.exists) {
-          const data = doc.data();
-          userData = { ...userData, ...data };
-          
-          // Mettre à jour l'interface avec les données
+          const data = doc.data() || {};
+          // Mappez les champs potentiels vers notre userData
+          userData.depense = Number(data.depense || data.debit || data.expense || 0) || 0;
+          userData.profit = Number(data.profit || data.revenue || 0) || 0;
+          userData.solde = Number(data.solde || data.balance || data.soldeAccount || 0) || 0;
+          userData.retire = Number(data.retire || data.withdrawn || 0) || 0;
+          userData.parrainage = Number(data.parrainage || data.referralEarnings || 0) || 0;
+          userData.bonusAgent = Number(data.bonusAgent || data.agentBonus || 0) || 0;
+          userData.whatsappGains = Number(data.whatsappGains || 0) || 0;
+          userData.triviaGains = Number(data.triviaGains || 0) || 0;
+          userData.publiciteGains = Number(data.publiciteGains || 0) || 0;
+          userData.tiktokGains = Number(data.tiktokGains || 0) || 0;
+          userData.youtubeGains = Number(data.youtubeGains || 0) || 0;
+          userData.depotSolde = Number(data.depotSolde || data.depositBalance || 0) || 0;
+          userData.phoneNumber = data.phoneNumber || data.phone || userData.phoneNumber || "";
+          userData.country = data.country || data.pays || userData.country || "";
+          userData.referrer = data.referrer || data.parrain || data.referral || userData.referrer || "";
+          userData.activeReferrals = Number(data.activeReferrals || data.parrainageCount || 0) || 0;
+
+          // Détecter paiement via champs multiples
+          userData.paid = isUserPaidFromDoc(data);
+
+          // garder les autres champs si présent
+          if (data.displayName) userData.displayName = data.displayName;
+          if (data.email) userData.email = data.email;
+
+          // mettre à jour UI
           updateDashboardUI();
           updateUserInfoUI(data);
         } else {
-          // Créer un document avec des valeurs par défaut (0 pour tous les champs)
+          // Créer un document avec les valeurs par défaut (merge)
           await saveUserData();
         }
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
       }
     }
-    
-    // Fonction pour mettre à jour l'interface avec les données utilisateur
+
+    /******** Mettre à jour la partie Dashboard UI (sécurisé) ********/
+    function formatNumberSafe(n){ return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString() : '0'; }
     function updateDashboardUI() {
-      // Mettre à jour les cartes de statistiques
-      document.querySelector('#depense-card .small-stat-value').textContent = `XAF ${userData.depense.toLocaleString()}`;
-      document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${userData.profit.toLocaleString()}`;
-      document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${userData.solde.toLocaleString()}`;
-      document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${userData.retire.toLocaleString()}`;
-      document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${userData.parrainage.toLocaleString()}`;
-      document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${userData.bonusAgent.toLocaleString()}`;
-      document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${userData.whatsappGains.toLocaleString()}`;
-      document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${userData.triviaGains.toLocaleString()}`;
-      document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${userData.publiciteGains.toLocaleString()}`;
-      document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${userData.tiktokGains.toLocaleString()}`;
-      document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${userData.youtubeGains.toLocaleString()}`;
-      document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${userData.depotSolde.toLocaleString()}`;
+      try {
+        const dep = document.querySelector('#depense-card .small-stat-value');
+        const prof = document.querySelector('#profit-card .small-stat-value');
+        const sol = document.querySelector('#solde-card .large-stat-value');
+        const ret = document.querySelector('#retire-card .medium-stat-value');
+        const par = document.querySelector('#parrainage-card .medium-stat-value');
+        const bonus = document.querySelector('#bonus-agent-card .medium-stat-value');
+        const wa = document.querySelector('#whatsapp-gains .gain-stat-value');
+        const tr = document.querySelector('#trivia-gains .gain-stat-value');
+        const pub = document.querySelector('#publicite-gains .gain-stat-value');
+        const tkt = document.querySelector('#tiktok-gains .gain-stat-value');
+        const yt = document.querySelector('#youtube-gains .gain-stat-value');
+        const depSol = document.querySelector('#depot-solde .gain-stat-value');
+        if (dep) dep.textContent = `XAF ${formatNumberSafe(userData.depense)}`;
+        if (prof) prof.textContent = `XAF ${formatNumberSafe(userData.profit)}`;
+        if (sol) sol.textContent = `XAF ${formatNumberSafe(userData.solde)}`;
+        if (ret) ret.textContent = `XAF ${formatNumberSafe(userData.retire)}`;
+        if (par) par.textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
+        if (bonus) bonus.textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
+        if (wa) wa.textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
+        if (tr) tr.textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
+        if (pub) pub.textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
+        if (tkt) tkt.textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
+        if (yt) yt.textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
+        if (depSol) depSol.textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
+      } catch (e) {
+        console.error('updateDashboardUI error', e);
+      }
     }
-    
-    // Fonction pour mettre à jour les informations utilisateur dans l'interface
-    function updateUserInfoUI(userData) {
-      const displayName = userData.displayName || userData.email || 'Utilisateur';
-      const email = userData.email || 'Non spécifié';
-      const phone = userData.phoneNumber || 'Non spécifié';
-      const country = userData.country || 'Non spécifié';
-      const referrer = userData.referrer || 'Aucun';
-      const activeReferrals = userData.activeReferrals || 0;
-      
-      // Mettre à jour le sidebar
-      sidebarUsername.textContent = displayName;
-      
-      // Mettre à jour l'avatar
-      userAvatar.textContent = displayName.charAt(0).toUpperCase();
-      
-      // Mettre à jour la section informations utilisateur
-      infoUsername.textContent = displayName;
-      infoEmail.textContent = email;
-      infoPhone.textContent = phone;
-      infoCountry.textContent = country;
-      infoParrain.textContent = referrer;
-      infoParrainage.textContent = `${activeReferrals} personnes`;
-      
-      // Mettre à jour la clé de fidélité avec le nom d'utilisateur
-      fidelityKey.textContent = `MULA-${displayName.substring(0, 5)}-2024-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
-      
-      // Mettre à jour le lien de parrainage
-      referralLink.textContent = `mulaflowr.com/?ref=${displayName.substring(0, 5)}${Math.floor(100 + Math.random() * 900)}X${Math.floor(0 + Math.random() * 9)}`;
+
+    /******** Mettre à jour les infos utilisateur dans l'UI ********/
+    function updateUserInfoUI(docData) {
+      const displayName = (docData && (docData.displayName || docData.name)) || currentUser?.displayName || currentUser?.email || 'Utilisateur';
+      const email = (docData && docData.email) || currentUser?.email || 'Non spécifié';
+      const phone = (docData && (docData.phoneNumber || docData.phone)) || userData.phoneNumber || 'Non spécifié';
+      const country = (docData && (docData.country || docData.pays)) || userData.country || 'Non spécifié';
+      const referrer = (docData && (docData.referrer || docData.parrain)) || userData.referrer || 'Aucun';
+      const activeReferrals = (docData && (docData.activeReferrals || docData.parrainageCount)) || userData.activeReferrals || 0;
+
+      if (sidebarUsername) sidebarUsername.textContent = displayName;
+      if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+      if (infoUsername) infoUsername.textContent = displayName;
+      if (infoEmail) infoEmail.textContent = email;
+      if (infoPhone) infoPhone.textContent = phone;
+      if (infoCountry) infoCountry.textContent = country;
+      if (infoParrain) infoParrain.textContent = referrer;
+      if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
+
+      if (fidelityKey) fidelityKey.textContent = `MULA-${displayName.substring(0,5)}-2024-${Math.floor(1000 + Math.random()*9000)}-${Math.floor(1000 + Math.random()*9000)}`;
+      if (referralLink) referralLink.textContent = `mulaflowr.com/?ref=${displayName.substring(0,5)}${Math.floor(100 + Math.random()*900)}X${Math.floor(0 + Math.random()*9)}`;
     }
-    
-    // Vérifier si l'utilisateur a payé
-    function checkUserPayment() {
-      if (!userData.paid) {
+
+    /******** Vérifier paiement et rediriger si nécessaire ********/
+    function checkUserPaymentAndAct() {
+      // si payé -> continuer, sinon rediriger vers paiement
+      if (!isUserPaidFromDoc(userData) && !isPaidFlag(userData.paid)) {
         showNotification('error', 'Paiement requis', 'Veuillez finaliser votre paiement pour accéder à toutes les fonctionnalités.');
-        // Rediriger vers la page de paiement après 3 secondes
-        setTimeout(() => {
-          window.location.href = 'paiement.html';
-        }, 3000);
+        // évite doubles redirections
+        if (!hasRedirected) {
+          hasRedirected = true;
+          // délai court pour que l'utilisateur voit la notification (optionnel)
+          setTimeout(() => { window.location.href = 'paiement.html'; }, 1200);
+        }
         return false;
       }
       return true;
     }
-    
-    // Gestion de l'authentification
+
+    /******** Auth state handling (unique source de vérité) ********/
     auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        console.log('Utilisateur connecté:', user);
-        
-        // Charger les données utilisateur
-        await loadUserData();
-        
-        // Vérifier si l'utilisateur a payé
-        if (!checkUserPayment()) {
-          return;
+      try {
+        if (user) {
+          currentUser = user;
+          console.log('Utilisateur connecté:', user.uid || user.email);
+          // charger les données
+          await loadUserData();
+          // vérifier paiement
+          const ok = checkUserPaymentAndAct();
+          if (!ok) {
+            // on ne révèle pas la page si on redirige vers paiement
+            return;
+          }
+          // tout va bien -> rendre visible l'UI
+          document.documentElement.style.visibility = 'visible';
+          showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
+        } else {
+          // non connecté -> rediriger vers login (éviter double redirect)
+          if (!hasRedirected) {
+            hasRedirected = true;
+            window.location.href = 'login.html';
+          }
         }
-        
-        // Afficher une notification de bienvenue
-        showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
-      } else {
-        // Rediriger vers la page de connexion si non authentifié
-        window.location.href = 'login.html';
+      } catch (err) {
+        console.error('Erreur onAuthStateChanged:', err);
+        // en cas d'erreur critique, rediriger vers login
+        if (!hasRedirected) { hasRedirected = true; window.location.href = 'login.html'; }
       }
     });
-    
-    // Enregistrer les données du dashboard périodiquement
-    setInterval(saveUserData, 30000); // Toutes les 30 secondes
-    
-    // Simulate loading user data
+
+    /******** Éviter redirection immédiate dans DOMContentLoaded (ancien bug) ********/
+    // NE PAS rediriger ici — s'appuyer uniquement sur onAuthStateChanged.
     document.addEventListener('DOMContentLoaded', () => {
-      // Vérifier si l'utilisateur est connecté
-      if (auth.currentUser) {
-        currentUser = auth.currentUser;
-        loadUserData();
-      } else {
-        // Rediriger immédiatement vers la page de connexion si non authentifié
-        window.location.href = 'login.html';
-      }
+      // on initialise des choses qui ne nécessitent pas d'auth
+      updateCalendar();
+      // ne pas rediriger ici : auth n'a peut-être pas encore initialisé
     });
+
+    /******** Enregistrement périodique (uniquement si connecté) ********/
+    setInterval(() => { if (currentUser) saveUserData(); }, 30000);
+
+    /******** Fin du script ********/
   </script>
 </body>
 </html>
