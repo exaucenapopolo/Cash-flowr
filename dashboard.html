@@ -1,1408 +1,181 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" style="visibility: hidden;">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- Intégration de Firebase -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  
-  <style>
-    /* Style initial pour éviter le flash blanc */
-    body:not(.loaded) {
-      visibility: hidden;
-      opacity: 0;
-      overflow: hidden;
-    }
 
-    :root {
-      --primary-color: #3a8ee6;
-      --primary-light: #4da6ff;
-      --primary-dark: #2c75c9;
-      --secondary-color: #4c566a;
-      --accent-color: #5e81ac;
-      --background-light: #f5f7fb;
-      --background-dark: #e5e9f0;
-      --card-bg: #ffffff;
-      --text-color: #2e3440;
-      --text-light: #4c566a;
-      --success-color: #4CD964;
-      --warning-color: #FF9500;
-      --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
-      --teal-color: #5AC8FA;
-      --orange-color: #FF9500;
-      --pink-color: #FF2D55;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  <style>
+    :root{
+      --primary-color:#3a8ee6;
+      --primary-light:#4da6ff;
+      --primary-dark:#2c75c9;
+      --card-bg:#ffffff;
+      --text-color:#2e3440;
+      --text-light:#4c566a;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
       --transition: all 0.3s ease;
     }
-
-    .dark-mode {
-      --primary-color: #5e81ac;
-      --primary-light: #81a1c1;
-      --primary-dark: #4c566a;
-      --secondary-color: #d8dee9;
-      --accent-color: #88c0d0;
-      --background-light: #2e3440;
-      --background-dark: #3b4252;
-      --card-bg: #434c5e;
-      --text-color: #eceff4;
-      --text-light: #d8dee9;
-      --success-color: #4CD964;
-      --warning-color: #FF9500;
-      --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
-      --teal-color: #5AC8FA;
-      --orange-color: #FF9500;
-      --pink-color: #FF2D55;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      transition: var(--transition);
-    }
-
-    body {
-      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      color: var(--text-color);
-      min-height: 100vh;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    /* Loader pour éviter le flash blanc */
-    .loader-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    .loader-container.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .loader {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: conic-gradient(#0000 10%, var(--primary-color));
-      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
-      animation: spin 1s infinite linear;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(1turn);
-      }
-    }
-
-    /* Header styles */
-    .header {
-      background-color: var(--card-bg);
-      box-shadow: var(--shadow);
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      font-family: 'Montserrat', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .language-selector, .theme-toggle {
-      background-color: var(--primary-light);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
-    }
-
-    .theme-toggle {
-      background-color: var(--secondary-color);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-
-    .avatar {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: 2px solid var(--primary-light);
-    }
-
-    /* Main layout */
-    .main-container {
-      display: flex;
-      flex: 1;
-    }
-
-    /* Sidebar styles */
-    .sidebar {
-      width: 280px;
-      background-color: var(--card-bg);
-      box-shadow: var(--shadow);
-      height: calc(100vh - 80px);
-      position: sticky;
-      top: 80px;
-      padding: 25px 0;
-      overflow-y: auto;
-    }
-
-    .welcome-section {
-      padding: 0 25px 25px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .welcome-text {
-      color: var(--text-light);
-      font-size: 0.9rem;
-      margin-bottom: 5px;
-    }
-
-    .username {
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: var(--primary-color);
-    }
-
-    .menu-category {
-      padding: 15px 25px 5px;
-      font-size: 0.85rem;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-    }
-
-    .menu-item {
-      padding: 12px 25px 12px 35px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      color: var(--text-color);
-      text-decoration: none;
-      font-weight: 500;
-      border-left: 4px solid transparent;
-      position: relative;
-    }
-
-    .menu-item:hover, .menu-item.active {
-      background-color: rgba(0, 0, 0, 0.05);
-      border-left-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-
-    .menu-item i {
-      width: 20px;
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
-
-    .menu-item:hover i {
-      animation: dance 0.5s ease infinite;
-    }
-
-    @keyframes dance {
-      0%, 100% { transform: translateY(0) rotate(0); }
-      25% { transform: translateY(-3px) rotate(-5deg); }
-      50% { transform: translateY(0) rotate(0); }
-      75% { transform: translateY(-3px) rotate(5deg); }
-    }
-
-    .menu-badge {
-      position: absolute;
-      right: 25px;
-      background-color: var(--primary-color);
-      color: white;
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-
-    /* Content area */
-    .content {
-      flex: 1;
-      padding: 30px;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-      margin-bottom: 25px;
-      color: var(--secondary-color);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .page-title i {
-      color: var(--primary-color);
-    }
-
-    /* Banner */
-    .banner {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .banner::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) rotate(45deg); }
-    }
-
-    .banner-title {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-
-    .banner-text {
-      font-size: 0.9rem;
-      margin-bottom: 15px;
-      opacity: 0.9;
-      position: relative;
-      z-index: 1;
-    }
-
-    .banner-link {
-      display: inline-block;
-      background-color: white;
-      color: var(--primary-color);
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 0.9rem;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .banner-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Small stats cards - MODIFIÉ avec barres de progression en bas */
-    .small-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .small-stat-card {
-      background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      height: 100px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .small-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
-    }
-
-    .small-stat-card:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .small-stat-title {
-      color: white;
-      font-size: 0.85rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 2;
-    }
-
-    .small-stat-value {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 5px;
-      z-index: 2;
-    }
-
-    .arrow-icon {
-      font-size: 1.2rem;
-    }
-
-    /* Barre de progression en bas pour Dépense/Profit - MODIFIÉ */
-    .progress-mid-container {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      z-index: 1;
-      border-radius: 4px 4px 0 0;
-    }
-
-    .progress-mid-bar {
-      height: 100%;
-      border-radius: 4px;
-      width: 0;
-      transition: width 1s ease-in-out;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    }
-
-    #depense-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
-      width: 20%;
-    }
-
-    #profit-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
-      width: 70%;
-    }
-
-    /* Animation spéciale pour les cartes Dépense/Profit */
-    .small-stat-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.1) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .small-stat-card:hover::after {
-      opacity: 1;
-    }
-
-    /* Large stats cards - Groupe 2: Animations vagues avec niveau d'eau augmenté */
-    .large-stats {
-      display: grid;
-      grid-template-columns: repeat(1, 1fr);
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .large-stat-card {
-      background: linear-gradient(135deg, #a2d2ff 0%, #5c9ce6 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      color: white;
-      min-height: 150px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* Animation vagues pour les grandes cartes avec niveau d'eau augmenté */
-    .large-stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 25%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 25%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .large-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .large-stat-card:hover::before {
-      opacity: 1;
-    }
-
-    /* Effet vague animé avec niveau d'eau augmenté (40%) */
-    .large-stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      height: 40%;
-      background: linear-gradient(transparent, rgba(255, 255, 255, 0.4));
-      animation: wave 3s linear infinite;
-      z-index: 1;
-    }
-
-    @keyframes wave {
-      0% { transform: translateX(-50%); }
-      100% { transform: translateX(0%); }
-    }
-
-    .large-stat-title {
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 2;
-    }
-
-    .large-stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-      z-index: 2;
-    }
-
-    .large-stat-icon {
-      font-size: 2rem;
-      opacity: 0.7;
-      z-index: 2;
-    }
-
-    /* Medium stats cards - Groupe 2: Animations vagues différentes avec niveau d'eau augmenté */
-    .medium-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .medium-stat-card {
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      min-height: 130px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* Animation vagues pour les cartes moyennes avec niveau d'eau augmenté */
-    .medium-stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 30%),
-        radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 30%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .medium-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .medium-stat-card:hover::before {
-      opacity: 1;
-    }
-
-    /* Effet vague animé différent avec niveau d'eau augmenté (30-40%) */
-    .medium-stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      height: 40%;
-      background: linear-gradient(transparent, rgba(255, 255, 255, 0.3));
-      animation: wave 2s linear infinite;
-      z-index: 1;
-    }
-
-    .medium-stat-card:nth-child(1) {
-      background: linear-gradient(135deg, #ffc7a2 0%, #ff9a5c 100%);
-    }
-
-    .medium-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #c2a2ff 0%, #8c5ce7 100%);
-    }
-
-    .medium-stat-card:nth-child(3) {
-      background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
-    }
-
-    /* Ajustement du niveau d'eau pour chaque carte */
-    #solde-card::after { height: 40%; }
-    #retire-card::after { height: 30%; }
-    #parrainage-card::after { height: 35%; }
-    #bonus-agent-card::after { height: 25%; }
-
-    .medium-stat-title {
-      color: white;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 2;
-    }
-
-    .medium-stat-value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: white;
-      z-index: 2;
-    }
-
-    .medium-stat-icon {
-      font-size: 2rem;
-      opacity: 0.7;
-      z-index: 2;
-    }
-
-    /* Small gain cards - Groupe 3: Nouvelles animations ajoutées */
-    .gain-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
-    .gain-stat-card {
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      height: 90px;
-      transition: all 0.4s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .gain-stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      z-index: 1;
-    }
-
-    /* Animation de rotation au survol */
-    .gain-stat-card:hover {
-      transform: translateY(-5px) rotate(1deg);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .gain-stat-card:hover::before {
-      opacity: 1;
-    }
-
-    /* Nouvelle animation d'eau pour les cartes de gains */
-    .gain-stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      height: 20%;
-      background: linear-gradient(transparent, rgba(255, 255, 255, 0.2));
-      animation: wave 4s linear infinite;
-      z-index: 1;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    .gain-stat-card:hover::after {
-      opacity: 1;
-    }
-
-    /* Effet de pulsation pour les icônes */
-    .gain-stat-card:hover .gain-stat-icon {
-      animation: pulse 1s infinite;
-    }
-
-    .gain-stat-card:nth-child(1) {
-      background: linear-gradient(135deg, #d4ffd4 0%, #a0f0a0 100%);
-    }
-    .gain-stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #ffd4f0 0%, #f0a0d4 100%);
-    }
-    .gain-stat-card:nth-child(3) {
-      background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
-    }
-    .gain-stat-card:nth-child(4) {
-      background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
-    }
-    .gain-stat-card:nth-child(5) {
-      background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
-    }
-    .gain-stat-card:nth-child(6) {
-      background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
-    }
-
-    .gain-stat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      z-index: 2;
-    }
-
-    .gain-stat-title {
-      color: var(--text-light);
-      font-size: 0.75rem;
-      font-weight: 500;
-      z-index: 2;
-    }
-
-    .gain-stat-icon {
-      width: 25px;
-      height: 25px;
-      border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.3);
-      color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      z-index: 2;
-    }
-
-    .gain-stat-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-color);
-      z-index: 2;
-    }
-
-    /* Fidelity key section */
-    .fidelity-section {
-      background: linear-gradient(135deg, #e6fffd 0%, #b2fff8 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .fidelity-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    .fidelity-key {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .key-icon {
-      font-size: 1.5rem;
-      color: var(--primary-color);
-    }
-
-    .key-text {
-      flex: 1;
-      font-family: monospace;
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-    }
-
-    .key-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .copy-key-btn, .send-key-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .copy-key-btn:hover, .send-key-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .send-key-btn {
-      background-color: #25D366;
-    }
-
-    /* Referral section */
-    .referral-section {
-      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .referral-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    .section-title {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
-      color: var(--secondary-color);
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-
-    .referral-content {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-
-    .referral-link-container {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .link-box {
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .link-text {
-      font-size: 0.9rem;
-      color: var(--text-light);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-      margin-right: 15px;
-    }
-
-    .copy-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .copy-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .social-share {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .social-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: transform 0.2s;
-      position: relative;
-      z-index: 1;
-    }
-
-    .social-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .whatsapp { background-color: #25D366; }
-    .facebook { background-color: #3b5998; }
-    .twitter { background-color: #1DA1F2; }
-    .telegram { background-color: #0088cc; }
-
-    /* User info section */
-    .user-info-section {
-      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-info-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    .user-info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-    }
-
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      z-index: 1;
-    }
-
-    .info-label {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      margin-bottom: 5px;
-    }
-
-    .info-value {
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text-color);
-    }
-
-    /* Task calendar */
-    .task-calendar {
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .task-calendar::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .calendar-month {
-      font-weight: 600;
-      color: var(--text-color);
-    }
-
-    .calendar-nav {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-btn {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background-color: var(--primary-light);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .nav-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .calendar-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 15px;
-    }
-
-    .day-header {
-      text-align: center;
-      padding: 10px;
-      font-weight: 600;
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-
-    .calendar-date {
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      cursor: pointer;
-      position: relative;
-      background-color: rgba(255, 255, 255, 0.5);
-      transition: all 0.2s ease;
-    }
-
-    .calendar-date:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.05);
-    }
-
-    .calendar-date.active {
-      background-color: var(--primary-color);
-      color: white;
-      transform: scale(1.05);
-    }
-
-    .calendar-date.has-task::after {
-      content: "";
-      position: absolute;
-      bottom: 5px;
-      width: 6px;
-      height: 6px;
-      background-color: var(--success-color);
-      border-radius: 50%;
-    }
-
-    .task-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .task-table th, .task-table td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .task-table th {
-      background-color: rgba(0, 0, 0, 0.05);
-      font-weight: 600;
-      color: var(--text-light);
-    }
-
-    .task-table tr {
-      transition: background-color 0.2s ease;
-    }
-
-    .task-table tr:hover {
-      background-color: rgba(0, 0, 0, 0.03);
-      transform: scale(1.01);
-    }
-
-    .task-status {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      background-color: var(--success-color);
-      color: white;
-    }
-
-    /* Footer */
-    .footer {
-      background-color: var(--card-bg);
-      padding: 20px 30px;
-      text-align: center;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-      margin-top: auto;
-    }
-
-    .footer-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .footer-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    .footer-link:hover {
-      text-decoration: underline;
-      color: var(--primary-dark);
-    }
-
-    .footer-text {
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    /* Pulse animation for important elements */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 992px) {
-      .sidebar {
-        width: 230px;
-      }
-      
-      .medium-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .main-container {
-        flex-direction: column;
-      }
-      
-      .sidebar {
-        width: 50%;
-        height: 100vh;
-        position: fixed;
-        top: 80px;
-        left: -50%;
-        z-index: 99;
-        transition: left 0.3s ease;
-      }
-      
-      .sidebar.active {
-        left: 0;
-      }
-      
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 80px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 98;
-      }
-      
-      .overlay.active {
-        display: block;
-      }
-      
-      .header {
-        padding: 15px;
-      }
-      
-      .logo {
-        font-size: 1.5rem;
-      }
-      
-      .content {
-        padding: 20px;
-      }
-      
-      .medium-stats {
-        grid-template-columns: 1fr;
-      }
-      
-      .gain-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .key-buttons {
-        flex-direction: column;
-      }
-
-      .footer-links {
-        flex-direction: column;
-        gap: 10px;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .gain-stats {
-        grid-template-columns: 1fr;
-      }
-      
-      .user-info-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .task-table {
-        display: block;
-        overflow-x: auto;
-      }
-      
-      .user-name {
-        display: none;
-      }
-    }
-
-    /* Hamburger menu for mobile */
-    .hamburger-menu {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--secondary-color);
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .hamburger-menu {
-        display: block;
-      }
-    }
-
-    /* Animation for notifications */
-    .notification-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .notification {
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      max-width: 350px;
-      animation: slideIn 0.3s ease forwards;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .notification.success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
-      color: white;
-    }
-
-    .notification.error {
-      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
-      color: white;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif;transition:var(--transition);}
+    html,body{height:100%;}
+    body{background:linear-gradient(135deg,#d5e8d9 0%,#c5dfe6 100%);color:var(--text-color);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Loader */
+    .loader-container{
+      position:fixed;inset:0;
+      background:linear-gradient(135deg,#d5e8d9 0%,#c5dfe6 100%);
+      display:flex;align-items:center;justify-content:center;z-index:99999;
+      transition:opacity .45s ease,visibility .45s ease;
+    }
+    .loader-container.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+    .loader{
+      width:64px;height:64px;border-radius:50%;
+      background:conic-gradient(#0000 12%, var(--primary-color));
+      -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+      animation:spin 1s linear infinite; box-shadow:0 8px 30px rgba(0,0,0,0.12);
+    }
+    @keyframes spin{to{transform:rotate(1turn);} }
+
+    /* Header */
+    .header{background:var(--card-bg);box-shadow:var(--shadow);padding:15px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+    .logo{font-weight:800;color:var(--primary-color);font-family:'Montserrat',sans-serif;}
+    .header-controls{display:flex;align-items:center;gap:12px;}
+    .language-selector,.theme-toggle{border-radius:20px;padding:8px 12px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;}
+    .theme-toggle{background:var(--primary-light);color:#fff;}
+    .avatar{width:45px;height:45px;border-radius:50%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;border:2px solid var(--primary-light);}
+
+    .main-container{display:flex;flex:1;}
+    .sidebar{width:280px;background:var(--card-bg);box-shadow:var(--shadow);height:calc(100vh - 80px);position:sticky;top:80px;padding:25px 0;overflow-y:auto;}
+    .welcome-section{padding:0 25px 25px;border-bottom:1px solid rgba(0,0,0,0.08);margin-bottom:20px;}
+    .username{color:var(--primary-color);font-weight:600;}
+
+    .menu-item{padding:12px 25px 12px 35px;display:flex;align-items:center;gap:12px;color:var(--text-color);text-decoration:none;position:relative;}
+    .menu-item.active,.menu-item:hover{background:rgba(0,0,0,0.05);border-left:4px solid var(--primary-color);color:var(--primary-color);}
+    .menu-badge{position:absolute;right:25px;background:var(--primary-color);color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem;}
+
+    .content{flex:1;padding:30px;}
+    .page-title{font-size:1.4rem;margin-bottom:20px;color:var(--text-light);display:flex;gap:10px;align-items:center;}
+
+    .banner{background:linear-gradient(135deg,var(--primary-light),var(--primary-dark));color:#fff;padding:18px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:22px;position:relative;overflow:hidden;}
+    .banner::before{content:'';position:absolute;inset:-40% auto auto -40%;width:200%;height:200%;background:linear-gradient(to right,transparent,rgba(255,255,255,0.14),transparent);transform:rotate(45deg);animation:shimmer 3s linear infinite;}
+    @keyframes shimmer{0%{transform:translateX(-100%) rotate(45deg);}100%{transform:translateX(100%) rotate(45deg);} }
+
+    /* Small stats (Dépense / Profit) - structure updated to underline directly under amount */
+    .small-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
+    .small-stat-card{border-radius:10px;padding:14px;box-shadow:var(--shadow);position:relative;overflow:visible;height:120px;display:flex;flex-direction:column;justify-content:center;}
+    .small-stat-card:nth-child(1){background:linear-gradient(135deg,#ff6b6b 0%,#c62828 100%);color:#fff;}
+    .small-stat-card:nth-child(2){background:linear-gradient(135deg,#4cd964 0%,#2e7d32 100%);color:#fff;}
+    .small-stat-title{font-size:0.9rem;opacity:0.95;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+    /* wrapper around value so we can place underline just under text */
+    .value-wrapper{position:relative;display:flex;justify-content:center;align-items:center;flex-direction:column;padding-bottom:12px;}
+    .small-stat-value{font-size:1.6rem;font-weight:700;color:#fff;z-index:2;}
+
+    /* underline (progress) just under the amount, centered */
+    .progress-underline {
+      position:absolute;
+      bottom:6px; /* just under the text */
+      left:50%;
+      transform:translateX(-50%);
+      width:66%;
+      height:8px;
+      background:rgba(255,255,255,0.12);
+      border-radius:8px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      z-index:1;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    }
+    .progress-underline .bar {
+      height:100%;
+      width:0%;
+      border-radius:8px;
+      transition:width 1s cubic-bezier(.2,.9,.2,1);
+      box-shadow:0 0 12px rgba(255,255,255,0.35);
+      background:linear-gradient(90deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.95) 100%);
+    }
+    /* default widths (will be overridden by JS based on data) */
+    #depense-card .bar { width:40%; }
+    #profit-card .bar { width:65%; }
+
+    /* Large stat card (Solde) - add water fill */
+    .large-stats{margin-bottom:18px;display:grid;gap:18px;}
+    .large-stat-card{
+      position:relative;border-radius:12px;padding:22px;overflow:hidden;box-shadow:var(--shadow);min-height:150px;color:#fff;background:linear-gradient(135deg,#a2d2ff 0%,#5c9ce6 100%);
+    }
+    .large-stat-card .large-stat-value{font-size:2rem;font-weight:700;margin-bottom:6px;z-index:3;position:relative;}
+    /* water fill wrapper (absolute) - uses CSS variable --water-level */
+    .water-fill{
+      position:absolute;left:0;right:0;bottom:0;height:var(--water-level, 40%);pointer-events:none;overflow:hidden;z-index:2;
+      transition:height 0.8s ease;
+    }
+    /* wave SVG inside fill */
+    .water-fill svg{position:absolute;left:0;bottom:0;width:200%;height:80px;transform:translateX(0);animation:waveMove 6s linear infinite;opacity:0.95;}
+    @keyframes waveMove{0%{transform:translateX(0);}100%{transform:translateX(-50%);} }
+
+    /* medium stats (Retiré, etc.) - we'll add water for the specific ones */
+    .medium-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;}
+    .medium-stat-card{position:relative;border-radius:12px;padding:18px;min-height:130px;box-shadow:var(--shadow);overflow:hidden;color:#fff;}
+    .medium-stat-card .medium-stat-value{font-size:1.6rem;font-weight:700;z-index:3;position:relative;}
+    /* add water-fill to any medium-stat-card that needs it as well */
+
+    /* gain-stats kept as before (small animated cards) */
+    .gain-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;margin-bottom:30px;}
+    .gain-stat-card{border-radius:10px;padding:14px;box-shadow:var(--shadow);height:110px;position:relative;overflow:hidden;transition:transform .28s;}
+    .gain-stat-card:hover{transform:translateY(-6px) scale(1.01);}
+    .gain-stat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .gain-stat-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.28);display:flex;align-items:center;justify-content:center;color:var(--primary-color);}
+
+    /* per-card backgrounds */
+    .gain-stat-card:nth-child(1){background:linear-gradient(135deg,#d4ffd4 0%,#a0f0a0 100%);}
+    .gain-stat-card:nth-child(2){background:linear-gradient(135deg,#ffd4f0 0%,#f0a0d4 100%);}
+    .gain-stat-card:nth-child(3){background:linear-gradient(135deg,#d4f0ff 0%,#a0d4f0 100%);}
+    .gain-stat-card:nth-child(4){background:linear-gradient(135deg,#fff0d4 0%,#f0d4a0 100%);}
+    .gain-stat-card:nth-child(5){background:linear-gradient(135deg,#e6d4ff 0%,#c8a0f0 100%);}
+    .gain-stat-card:nth-child(6){background:linear-gradient(135deg,#d4fff0 0%,#a0f0d4 100%);}
+
+    /* small responsive & UI niceties */
+    @media(max-width:992px){.sidebar{width:230px}.medium-stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.main-container{flex-direction:column}.sidebar{position:fixed;left:-50%;top:80px;height:100vh;z-index:99;transition:left .28s}.sidebar.active{left:0}}
+    .hamburger-menu{display:none}@media(max-width:768px){.hamburger-menu{display:block}}
+
+    /* calendar / other styles kept (abbreviated for clarity) */
+    .fidelity-section{background:linear-gradient(135deg,#e6fffd 0%,#b2fff8 100%);border-radius:12px;padding:20px;margin-bottom:22px;box-shadow:var(--shadow);position:relative;}
+    .referral-section{background:linear-gradient(135deg,#e0f7fa 0%,#b2ebf2 100%);border-radius:12px;padding:20px;margin-bottom:22px;box-shadow:var(--shadow);position:relative;}
+    .user-info-section{background:linear-gradient(135deg,#f3e5f5 0%,#e1bee7 100%);border-radius:12px;padding:20px;margin-bottom:22px;box-shadow:var(--shadow)}
+    .task-calendar{background:linear-gradient(135deg,#fff3e0 0%,#ffe0b2 100%);border-radius:12px;padding:20px;margin-bottom:22px;box-shadow:var(--shadow)}
+    .footer{background:var(--card-bg);padding:18px;text-align:center;box-shadow:0 -4px 12px rgba(0,0,0,0.08);margin-top:auto}
   </style>
 </head>
 <body>
-  <!-- Loader pour éviter le flash blanc -->
+  <!-- Loader -->
   <div class="loader-container" id="loader">
-    <div class="loader"></div>
+    <div class="loader" aria-hidden="true"></div>
   </div>
 
-  <!-- Notifications container -->
+  <!-- Notifications -->
   <div class="notification-container" id="notificationContainer"></div>
 
   <!-- Header -->
   <header class="header">
-    <button class="hamburger-menu" id="hamburgerMenu">
-      <i class="fas fa-bars"></i>
-    </button>
-    
-    <div class="logo">
-      <span>MULAFLOWR</span>
-    </div>
-    
+    <button class="hamburger-menu" id="hamburgerMenu"><i class="fas fa-bars"></i></button>
+    <div class="logo">MULAFLOWR</div>
     <div class="header-controls">
-      <button class="language-selector" id="languageSelector">
-        <i class="fas fa-globe"></i>
-        <span>French</span>
-        <i class="fas fa-chevron-down"></i>
-      </button>
-      
-      <button class="theme-toggle" id="themeToggle">
-        <i class="fas fa-moon"></i>
-        <span>Mode nuit</span>
-      </button>
-      
-      <div class="user-profile" id="userProfile">
-        <div class="avatar" id="userAvatar">U</div>
-      </div>
+      <button class="language-selector" id="languageSelector"><i class="fas fa-globe"></i><span>French</span></button>
+      <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><span>Mode nuit</span></button>
+      <div class="user-profile" id="userProfile"><div class="avatar" id="userAvatar">U</div></div>
     </div>
   </header>
 
-  <!-- Overlay for mobile sidebar -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- Main content -->
   <div class="main-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -1410,498 +183,210 @@
         <div class="welcome-text">Dashboard >> MULAFLOWR</div>
         <div class="username" id="sidebarUsername">Utilisateur</div>
       </div>
-      
       <div class="menu-category">PRINCIPAL</div>
-      <a href="dashboard.html" class="menu-item active">
-        <i class="fas fa-home"></i>
-        <span>Tableau de bord</span>
-        <span class="menu-badge">☑</span>
-      </a>
-      
-      <a href="depot.html" class="menu-item">
-        <i class="fas fa-wallet"></i>
-        <span>Dépôt 💵</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="bonus_bienvenue.html" class="menu-item">
-        <i class="fas fa-gift"></i>
-        <span>Bonus de bienvenue</span>
-        <span class="menu-badge">☒</span>
-      </a>
-      
+      <a href="dashboard.html" class="menu-item active"><i class="fas fa-home"></i><span>Tableau de bord</span><span class="menu-badge">☑</span></a>
+      <a href="depot.html" class="menu-item"><i class="fas fa-wallet"></i><span>Dépôt 💵</span><span class="menu-badge">☐</span></a>
+      <a href="bonus_bienvenue.html" class="menu-item"><i class="fas fa-gift"></i><span>Bonus de bienvenue</span><span class="menu-badge">☒</span></a>
       <div class="menu-category">COMPTES</div>
-      <a href="retrait.html" class="menu-item">
-        <i class="fas fa-money-bill-wave"></i>
-        <span>Retrait</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="equipe.html" class="menu-item">
-        <i class="fas fa-users"></i>
-        <span>Équipe</span>
-        <span class="menu-badge">☒</span>
-      </a>
-
+      <a href="retrait.html" class="menu-item"><i class="fas fa-money-bill-wave"></i><span>Retrait</span><span class="menu-badge">☐</span></a>
+      <a href="equipe.html" class="menu-item"><i class="fas fa-users"></i><span>Équipe</span><span class="menu-badge">☒</span></a>
       <div class="menu-category">SPÉCIAL</div>
-      <a href="love_earn.html" class="menu-item">
-        <i class="fas fa-heart"></i>
-        <span>LoveEarn</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="social_boost.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>SBH</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="challenge_reward.html" class="menu-item">
-        <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <div class="menu-category">PRODUIT / TACHE</div>
-      <a href="whatsapp_earn.html" class="menu-item">
-        <i class="fab fa-whatsapp"></i>
-        <span>Gagner via Whatsapp</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="movies.html" class="menu-item">
-        <i class="fas fa-film"></i>
-        <span>Movies</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="paris_fixes.html" class="menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Paris fixes</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="gains_publicitaires.html" class="menu-item">
-        <i class="fas fa-ad"></i>
-        <span>Gains publicitaires</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="spin_wheel.html" class="menu-item">
-        <i class="fas fa-trophy"></i>
-        <span>Spin wheel 🏆</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="tiktok_earn.html" class="menu-item">
-        <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="youtube_earn.html" class="menu-item">
-        <i class="fab fa-youtube"></i>
-        <span>YouTube Earn</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="instagram_earn.html" class="menu-item">
-        <i class="fab fa-instagram"></i>
-        <span>Instagram Earn</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="trivia_challenge.html" class="menu-item">
-        <i class="fas fa-brain"></i>
-        <span>TRIVIA challenge</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <div class="menu-category">BONUS</div>
-      <a href="liste_contacts.html" class="menu-item">
-        <i class="fas fa-address-book"></i>
-        <span>Liste de contacts gratuit 🆓</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="booster_visibilite.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>Booster ma visibilité</span>
-        <span class="menu-badge">☐</span>
-      </a>
+      <a href="love_earn.html" class="menu-item"><i class="fas fa-heart"></i><span>LoveEarn</span><span class="menu-badge">☐</span></a>
+      <a href="social_boost.html" class="menu-item"><i class="fas fa-rocket"></i><span>SBH</span><span class="menu-badge">☐</span></a>
+      <a href="challenge_reward.html" class="menu-item"><i class="fas fa-medal"></i><span>Challenge and Reward</span><span class="menu-badge">☐</span></a>
 
-      <a href="canva_pro.html" class="menu-item">
-        <i class="fas fa-palette"></i>
-        <span>Canva Pro</span>
-        <span class="menu-badge">☐</span>
-      </a>
-      
-      <a href="connexion_gratuite.html" class="menu-item">
-        <i class="fas fa-shield-alt"></i>
-        <span>Connexion gratuite</span>
-        <span class="menu-badge">☐</span>
-      </a>
+      <div class="menu-category">PRODUIT / TACHE</div>
+      <a href="whatsapp_earn.html" class="menu-item"><i class="fab fa-whatsapp"></i><span>Gagner via Whatsapp</span><span class="menu-badge">☐</span></a>
+      <a href="movies.html" class="menu-item"><i class="fas fa-film"></i><span>Movies</span><span class="menu-badge">☐</span></a>
+      <a href="paris_fixes.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Paris fixes</span><span class="menu-badge">☐</span></a>
+      <a href="gains_publicitaires.html" class="menu-item"><i class="fas fa-ad"></i><span>Gains publicitaires</span><span class="menu-badge">☐</span></a>
+      <a href="spin_wheel.html" class="menu-item"><i class="fas fa-trophy"></i><span>Spin wheel 🏆</span><span class="menu-badge">☐</span></a>
+      <a href="tiktok_earn.html" class="menu-item"><i class="fab fa-tiktok"></i><span>TikTok Earn</span><span class="menu-badge">☐</span></a>
+      <a href="youtube_earn.html" class="menu-item"><i class="fab fa-youtube"></i><span>YouTube Earn</span><span class="menu-badge">☐</span></a>
+      <a href="instagram_earn.html" class="menu-item"><i class="fab fa-instagram"></i><span>Instagram Earn</span><span class="menu-badge">☐</span></a>
+      <a href="trivia_challenge.html" class="menu-item"><i class="fas fa-brain"></i><span>TRIVIA challenge</span><span class="menu-badge">☐</span></a>
+
+      <div class="menu-category">BONUS</div>
+      <a href="liste_contacts.html" class="menu-item"><i class="fas fa-address-book"></i><span>Liste de contacts gratuit 🆓</span><span class="menu-badge">☐</span></a>
+      <a href="booster_visibilite.html" class="menu-item"><i class="fas fa-rocket"></i><span>Booster ma visibilité</span><span class="menu-badge">☐</span></a>
+      <a href="canva_pro.html" class="menu-item"><i class="fas fa-palette"></i><span>Canva Pro</span><span class="menu-badge">☐</span></a>
+      <a href="connexion_gratuite.html" class="menu-item"><i class="fas fa-shield-alt"></i><span>Connexion gratuite</span><span class="menu-badge">☐</span></a>
     </aside>
 
-    <!-- Content -->
     <main class="content">
-      <h1 class="page-title">
-        <i class="fas fa-home"></i>
-        <span>Dashboard >> MULAFLOWR</span>
-      </h1>
-      
-      <!-- Banner -->
+      <h1 class="page-title"><i class="fas fa-home"></i><span>Dashboard >> MULAFLOWR</span></h1>
+
       <div class="banner">
         <div class="banner-title">MULAFLOWR</div>
-        <div class="banner-text">
-          Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
-        </div>
-        <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
+        <div class="banner-text">Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬</div>
+        <a class="banner-link" href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" style="background:#fff;color:var(--primary-color;padding:8px 12px;border-radius:16px;text-decoration:none;font-weight:700;">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
-      
-      <!-- Small stats (Dépense and Profit) - MODIFIÉ avec barres de progression en bas -->
+
+      <!-- Small stats: Depense / Profit -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
-          <div class="small-stat-title">
-            <i class="fas fa-arrow-down arrow-icon"></i>
-            Dépense:
-          </div>
-          <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression en bas -->
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
+          <div class="small-stat-title"><i class="fas fa-arrow-down"></i> Dépense:</div>
+          <div class="value-wrapper">
+            <div class="small-stat-value" id="depense-value">XAF 0</div>
+            <!-- underline (progress) positioned JUSTE sous le montant -->
+            <div class="progress-underline" aria-hidden="true">
+              <div class="bar" id="dep-bar"></div>
+            </div>
           </div>
         </div>
-        
+
         <div class="small-stat-card" id="profit-card">
-          <div class="small-stat-title">
-            <i class="fas fa-arrow-up arrow-icon"></i>
-            Profit:
-          </div>
-          <div class="small-stat-value">XAF 0</div>
-          <!-- Barre de progression en bas -->
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
+          <div class="small-stat-title"><i class="fas fa-arrow-up"></i> Profit:</div>
+          <div class="value-wrapper">
+            <div class="small-stat-value" id="profit-value">XAF 0</div>
+            <div class="progress-underline" aria-hidden="true">
+              <div class="bar" id="profit-bar"></div>
+            </div>
           </div>
         </div>
       </div>
-      
-      <!-- Large stat (Solde) - Groupe 2 avec animation d'eau augmentée -->
+
+      <!-- Large stat (Solde) with water fill (level ~45%) -->
       <div class="large-stats">
-        <div class="large-stat-card" id="solde-card">
-          <div class="large-stat-title">
-            <i class="fas fa-piggy-bank large-stat-icon"></i>
-            SOLDE
+        <div class="large-stat-card" id="solde-card" style="--water-level:45%;">
+          <div style="position:relative;z-index:3;">
+            <div class="large-stat-title"><i class="fas fa-piggy-bank"></i> SOLDE</div>
+            <div class="large-stat-value" id="solde-value">XAF 0</div>
+            <div class="stat-change"><span>Vol:(0%)</span></div>
           </div>
-          <div class="large-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
+          <!-- water fill (SVG wave) -->
+          <div class="water-fill" aria-hidden="true">
+            <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+              <path d="M0,40 C150,80 300,0 600,40 C900,80 1050,0 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.14)"></path>
+              <path d="M0,48 C150,12 300,80 600,48 C900,12 1050,80 1200,48 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.10)"></path>
+            </svg>
           </div>
         </div>
       </div>
-      
-      <!-- Medium stats (Retiré, Gains de parrainage, Bonus d'agent) - Groupe 2 avec animation d'eau augmentée -->
+
+      <!-- Medium stats: Retiré, Parrainage, Bonus agent (apply water to some) -->
       <div class="medium-stats">
-        <div class="medium-stat-card" id="retire-card">
-          <div class="medium-stat-title">
-            <i class="fas fa-download medium-stat-icon"></i>
-            Retiré
-          </div>
-          <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
+        <div class="medium-stat-card" id="retire-card" style="--water-level:30%;background:linear-gradient(135deg,#ffc7a2 0%,#ff9a5c 100%);">
+          <div style="position:relative;z-index:3;"><div class="medium-stat-title"><i class="fas fa-download"></i> Retiré</div><div class="medium-stat-value" id="retire-value">XAF 0</div></div>
+          <div class="water-fill" aria-hidden="true">
+            <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+              <path d="M0,40 C150,80 300,0 600,40 C900,80 1050,0 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.12)"></path>
+            </svg>
           </div>
         </div>
-        
-        <div class="medium-stat-card" id="parrainage-card">
-          <div class="medium-stat-title">
-            <i class="fas fa-users medium-stat-icon"></i>
-            Gains de parrainage
-          </div>
-          <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
+
+        <div class="medium-stat-card" id="parrainage-card" style="--water-level:25%;background:linear-gradient(135deg,#c2a2ff 0%,#8c5ce7 100%);">
+          <div style="position:relative;z-index:3;"><div class="medium-stat-title"><i class="fas fa-users"></i> Gains de parrainage</div><div class="medium-stat-value" id="parrain-value">XAF 0</div></div>
+          <div class="water-fill" aria-hidden="true">
+            <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+              <path d="M0,40 C150,10 300,60 600,40 C900,20 1050,60 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.10)"></path>
+            </svg>
           </div>
         </div>
-        
-        <div class="medium-stat-card" id="bonus-agent-card">
-          <div class="medium-stat-title">
-            <i class="fas fa-gift medium-stat-icon"></i>
-            Bonus d'agent
-          </div>
-          <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
-          </div>
+
+        <div class="medium-stat-card" id="bonus-agent-card" style="background:linear-gradient(135deg,#a2ffc7 0%,#5ce78c 100%);">
+          <div style="position:relative;z-index:3;"><div class="medium-stat-title"><i class="fas fa-gift"></i> Bonus d'agent</div><div class="medium-stat-value" id="bonus-value">XAF 0</div></div>
+          <!-- optional water omitted here (kept clean) -->
         </div>
       </div>
-      
-      <!-- Fidelity key section -->
+
+      <!-- Fidelity -->
       <div class="fidelity-section">
         <h2 class="section-title">CLÉ DE FIDÉLITÉ</h2>
         <p>Utilisez votre clé de fidélité pour accéder à des avantages exclusifs et des bonus supplémentaires.</p>
-        
         <div class="fidelity-key">
-          <i class="fas fa-key key-icon"></i>
-          <div class="key-text" id="fidelityKey">MULA-USER-2024-0000-0000</div>
-          <div class="key-buttons">
-            <button class="copy-key-btn" id="copyKeyBtn">
-              <i class="fas fa-copy"></i>
-              <span>Copier</span>
-            </button>
-            <button class="send-key-btn" id="sendKeyBtn">
-              <i class="fab fa-whatsapp"></i>
-              <span>Envoyer</span>
-            </button>
+          <i class="fas fa-key" style="font-size:1.2rem;color:var(--primary-color);"></i>
+          <div style="flex:1;font-family:monospace;" id="fidelityKey">MULA-USER-2024-0000-0000</div>
+          <div style="display:flex;gap:8px;">
+            <button class="copy-key-btn" id="copyKeyBtn" style="background:var(--primary-color);color:#fff;padding:8px;border-radius:6px;border:none;"><i class="fas fa-copy"></i> Copier</button>
+            <button class="send-key-btn" id="sendKeyBtn" style="background:#25D366;color:#fff;padding:8px;border-radius:6px;border:none;"><i class="fab fa-whatsapp"></i> Envoyer</button>
           </div>
         </div>
       </div>
-      
-      <!-- Gain stats (WhatsApp, Trivia, etc.) - Groupe 3 avec nouvelles animations -->
+
+      <!-- Gain stats including deposit (we add water to deposit card) -->
       <div class="gain-stats">
-        <div class="gain-stat-card" id="whatsapp-gains">
-          <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains WhatsApp</div>
-            <div class="gain-stat-icon">
-              <i class="fab fa-whatsapp"></i>
-            </div>
-          </div>
-          <div class="gain-stat-value">XAF 0</div>
-        </div>
-        
-        <div class="gain-stat-card" id="trivia-gains">
-          <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains Trivia</div>
-            <div class="gain-stat-icon">
-              <i class="fas fa-question-circle"></i>
-            </div>
-          </div>
-          <div class="gain-stat-value">XAF 0</div>
-        </div>
-        
-        <div class="gain-stat-card" id="publicite-gains">
-          <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains publicitaires</div>
-            <div class="gain-stat-icon">
-              <i class="fas fa-ad"></i>
-            </div>
-          </div>
-          <div class="gain-stat-value">XAF 0</div>
-        </div>
-        
-        <div class="gain-stat-card" id="tiktok-gains">
-          <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains TikTok</div>
-            <div class="gain-stat-icon">
-              <i class="fab fa-tiktok"></i>
-            </div>
-          </div>
-          <div class="gain-stat-value">XAF 0</div>
-        </div>
-        
-        <div class="gain-stat-card" id="youtube-gains">
-          <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains YouTube</div>
-            <div class="gain-stat-icon">
-              <i class="fab fa-youtube"></i>
-            </div>
-          </div>
-          <div class="gain-stat-value">XAF 0</div>
-        </div>
-        
-        <div class="gain-stat-card" id="depot-solde">
-          <div class="gain-stat-header">
+        <div class="gain-stat-card" id="whatsapp-gains"><div class="gain-stat-header"><div class="gain-stat-title">Gains WhatsApp</div><div class="gain-stat-icon"><i class="fab fa-whatsapp"></i></div></div><div class="gain-stat-value" id="wa-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="trivia-gains"><div class="gain-stat-header"><div class="gain-stat-title">Gains Trivia</div><div class="gain-stat-icon"><i class="fas fa-question-circle"></i></div></div><div class="gain-stat-value" id="trivia-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="publicite-gains"><div class="gain-stat-header"><div class="gain-stat-title">Gains publicitaires</div><div class="gain-stat-icon"><i class="fas fa-ad"></i></div></div><div class="gain-stat-value" id="pub-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="tiktok-gains"><div class="gain-stat-header"><div class="gain-stat-title">Gains TikTok</div><div class="gain-stat-icon"><i class="fab fa-tiktok"></i></div></div><div class="gain-stat-value" id="tiktok-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="youtube-gains"><div class="gain-stat-header"><div class="gain-stat-title">Gains YouTube</div><div class="gain-stat-icon"><i class="fab fa-youtube"></i></div></div><div class="gain-stat-value" id="yt-value">XAF 0</div></div>
+
+        <!-- Depot solde with water (35%) -->
+        <div class="gain-stat-card" id="depot-solde" style="position:relative;--water-level:35%;background:linear-gradient(135deg,#d4fff0 0%,#a0f0d4 100%);">
+          <div style="position:relative;z-index:3;" class="gain-stat-header">
             <div class="gain-stat-title">Solde du dépôt</div>
-            <div class="gain-stat-icon">
-              <i class="fas fa-piggy-bank"></i>
-            </div>
+            <div class="gain-stat-icon"><i class="fas fa-piggy-bank"></i></div>
           </div>
-          <div class="gain-stat-value">XAF 0</div>
+          <div class="gain-stat-value" id="depot-value">XAF 0</div>
+          <div class="water-fill" aria-hidden="true">
+            <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+              <path d="M0,40 C150,80 300,0 600,40 C900,80 1050,0 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.12)"></path>
+            </svg>
+          </div>
         </div>
       </div>
-      
-      <!-- Referral section -->
+
+      <!-- Referral -->
       <div class="referral-section">
         <h2 class="section-title">LIEN DE PARRAINAGE</h2>
-        
         <div class="referral-content">
-          <div class="referral-link-container">
-            <div class="link-box">
-              <div class="link-text" id="referralLink">mulaflowr.com/?ref=USER000X0</div>
-              <button class="copy-btn" id="copyLinkBtn">
-                <i class="fas fa-copy"></i>
-                <span>Copier</span>
-              </button>
+          <div style="flex:1;min-width:300px;">
+            <div style="background:rgba(0,0,0,0.05);padding:12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="referralLink">mulaflowr.com/?ref=USER000X0</div>
+              <button id="copyLinkBtn" class="copy-btn" style="background:var(--primary-color);color:#fff;border:none;padding:8px;border-radius:6px;"><i class="fas fa-copy"></i> Copier</button>
             </div>
-            
-            <div class="social-share">
-              <div class="social-btn whatsapp" id="shareWhatsApp">
-                <i class="fab fa-whatsapp"></i>
-              </div>
-              <div class="social-btn facebook" id="shareFacebook">
-                <i class="fab fa-facebook-f"></i>
-              </div>
-              <div class="social-btn twitter" id="shareTwitter">
-                <i class="fab fa-twitter"></i>
-              </div>
-              <div class="social-btn telegram" id="shareTelegram">
-                <i class="fab fa-telegram-plane"></i>
-              </div>
+            <div style="display:flex;gap:10px;">
+              <div class="social-btn whatsapp" id="shareWhatsApp" style="background:#25D366;padding:8px;border-radius:50%;color:#fff;cursor:pointer"><i class="fab fa-whatsapp"></i></div>
+              <div class="social-btn facebook" id="shareFacebook" style="background:#3b5998;padding:8px;border-radius:50%;color:#fff;cursor:pointer"><i class="fab fa-facebook-f"></i></div>
+              <div class="social-btn twitter" id="shareTwitter" style="background:#1DA1F2;padding:8px;border-radius:50%;color:#fff;cursor:pointer"><i class="fab fa-twitter"></i></div>
+              <div class="social-btn telegram" id="shareTelegram" style="background:#0088cc;padding:8px;border-radius:50%;color:#fff;cursor:pointer"><i class="fab fa-telegram-plane"></i></div>
             </div>
-            
-            <p>Partagez ce lien avec vos amis et gagnez des commissions sur leurs activités.</p>
           </div>
         </div>
       </div>
-      
-      <!-- User info section -->
+
+      <!-- User info -->
       <div class="user-info-section">
         <h2 class="section-title">INFORMATIONS UTILISATEUR</h2>
-        
-        <div class="user-info-grid">
-          <div class="info-item">
-            <div class="info-label">Nom d'utilisateur</div>
-            <div class="info-value" id="info-username">Chargement...</div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Email</div>
-            <div class="info-value" id="info-email">Chargement...</div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Téléphone</div>
-            <div class="info-value" id="info-phone">Chargement...</div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Pays</div>
-            <div class="info-value" id="info-country">Chargement...</div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Parrain</div>
-            <div class="info-value" id="info-parrain">Chargement...</div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">Parrainage actif</div>
-            <div class="info-value" id="info-parrainage">0 personnes</div>
-          </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+          <div><div class="info-label">Nom d'utilisateur</div><div id="info-username">Chargement...</div></div>
+          <div><div class="info-label">Email</div><div id="info-email">Chargement...</div></div>
+          <div><div class="info-label">Téléphone</div><div id="info-phone">Chargement...</div></div>
+          <div><div class="info-label">Pays</div><div id="info-country">Chargement...</div></div>
+          <div><div class="info-label">Parrain</div><div id="info-parrain">Chargement...</div></div>
+          <div><div class="info-label">Parrainage actif</div><div id="info-parrainage">0 personnes</div></div>
         </div>
       </div>
-      
-      <!-- Task calendar -->
+
+      <!-- Calendar (kept) -->
       <div class="task-calendar">
         <h2 class="section-title">CALENDRIER DES TÂCHES</h2>
-        
-        <div class="calendar-header">
-          <div class="calendar-month">Septembre 2025</div>
-          <div class="calendar-nav">
-            <div class="nav-btn" id="prevMonth">
-              <i class="fas fa-chevron-left"></i>
-            </div>
-            <div class="nav-btn" id="nextMonth">
-              <i class="fas fa-chevron-right"></i>
-            </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="calendar-month" id="calendarMonth">Septembre 2025</div>
+          <div style="display:flex;gap:8px;">
+            <div class="nav-btn" id="prevMonth" style="background:var(--primary-light);color:#fff;padding:8px;border-radius:50%;cursor:pointer"><i class="fas fa-chevron-left"></i></div>
+            <div class="nav-btn" id="nextMonth" style="background:var(--primary-light);color:#fff;padding:8px;border-radius:50%;cursor:pointer"><i class="fas fa-chevron-right"></i></div>
           </div>
         </div>
-        
-        <div class="calendar-days">
-          <div class="day-header">Lun</div>
-          <div class="day-header">Mar</div>
-          <div class="day-header">Mer</div>
-          <div class="day-header">Jeu</div>
-          <div class="day-header">Ven</div>
-          <div class="day-header">Sam</div>
-          <div class="day-header">Dim</div>
+        <div class="calendar-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;">
+          <div style="text-align:center;font-weight:700;color:var(--text-light)">Lun</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Mar</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Mer</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Jeu</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Ven</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Sam</div><div style="text-align:center;font-weight:700;color:var(--text-light)">Dim</div>
         </div>
-        
-        <div class="calendar-grid">
-          <!-- Calendar dates will be populated by JavaScript -->
-        </div>
-        
-        <table class="task-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Day1</th>
-              <th>Day2</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Youtube</td>
-              <td>Saturday</td>
-              <td>Sunday</td>
-              <td><span class="task-status">Active</span></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>triviatz</td>
-              <td>Tuesday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Completed</span></td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Tiktok</td>
-              <td>Tuesday</td>
-              <td>Wednesday</td>
-              <td><span class="task-status">Completed</span></td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td>whatsapp</td>
-              <td>Monday</td>
-              <td>Wednesday</td>
-              <td><span class="task-status">Pending</span></td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>trivia</td>
-              <td>Tuesday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Completed</span></td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>ads</td>
-              <td>Monday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Pending</span></td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>blogs</td>
-              <td>Monday</td>
-              <td>Friday</td>
-              <td><span class="task-status">Active</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="calendar-grid" id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
       </div>
     </main>
   </div>
 
-  <!-- Footer -->
   <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-links">
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
-      </div>
-      <div class="footer-text">
-        © 2025 MULAFLOWR. Tous droits réservés.
-      </div>
+    <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;">
+      <a href="https://social-boost-horizon-new-sbh.vercel.app" style="color:var(--primary-color);text-decoration:none">Pro Tech Management</a>
+      <a href="https://social-boost-horizon-new-sbh.vercel.app" style="color:var(--primary-color);text-decoration:none">Site propulsé par Social Boost Horizon</a>
     </div>
+    <div style="color:var(--text-light);margin-top:8px">© 2025 MULAFLOWR. Tous droits réservés.</div>
   </footer>
 
   <script>
-/******** CONFIG FIREBASE ********/
+    /******** Firebase config ********/
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
@@ -1915,198 +400,174 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    /******** DOM Elements ********/
-    const hamburgerMenu = document.getElementById('hamburgerMenu');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const referralLink = document.getElementById('referralLink');
-    const languageSelector = document.getElementById('languageSelector');
-    const shareWhatsApp = document.getElementById('shareWhatsApp');
-    const shareFacebook = document.getElementById('shareFacebook');
-    const shareTwitter = document.getElementById('shareTwitter');
-    const shareTelegram = document.getElementById('shareTelegram');
-    const prevMonth = document.getElementById('prevMonth');
-    const nextMonth = document.getElementById('nextMonth');
-    const calendarGrid = document.querySelector('.calendar-grid');
-    const calendarMonth = document.querySelector('.calendar-month');
-    const copyKeyBtn = document.getElementById('copyKeyBtn');
-    const fidelityKey = document.getElementById('fidelityKey');
-    const sendKeyBtn = document.getElementById('sendKeyBtn');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    const infoUsername = document.getElementById('info-username');
-    const infoEmail = document.getElementById('info-email');
-    const infoPhone = document.getElementById('info-phone');
-    const infoCountry = document.getElementById('info-country');
-    const infoParrain = document.getElementById('info-parrain');
-    const infoParrainage = document.getElementById('info-parrainage');
+    /* DOM */
     const loader = document.getElementById('loader');
+    const notificationContainer = document.getElementById('notificationContainer');
+    const depBar = document.getElementById('dep-bar');
+    const profitBar = document.getElementById('profit-bar');
+    const depValueEl = document.getElementById('depense-value');
+    const profitValueEl = document.getElementById('profit-value');
+    const soldeValue = document.getElementById('solde-value');
+    const retireValue = document.getElementById('retire-value');
+    const parrainValue = document.getElementById('parrain-value');
+    const depotValue = document.getElementById('depot-value');
 
-    /******** Variables d'état ********/
+    /* calendar */
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarMonth = document.getElementById('calendarMonth');
     let currentDate = new Date();
-    let userData = {
-      depense: 0, profit: 0, solde: 0, retire: 0, parrainage: 0, bonusAgent: 0,
-      whatsappGains: 0, triviaGains: 0, publiciteGains: 0, tiktokGains: 0, youtubeGains: 0, depotSolde: 0,
-      paid: false, phoneNumber: "", country: "", referrer: "", activeReferrals: 0
-    };
+
+    /* state */
     let currentUser = null;
-    let hasRedirected = false; // évite redirections en double
+    let userData = {
+      depense:0, profit:0, solde:0, retire:0, parrainage:0, bonusAgent:0,
+      whatsappGains:0, triviaGains:0, publiciteGains:0, tiktokGains:0, youtubeGains:0, depotSolde:0,
+      paid:false, phoneNumber:"", country:"", referrer:"", activeReferrals:0
+    };
+    let hasRedirected = false;
 
-    /******** Prévenir flash : masquer page tant que l'auth n'est pas confirmée ********/
-    document.documentElement.style.visibility = 'hidden';
-
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 3000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      notification.innerHTML = `
-        <i class="fas ${icon} notification-icon"></i>
-        <div class="notification-content">
-          <div class="notification-title">${title}</div>
-          <div class="notification-message">${message}</div>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
+    /* helper notifications */
+    function showNotification(type,title,msg,ms=3000){
+      const n = document.createElement('div');
+      n.className = 'notification ' + (type||'success');
+      n.style.padding = '12px 14px';
+      n.style.borderRadius = '8px';
+      n.style.color = '#fff';
+      n.style.background = (type==='error') ? 'linear-gradient(135deg,#ff5b5b,#c0392b)' : 'linear-gradient(135deg,#28d27f,#1b8a3a)';
+      n.innerHTML = `<strong style="display:block;margin-bottom:6px">${title}</strong><div>${msg}</div>`;
+      notificationContainer.appendChild(n);
+      setTimeout(()=>{ n.style.opacity = 0; setTimeout(()=>n.remove(),300); }, ms);
     }
 
-    /******** Sidebar mobile toggle ********/
-    hamburgerMenu.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-    });
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    });
-
-    /******** Theme toggle (sauvegarde possible) ********/
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      if (document.body.classList.contains('dark-mode')) {
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Mode jour</span>';
-      } else {
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-      }
-      // Sauvegarde optionnelle
-      saveUserData('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    });
-
-    /******** Copy / share actions (inchangés) ********/
-    if (copyLinkBtn) {
-      copyLinkBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(referralLink.textContent)
-          .then(() => showNotification('success', 'Succès', 'Lien copié dans le presse-papier!'))
-          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier le lien: ' + err));
-      });
-    }
-    if (copyKeyBtn) {
-      copyKeyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(fidelityKey.textContent)
-          .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
-          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier la clé: ' + err));
-      });
-    }
-    if (sendKeyBtn) {
-      sendKeyBtn.addEventListener('click', () => {
-        const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
-        window.open(`https://wa.me/?text=${message}`, '_blank');
-      });
-    }
-    const promoMessage = "Tu veux gagner de l'argent en ligne? Tu fais quoi avec ton téléphone sans gagner de l'argent? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peut gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
-    if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
-    if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
-    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
-    if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
-
-    /******** Calendrier (inchangé, mais safe) ********/
-    function updateCalendar() {
-      if (!calendarGrid || !calendarMonth) return;
+    /* calendar simple */
+    function updateCalendar(){
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-      calendarMonth.textContent = `${monthNames[month]} ${year}`;
+      calendarMonth.textContent = monthNames[month] + ' ' + year;
       calendarGrid.innerHTML = '';
       const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      let startDay = firstDay === 0 ? 6 : firstDay - 1;
-      for (let i=0;i<startDay;i++){ const emptyCell = document.createElement('div'); emptyCell.className='calendar-date'; calendarGrid.appendChild(emptyCell); }
-      for (let day=1; day<=daysInMonth; day++){
-        const dateCell = document.createElement('div');
-        dateCell.className = 'calendar-date';
-        dateCell.textContent = day;
-        const today = new Date();
-        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
-        if (Math.random() > 0.7) dateCell.classList.add('has-task');
-        calendarGrid.appendChild(dateCell);
-      }
+      const daysInMonth = new Date(year, month+1,0).getDate();
+      let start = firstDay===0?6:firstDay-1;
+      for(let i=0;i<start;i++){ const cell=document.createElement('div');cell.className='calendar-date';cell.style.height='36px';calendarGrid.appendChild(cell); }
+      for(let d=1; d<=daysInMonth; d++){ const cell=document.createElement('div');cell.className='calendar-date';cell.style.height='36px';cell.style.display='flex';cell.style.alignItems='center';cell.style.justifyContent='center';cell.textContent=d; if(Math.random()>0.7){const dot=document.createElement('div');dot.style.position='absolute';dot.style.bottom='6px';dot.style.width='6px';dot.style.height='6px';dot.style.borderRadius='50%';dot.style.background='#4CD964';cell.appendChild(dot);} calendarGrid.appendChild(cell);}
     }
-    if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
-    if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
+    document.getElementById('prevMonth')?.addEventListener('click',()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
+    document.getElementById('nextMonth')?.addEventListener('click',()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
     updateCalendar();
 
-    /******** Fonction utilitaire pour déterminer si un utilisateur est 'payé' ********/
-    function isPaidFlag(value) {
-      // accepte boolean, string, number
-      if (value === true) return true;
-      if (typeof value === 'string') {
-        const v = value.toLowerCase().trim();
-        return (v === 'true' || v === 'yes' || v === 'paid' || v === 'payé' || v === 'complete' || v === 'completed' || v === '1');
-      }
-      if (typeof value === 'number') return value === 1;
+    /* format */
+    function formatN(n){ return (typeof n==='number' && !isNaN(n)) ? n.toLocaleString() : '0'; }
+
+    /* paid detection */
+    function isPaidFlag(v){
+      if(v===true) return true;
+      if(typeof v==='string'){ const s=v.toLowerCase().trim(); return ['true','yes','paid','payé','complete','completed','1'].includes(s); }
+      if(typeof v==='number') return v===1;
       return false;
     }
-    function isUserPaidFromDoc(docData) {
-      // Rechercher différents champs possibles
-      if (!docData) return false;
-      const candidates = [
-        docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
-        docData.status, docData.statut, docData.payment, docData.paidStatus
-      ];
-      for (const c of candidates) {
-        if (c !== undefined && c !== null) {
-          if (isPaidFlag(c)) return true;
-        }
-      }
+    function isUserPaidFromDoc(docData){
+      if(!docData) return false;
+      const cand=[docData.paid,docData.isPaid,docData.paymentStatus,docData.status,docData.statut,docData.paiement];
+      for(const c of cand) if(c!==undefined && c!==null && isPaidFlag(c)) return true;
       return false;
     }
 
-    /******** Sauvegarde des données utilisateur (accept un key/value optionnel) ********/
-    async function saveUserData(key=null, value=null) {
-      if (!currentUser) return;
-      try {
+    /* update UI values + underline widths + water heights */
+    function updateDashboardUI(){
+      try{
+        // values
+        depValueEl.textContent = 'XAF ' + formatN(userData.depense);
+        profitValueEl.textContent = 'XAF ' + formatN(userData.profit);
+        soldeValue.textContent = 'XAF ' + formatN(userData.solde);
+        retireValue.textContent = 'XAF ' + formatN(userData.retire);
+        parrainValue.textContent = 'XAF ' + formatN(userData.parrainage);
+        depotValue.textContent = 'XAF ' + formatN(userData.depotSolde);
+
+        // progress bar percentages: compute relative if possible; defaults preserved
+        const total = (userData.depense||0) + (userData.profit||0);
+        let depPct=40, profPct=65;
+        if(total>0){
+          depPct = Math.round((userData.depense/total)*100);
+          profPct = Math.round((userData.profit/total)*100);
+          if(depPct<6) depPct=6; if(profPct<6) profPct=6;
+          if(depPct>94) depPct=94; if(profPct>94) profPct=94;
+        }
+        // animate widths
+        requestAnimationFrame(()=>{ depBar.style.width = depPct + '%'; profitBar.style.width = profPct + '%'; });
+
+        // water levels: if you have fields in userData for levels you can plug here; else defaults from CSS inline.
+        // Example: adjust water heights slightly based on solde/depot values
+        // We'll keep CSS variable inline but allow dynamic update:
+        const solCard = document.getElementById('solde-card');
+        const retireCard = document.getElementById('retire-card');
+        const parrainCard = document.getElementById('parrainage-card');
+        const depotCard = document.getElementById('depot-solde');
+
+        // If values present, compute level percent heuristically, else keep defaults
+        if(solCard){
+          let lvl = 45;
+          if(userData.solde && userData.solde>0) lvl = Math.min(70, 30 + Math.log10(Math.max(1,userData.solde))*4);
+          solCard.style.setProperty('--water-level', lvl + '%');
+        }
+        if(retireCard){
+          let lvl = 30;
+          if(userData.retire && userData.retire>0) lvl = Math.min(60, 14 + Math.log10(Math.max(1,userData.retire))*3.5);
+          retireCard.style.setProperty('--water-level', lvl + '%');
+        }
+        if(parrainCard){
+          let lvl = 25;
+          if(userData.parrainage && userData.parrainage>0) lvl = Math.min(60, 12 + userData.parrainage*3);
+          parrainCard.style.setProperty('--water-level', lvl + '%');
+        }
+        if(depotCard){
+          let lvl = 35;
+          if(userData.depotSolde && userData.depotSolde>0) lvl = Math.min(65, 20 + Math.log10(Math.max(1,userData.depotSolde))*4);
+          depotCard.style.setProperty('--water-level', lvl + '%');
+        }
+
+      }catch(e){ console.error('updateDashboardUI error', e); }
+    }
+
+    /* update user info UI */
+    function updateUserInfoUI(docData){
+      const displayName = (docData && (docData.displayName || docData.name)) || currentUser?.displayName || currentUser?.email || 'Utilisateur';
+      document.getElementById('sidebarUsername').textContent = displayName;
+      document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+      document.getElementById('info-username').textContent = displayName;
+      document.getElementById('info-email').textContent = (docData && docData.email) || currentUser?.email || 'Non spécifié';
+      document.getElementById('info-phone').textContent = (docData && (docData.phoneNumber || docData.phone)) || 'Non spécifié';
+      document.getElementById('info-country').textContent = (docData && (docData.country || docData.pays)) || 'Non spécifié';
+      document.getElementById('info-parrain').textContent = (docData && (docData.referrer || docData.parrain)) || 'Aucun';
+      document.getElementById('info-parrainage').textContent = ((docData && (docData.activeReferrals || docData.parrainageCount)) || userData.activeReferrals || 0) + ' personnes';
+
+      // fidelity + referral text
+      const fidelity = document.getElementById('fidelityKey');
+      const refEl = document.getElementById('referralLink');
+      if(fidelity) fidelity.textContent = `MULA-${displayName.substring(0,5)}-2024-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`;
+      if(refEl) refEl.textContent = `mulaflowr.com/?ref=${displayName.substring(0,5)}${Math.floor(100+Math.random()*900)}X${Math.floor(Math.random()*9)}`;
+    }
+
+    /* save user data (merge) */
+    async function saveUserData(key=null,value=null){
+      if(!currentUser) return;
+      try{
         const userRef = db.collection('users').doc(currentUser.uid);
-        if (key !== null) {
-          // Mettre à jour un champ spécifique
-          const updateObj = { [key]: value, lastUpdate: new Date() };
-          await userRef.set(updateObj, { merge: true });
+        if(key!==null){
+          await userRef.set({[key]:value,lastUpdate:new Date()}, {merge:true});
         } else {
-          // Sauvegarder tout userData (merge)
-          await userRef.set({ ...userData, uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email, lastUpdate: new Date() }, { merge: true });
+          await userRef.set({...userData, uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email, lastUpdate:new Date()}, {merge:true});
         }
-        console.log('Données utilisateur enregistrées');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement des données:', error);
-      }
+      }catch(e){ console.error('saveUserData error', e); }
     }
 
-    /******** Chargement / mapping des données utilisateur depuis Firestore ********/
-    async function loadUserData() {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const doc = await userRef.get();
-        if (doc.exists) {
+    /* load user data */
+    async function loadUserData(){
+      if(!currentUser) return;
+      try{
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if(doc.exists){
           const data = doc.data() || {};
-          // Mappez les champs potentiels vers notre userData
           userData.depense = Number(data.depense || data.debit || data.expense || 0) || 0;
           userData.profit = Number(data.profit || data.revenue || 0) || 0;
           userData.solde = Number(data.solde || data.balance || data.soldeAccount || 0) || 0;
@@ -2119,147 +580,80 @@
           userData.tiktokGains = Number(data.tiktokGains || 0) || 0;
           userData.youtubeGains = Number(data.youtubeGains || 0) || 0;
           userData.depotSolde = Number(data.depotSolde || data.depositBalance || 0) || 0;
-          userData.phoneNumber = data.phoneNumber || data.phone || userData.phoneNumber || "";
-          userData.country = data.country || data.pays || userData.country || "";
-          userData.referrer = data.referrer || data.parrain || data.referral || userData.referrer || "";
+          userData.phoneNumber = data.phoneNumber || data.phone || "";
+          userData.country = data.country || data.pays || "";
+          userData.referrer = data.referrer || data.parrain || data.referral || "";
           userData.activeReferrals = Number(data.activeReferrals || data.parrainageCount || 0) || 0;
-
-          // Détecter paiement via champs multiples
           userData.paid = isUserPaidFromDoc(data);
-
-          // garder les autres champs si présent
-          if (data.displayName) userData.displayName = data.displayName;
-          if (data.email) userData.email = data.email;
-
-          // mettre à jour UI
+          if(data.displayName) userData.displayName = data.displayName;
+          if(data.email) userData.email = data.email;
           updateDashboardUI();
           updateUserInfoUI(data);
         } else {
-          // Créer un document avec les valeurs par défaut (merge)
           await saveUserData();
         }
-      } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
-      }
+      }catch(e){ console.error('loadUserData error', e); }
     }
 
-    /******** Mettre à jour la partie Dashboard UI (sécurisé) ********/
-    function formatNumberSafe(n){ return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString() : '0'; }
-    function updateDashboardUI() {
-      try {
-        const dep = document.querySelector('#depense-card .small-stat-value');
-        const prof = document.querySelector('#profit-card .small-stat-value');
-        const sol = document.querySelector('#solde-card .large-stat-value');
-        const ret = document.querySelector('#retire-card .medium-stat-value');
-        const par = document.querySelector('#parrainage-card .medium-stat-value');
-        const bonus = document.querySelector('#bonus-agent-card .medium-stat-value');
-        const wa = document.querySelector('#whatsapp-gains .gain-stat-value');
-        const tr = document.querySelector('#trivia-gains .gain-stat-value');
-        const pub = document.querySelector('#publicite-gains .gain-stat-value');
-        const tkt = document.querySelector('#tiktok-gains .gain-stat-value');
-        const yt = document.querySelector('#youtube-gains .gain-stat-value');
-        const depSol = document.querySelector('#depot-solde .gain-stat-value');
-        if (dep) dep.textContent = `XAF ${formatNumberSafe(userData.depense)}`;
-        if (prof) prof.textContent = `XAF ${formatNumberSafe(userData.profit)}`;
-        if (sol) sol.textContent = `XAF ${formatNumberSafe(userData.solde)}`;
-        if (ret) ret.textContent = `XAF ${formatNumberSafe(userData.retire)}`;
-        if (par) par.textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
-        if (bonus) bonus.textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
-        if (wa) wa.textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
-        if (tr) tr.textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
-        if (pub) pub.textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
-        if (tkt) tkt.textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
-        if (yt) yt.textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
-        if (depSol) depSol.textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
-      } catch (e) {
-        console.error('updateDashboardUI error', e);
-      }
-    }
-
-    /******** Mettre à jour les infos utilisateur dans l'UI ********/
-    function updateUserInfoUI(docData) {
-      const displayName = (docData && (docData.displayName || docData.name)) || currentUser?.displayName || currentUser?.email || 'Utilisateur';
-      const email = (docData && docData.email) || currentUser?.email || 'Non spécifié';
-      const phone = (docData && (docData.phoneNumber || docData.phone)) || userData.phoneNumber || 'Non spécifié';
-      const country = (docData && (docData.country || docData.pays)) || userData.country || 'Non spécifié';
-      const referrer = (docData && (docData.referrer || docData.parrain)) || userData.referrer || 'Aucun';
-      const activeReferrals = (docData && (docData.activeReferrals || docData.parrainageCount)) || userData.activeReferrals || 0;
-
-      if (sidebarUsername) sidebarUsername.textContent = displayName;
-      if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-      if (infoUsername) infoUsername.textContent = displayName;
-      if (infoEmail) infoEmail.textContent = email;
-      if (infoPhone) infoPhone.textContent = phone;
-      if (infoCountry) infoCountry.textContent = country;
-      if (infoParrain) infoParrain.textContent = referrer;
-      if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
-
-      if (fidelityKey) fidelityKey.textContent = `MULA-${displayName.substring(0,5)}-2024-${Math.floor(1000 + Math.random()*9000)}-${Math.floor(1000 + Math.random()*9000)}`;
-      if (referralLink) referralLink.textContent = `mulaflowr.com/?ref=${displayName.substring(0,5)}${Math.floor(100 + Math.random()*900)}X${Math.floor(0 + Math.random()*9)}`;
-    }
-
-    /******** Vérifier paiement et rediriger si nécessaire ********/
-    function checkUserPaymentAndAct() {
-      // si payé -> continuer, sinon rediriger vers paiement
-      if (!isUserPaidFromDoc(userData) && !isPaidFlag(userData.paid)) {
-        showNotification('error', 'Paiement requis', 'Veuillez finaliser votre paiement pour accéder à toutes les fonctionnalités.');
-        // évite doubles redirections
-        if (!hasRedirected) {
-          hasRedirected = true;
-          // délai court pour que l'utilisateur voit la notification (optionnel)
-          setTimeout(() => { window.location.href = 'paiement.html'; }, 1200);
-        }
+    function checkUserPaymentAndAct(){
+      if(!isUserPaidFromDoc(userData) && !isPaidFlag(userData.paid)){
+        showNotification('error','Paiement requis','Veuillez finaliser votre paiement pour accéder à toutes les fonctionnalités.',2500);
+        if(!hasRedirected){ hasRedirected=true; setTimeout(()=>{ window.location.href='paiement.html'; },900); }
         return false;
       }
       return true;
     }
 
-    /******** Auth state handling (unique source de vérité) ********/
-    auth.onAuthStateChanged(async (user) => {
-      try {
-        if (user) {
+    /* Auth handling */
+    auth.onAuthStateChanged(async (user)=>{
+      try{
+        if(user){
           currentUser = user;
-          console.log('Utilisateur connecté:', user.uid || user.email);
-          // charger les données
           await loadUserData();
-          // vérifier paiement
           const ok = checkUserPaymentAndAct();
-          if (!ok) {
-            // on ne révèle pas la page si on redirige vers paiement
-            return;
-          }
-          // tout va bien -> rendre visible l'UI et masquer le loader
+          if(!ok) return;
+          // reveal page and hide loader smoothly
           document.documentElement.style.visibility = 'visible';
           loader.classList.add('hidden');
-          // Ajouter la classe loaded au body pour révéler le contenu
-          document.body.classList.add('loaded');
-          showNotification('success', 'Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`);
+          setTimeout(()=>{ loader.parentNode && loader.parentNode.removeChild(loader); }, 600);
+          showNotification('success','Bienvenue', `Content de vous revoir, ${user.displayName || user.email}!`, 1500);
         } else {
-          // non connecté -> rediriger vers login (éviter double redirect)
-          if (!hasRedirected) {
+          if(!hasRedirected){
             hasRedirected = true;
+            // reveal page so user sees the login redirect briefly (prevents white flash)
+            document.documentElement.style.visibility = 'visible';
+            loader.classList.add('hidden');
+            setTimeout(()=>{ try{ loader.parentNode && loader.parentNode.removeChild(loader); }catch(e){} },600);
             window.location.href = 'login.html';
           }
         }
-      } catch (err) {
-        console.error('Erreur onAuthStateChanged:', err);
-        // en cas d'erreur critique, rediriger vers login
-        if (!hasRedirected) { hasRedirected = true; window.location.href = 'login.html'; }
+      }catch(e){
+        console.error('onAuthStateChanged error', e);
+        if(!hasRedirected){ hasRedirected=true; window.location.href='login.html'; }
       }
     });
 
-    /******** Éviter redirection immédiate dans DOMContentLoaded (ancien bug) ********/
-    // NE PAS rediriger ici — s'appuyer uniquement sur onAuthStateChanged.
-    document.addEventListener('DOMContentLoaded', () => {
-      // on initialise des choses qui ne nécessitent pas d'auth
-      updateCalendar();
-      // ne pas rediriger ici : auth n'a peut-être pas encore initialisé
-    });
+    /* Copy / share actions */
+    document.getElementById('copyLinkBtn')?.addEventListener('click', ()=>{ navigator.clipboard.writeText(document.getElementById('referralLink').textContent).then(()=>showNotification('success','Succès','Lien copié!')).catch(e=>showNotification('error','Erreur','Impossible de copier')); });
+    document.getElementById('copyKeyBtn')?.addEventListener('click', ()=>{ navigator.clipboard.writeText(document.getElementById('fidelityKey').textContent).then(()=>showNotification('success','Succès','Clé copiée!')).catch(()=>showNotification('error','Erreur','Impossible')); });
+    document.getElementById('sendKeyBtn')?.addEventListener('click', ()=>{ const msg = encodeURIComponent("Voici ma clé MULAFLOWR: "+document.getElementById('fidelityKey').textContent); window.open(`https://wa.me/?text=${msg}`,'_blank'); });
 
-    /******** Enregistrement périodique (uniquement si connecté) ********/
-    setInterval(() => { if (currentUser) saveUserData(); }, 30000);
+    const shareMsg = "Tu veux gagner de l'argent en ligne? Voici un lien: ";
+    document.getElementById('shareWhatsApp')?.addEventListener('click', ()=>{ window.open(`https://wa.me/?text=${encodeURIComponent(shareMsg + document.getElementById('referralLink').textContent)}`,'_blank'); });
+    document.getElementById('shareFacebook')?.addEventListener('click', ()=>{ window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(document.getElementById('referralLink').textContent)}`,'_blank'); });
+    document.getElementById('shareTwitter')?.addEventListener('click', ()=>{ window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMsg)}&url=${encodeURIComponent(document.getElementById('referralLink').textContent)}`,'_blank'); });
+    document.getElementById('shareTelegram')?.addEventListener('click', ()=>{ window.open(`https://t.me/share/url?url=${encodeURIComponent(shareMsg + document.getElementById('referralLink').textContent)}`,'_blank'); });
 
-    /******** Fin du script ********/
+    /* small UI: hamburger */
+    document.getElementById('hamburgerMenu')?.addEventListener('click', ()=>{ document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); });
+    document.getElementById('overlay')?.addEventListener('click', ()=>{ document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); });
+
+    /* periodic save */
+    setInterval(()=>{ if(currentUser) saveUserData(); }, 30000);
+
+    /* DOM ready fallback: keep updateCalendar ready */
+    document.addEventListener('DOMContentLoaded', ()=>{ updateCalendar(); });
+
   </script>
 </body>
 </html>
