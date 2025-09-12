@@ -6,6 +6,7 @@
   <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -50,6 +51,7 @@
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
+      --username-color: #FFD700; /* Nouvelle couleur pour le nom d'utilisateur */
     }
 
     .dark-mode {
@@ -71,6 +73,7 @@
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --username-color: #FFA500; /* Couleur différente en mode sombre */
     }
 
     * {
@@ -294,7 +297,7 @@
       color: var(--primary-color);
     }
 
-    /* Banner - MODIFIÉ avec nom d'utilisateur */
+    /* Banner - MODIFIÉ avec nom d'utilisateur et style spécial */
     .banner {
       background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
       border-radius: 12px;
@@ -339,6 +342,15 @@
       z-index: 1;
     }
 
+    .username-display {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.5rem;
+      color: var(--username-color);
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      margin: 5px 0;
+    }
+
     .banner-link {
       display: inline-block;
       background-color: white;
@@ -358,7 +370,7 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Small stats cards - MODIFIÉ avec barres de progression améliorées */
+    /* Small stats cards - MODIFIÉ: barres de progression enlevées et nouveau style */
     .small-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -368,15 +380,18 @@
 
     .small-stat-card {
       background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
-      border-radius: 10px;
-      padding: 15px;
+      border-radius: 12px;
+      padding: 20px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      height: 100px;
+      height: 120px;
       position: relative;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
     .small-stat-card:nth-child(2) {
@@ -385,12 +400,12 @@
 
     .small-stat-card:hover {
       transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     }
 
     .small-stat-title {
       color: white;
-      font-size: 0.85rem;
+      font-size: 1rem;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -399,7 +414,7 @@
     }
 
     .small-stat-value {
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: white;
       display: flex;
@@ -410,57 +425,7 @@
     }
 
     .arrow-icon {
-      font-size: 1.2rem;
-    }
-
-    /* Barre de progression améliorée pour Dépense/Profit - STYLE AMÉLIORÉ */
-    .progress-mid-container {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      z-index: 1;
-      border-radius: 4px 4px 0 0;
-    }
-
-    .progress-mid-bar {
-      height: 100%;
-      border-radius: 4px;
-      width: 0;
-      transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Animation de lueur pour les barres de progression */
-    .progress-mid-bar::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-      animation: progressGlow 2s infinite;
-    }
-
-    @keyframes progressGlow {
-      0% { left: -100%; }
-      100% { left: 200%; }
-    }
-
-    #depense-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 230, 230, 0.9) 100%);
-      width: 20%;
-    }
-
-    #profit-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 255, 230, 0.9) 100%);
-      width: 70%;
+      font-size: 1.5rem;
     }
 
     /* Animation spéciale pour les cartes Dépense/Profit */
@@ -480,7 +445,7 @@
       opacity: 1;
     }
 
-    /* Large stats cards - Groupe 2: Animations vagues avec niveau d'eau */
+    /* Large stats cards - Groupe 2: Animations vagues avec niveau d'eau amélioré */
     .large-stats {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
@@ -502,7 +467,7 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Animation vagues pour les grandes cartes avec niveau d'eau */
+    /* Animation vagues pour les grandes cartes avec niveau d'eau amélioré */
     .large-stat-card::before {
       content: '';
       position: absolute;
@@ -510,7 +475,7 @@
       left: 0;
       width: 100%;
       height: 30%; /* Niveau d'eau à 30% */
-      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
+      background: linear-gradient(to top, rgba(58, 142, 230, 0.7), rgba(58, 142, 230, 0.3));
       z-index: 1;
       animation: waterWave 6s ease-in-out infinite;
       border-radius: 50% 50% 0 0;
@@ -519,11 +484,11 @@
     @keyframes waterWave {
       0%, 100% {
         transform: translateY(0) scale(1, 1);
-        opacity: 0.5;
+        opacity: 0.7;
       }
       50% {
         transform: translateY(-5px) scale(1.05, 0.95);
-        opacity: 0.7;
+        opacity: 0.9;
       }
     }
 
@@ -555,7 +520,7 @@
       z-index: 2;
     }
 
-    /* Medium stats cards - Groupe 2: Animations vagues différentes avec niveau d'eau */
+    /* Medium stats cards - Groupe 2: Animations vagues améliorées avec niveau d'eau plus visible */
     .medium-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -575,7 +540,7 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Animation vagues pour les cartes moyennes avec niveau d'eau */
+    /* Animation vagues pour les cartes moyennes avec niveau d'eau amélioré */
     .medium-stat-card::before {
       content: '';
       position: absolute;
@@ -583,7 +548,6 @@
       left: 0;
       width: 100%;
       height: 25%; /* Niveau d'eau à 25% */
-      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
       z-index: 1;
       animation: waterWave 5s ease-in-out infinite;
       border-radius: 50% 50% 0 0;
@@ -597,20 +561,29 @@
     .medium-stat-card:nth-child(1) {
       background: linear-gradient(135deg, #ffc7a2 0%, #ff9a5c 100%);
     }
+    .medium-stat-card:nth-child(1)::before {
+      background: linear-gradient(to top, rgba(255, 156, 92, 0.7), rgba(255, 156, 92, 0.3));
+    }
 
     .medium-stat-card:nth-child(2) {
       background: linear-gradient(135deg, #c2a2ff 0%, #8c5ce7 100%);
+    }
+    .medium-stat-card:nth-child(2)::before {
+      background: linear-gradient(to top, rgba(140, 92, 231, 0.7), rgba(140, 92, 231, 0.3));
     }
 
     .medium-stat-card:nth-child(3) {
       background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
     }
+    .medium-stat-card:nth-child(3)::before {
+      background: linear-gradient(to top, rgba(92, 231, 140, 0.7), rgba(92, 231, 140, 0.3));
+    }
 
     /* Ajustement du niveau d'eau pour chaque carte */
     #solde-card::before { height: 30%; animation-duration: 6s; }
-    #retire-card::before { height: 20%; animation-duration: 7s; }
+    #retire-card::before { height: 25%; animation-duration: 7s; }
     #parrainage-card::before { height: 35%; animation-duration: 5s; }
-    #bonus-agent-card::before { height: 25%; animation-duration: 8s; }
+    #bonus-agent-card::before { height: 30%; animation-duration: 8s; }
 
     .medium-stat-title {
       color: white;
@@ -635,7 +608,7 @@
       z-index: 2;
     }
 
-    /* Small gain cards - Groupe 3: Nouvelles animations uniques pour chaque case */
+    /* Small gain cards - Groupe 3: Même animation pour toutes les cases (animation de rebond) */
     .gain-stats {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -653,6 +626,7 @@
       transition: all 0.4s ease;
       position: relative;
       overflow: hidden;
+      animation: bounceTrivia 4s infinite;
     }
 
     .gain-stat-card::before {
@@ -668,7 +642,12 @@
       z-index: 1;
     }
 
-    /* Animation de rotation au survol */
+    /* Animation de rebond pour toutes les cartes du groupe 3 */
+    @keyframes bounceTrivia {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
     .gain-stat-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -678,66 +657,23 @@
       opacity: 1;
     }
 
-    /* Animations uniques pour chaque carte du groupe 3 */
-    #whatsapp-gains {
+    .gain-stat-card:nth-child(1) {
       background: linear-gradient(135deg, #d4ffd4 0%, #a0f0a0 100%);
-      animation: pulseWhatsapp 3s infinite;
     }
-    
-    @keyframes pulseWhatsapp {
-      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-      50% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
-    }
-    
-    #trivia-gains {
+    .gain-stat-card:nth-child(2) {
       background: linear-gradient(135deg, #ffd4f0 0%, #f0a0d4 100%);
-      animation: bounceTrivia 4s infinite;
     }
-    
-    @keyframes bounceTrivia {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    
-    #publicite-gains {
+    .gain-stat-card:nth-child(3) {
       background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
-      animation: rotatePublicite 6s infinite linear;
     }
-    
-    @keyframes rotatePublicite {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    #tiktok-gains {
+    .gain-stat-card:nth-child(4) {
       background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
-      animation: shakeTiktok 5s infinite;
     }
-    
-    @keyframes shakeTiktok {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(1deg); }
-      75% { transform: rotate(-1deg); }
-    }
-    
-    #youtube-gains {
+    .gain-stat-card:nth-child(5) {
       background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
-      animation: glowYoutube 4s infinite alternate;
     }
-    
-    @keyframes glowYoutube {
-      0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-      100% { box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4); }
-    }
-    
-    #depot-solde {
+    .gain-stat-card:nth-child(6) {
       background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
-      animation: waveDepot 5s infinite linear;
-    }
-    
-    @keyframes waveDepot {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
     }
 
     .gain-stat-header {
@@ -1470,20 +1406,20 @@
       </a>
       
       <a href="bonus_bienvenue.html" class="menu-item">
-        <i class="fas fa-gift"></i>
+        <极速飞艇开奖结果开奖记录>
         <span>Bonus de bienvenue</span>
         <span class="menu-badge">☒</span>
       </a>
       
       <div class="menu-category">COMPTES</div>
-      <a href="retrait.html" class="menu-item">
+      <a href="retrait.html"极速飞艇开奖结果开奖记录>
         <i class="fas fa-money-bill-wave"></i>
         <span>Retrait</span>
         <span class="menu-badge">☐</span>
       </a>
       
       <a href="equipe.html" class="menu-item">
-        <i class="fas fa-users"></i>
+        <i class="fas fa-users"></极速飞艇开奖结果开奖记录>
         <span>Équipe</span>
         <span class="menu-badge">☒</span>
       </a>
@@ -1505,7 +1441,7 @@
         <i class="fas fa-medal"></i>
         <span>Challenge and Reward</span>
         <span class="menu-badge">☐</span>
-      </a>
+      </极速飞艇开奖结果开奖记录>
       
       <div class="menu-category">PRODUIT / TACHE</div>
       <a href="whatsapp_earn.html" class="menu-item">
@@ -1517,7 +1453,7 @@
       <a href="movies.html" class="menu-item">
         <i class="fas fa-film"></i>
         <span>Movies</span>
-        <span class="menu-badge">☐</span>
+        <span class="menu极速飞艇开奖结果开奖记录-badge">☐</span>
       </a>
       
       <a href="paris_fixes.html" class="menu-item">
@@ -1539,8 +1475,8 @@
       </a>
       
       <a href="tiktok_earn.html" class="menu-item">
-        <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
+        <i class="fab极速飞艇开奖结果开奖记录 fa-tiktok"></i>
+        <span>TikTok Earn</极速飞艇开奖结果开奖记录span>
         <span class="menu-badge">☐</span>
       </a>
       
@@ -1556,7 +1492,7 @@
         <span class="menu-badge">☐</span>
       </a>
       
-      <a href="trivia_challenge.html" class="menu-item">
+      <a href极速飞艇开奖结果开奖记录="trivia_challenge.html" class="menu-item">
         <i class="fas fa-brain"></i>
         <span>TRIVIA challenge</span>
         <span class="menu-badge">☐</span>
@@ -1594,15 +1530,17 @@
         <span>Dashboard >> MULAFLOWR</span>
       </h1>
       
-      <!-- Bannière modifiée pour afficher le nom d'utilisateur -->
+      <!-- Bannière modifiée pour afficher le nom d'utilisateur avec style spécial -->
       <div class="banner" id="welcomeBanner">
-        <div class="banner-title" id="welcomeTitle">Bienvenue sur MULAFLOWR</div>
-        <div class="banner-text" id="welcomeMessage">
+        <div class="banner-title">Bienvenue sur MULAFLOWR</div>
+        <div class="username-display" id="welcomeUsername">Utilisateur</div>
+        <div class="banner-text">
           Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
         </div>
         <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
       </div>
       
+      <!-- Cases Dépense et Profit - Barres de progression enlevées et nouveau style -->
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
           <div class="small-stat-title">
@@ -1610,20 +1548,14 @@
             Dépense:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
-          </div>
         </div>
         
         <div class="small-stat-card" id="profit-card">
           <div class="small-stat-title">
-            <i class="fas fa-arrow-up arrow-icon"></i>
+            <i class="fas fa-arrow-up arrow-icon"></极速飞艇开奖结果开奖记录i>
             Profit:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
-          </div>
         </div>
       </div>
       
@@ -1654,7 +1586,7 @@
         
         <div class="medium-stat-card" id="parrainage-card">
           <div class="medium-stat-title">
-            <i class="fas fa-users medium-stat-icon"></i>
+            <i class="fas极速飞艇开奖结果开奖记录 fa-users medium-stat-icon"></i>
             Gains de parrainage
           </div>
           <div class="medium-stat-value">XAF 0</div>
@@ -1664,7 +1596,7 @@
         </div>
         
         <div class="medium-stat-card" id="bonus-agent-card">
-          <div class="medium-stat-title">
+          <div class极速飞艇开奖结果开奖记录="medium-stat-title">
             <i class="fas fa-gift medium-stat-icon"></i>
             Bonus d'agent
           </div>
@@ -1718,7 +1650,7 @@
         
         <div class="gain-stat-card" id="publicite-gains">
           <div class="gain-stat-header">
-            <div class="gain-stat-title">Gains publicitaires</div>
+            <div class="极速飞艇开奖结果开奖记录gain-stat-title">Gains publicitaires</div>
             <div class="gain-stat-icon">
               <i class="fas fa-ad"></i>
             </div>
@@ -1762,9 +1694,9 @@
         
         <div class="referral-content">
           <div class="referral-link-container">
-            <div class="link-box">
+            <极速飞艇开奖结果开奖记录div class="link-box">
               <div class="link-text" id="referralLink">mulaflowr.com/?ref=USER000X0</div>
-              <button class="copy-btn" id="copyLinkBtn">
+              <button class="copy-btn" id="极速飞艇开奖结果开奖记录copyLinkBtn">
                 <i class="fas fa-copy"></i>
                 <span>Copier</span>
               </button>
@@ -1800,18 +1732,18 @@
           </div>
           
           <div class="info-item">
-            <div class="info-label">Email</div>
+            <div class极速飞艇开奖结果开奖记录="info-label">Email</div>
             <div class="info-value" id="info-email">Chargement...</div>
           </div>
           
           <div class="info-item">
             <div class="info-label">Téléphone</div>
-            <div class="info-value" id="info-phone">Chargement...</div>
+            <div class="info-value" id="info-phone">Chargement...</极速飞艇开奖结果开奖记录div>
           </div>
           
-          <div class="info-item">
+          <div class="info极速飞艇开奖结果开奖记录-item">
             <div class="info-label">Pays</div>
-            <div class="info-value" id="info-country">Chargement...</div>
+            <div class="info-value极速飞艇开奖结果开奖记录" id="info-country">Chargement...</div>
           </div>
           
           <div class="info-item">
@@ -1820,7 +1752,7 @@
           </div>
           
           <div class="info-item">
-            <div class="info-label">Parrainage actif</div>
+            <div class="info-label">Parrainage actif</极速飞艇开奖结果开奖记录div>
             <div class="info-value" id="info-parrainage">0 personnes</div>
           </div>
         </div>
@@ -1848,7 +1780,7 @@
           <div class="day-header">Jeu</div>
           <div class="day-header">Ven</div>
           <div class="day-header">Sam</div>
-          <div class="day-header">Dim</div>
+          <div class极速飞艇开奖结果开奖记录="day-header">Dim</极速飞艇开奖结果开奖记录div>
         </div>
         
         <div class="calendar-grid">
@@ -1887,7 +1819,7 @@
               <td><span class="task-status">Completed</span></td>
             </tr>
             <tr>
-              <td>4</td>
+              <td极速飞艇开奖结果开奖记录>4</td>
               <td>whatsapp</td>
               <td>Monday</td>
               <td>Wednesday</td>
@@ -1904,14 +1836,14 @@
               <td>6</td>
               <td>ads</td>
               <td>Monday</td>
-              <td>Thursday</td>
+              <td极速飞艇开奖结果开奖记录>Thursday</td>
               <td><span class="task-status">Pending</span></td>
             </tr>
             <tr>
               <td>7</td>
               <td>blogs</td>
               <td>Monday</td>
-              <td>Friday</td>
+              <td>Friday</极速飞艇开奖结果开奖记录td>
               <td><span class="task-status">Active</span></td>
             </tr>
           </tbody>
@@ -1935,7 +1867,7 @@
   <script>
     /******** CONFIG FIREBASE CORRIGÉE ET INTÉGRÉE ********/
     const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      apiKey: "AIzaSyCjGis极速飞艇开奖结果开奖记录jgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
       projectId: "cash-flowr",
       storageBucket: "cash-flowr.appspot.com", // CORRECTION APPLIQUÉE ICI
@@ -1978,8 +1910,7 @@
     const infoParrainage = document.getElementById('info-parrainage');
     const loader = document.getElementById('loader');
     const welcomeBanner = document.getElementById('welcomeBanner');
-    const welcomeTitle = document.getElementById('welcomeTitle');
-    const welcomeMessage = document.getElementById('welcomeMessage');
+    const welcomeUsername = document.getElementById('welcomeUsername');
 
     /******** Variables d'état ********/
     let currentDate = new Date();
@@ -1991,7 +1922,7 @@
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle极速飞艇开奖结果开奖记录' : 'fa-info-circle');
       notification.innerHTML = `
         <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
         <div>
@@ -2037,7 +1968,7 @@
     if (copyKeyBtn) {
       copyKeyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(fidelityKey.textContent)
-          .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
+          .then(() => showNotification('success', '极速飞艇开奖结果开奖记录Succès', 'Clé de fidélité copiée!'))
           .catch(err => showNotification('error', 'Erreur', 'Impossible de copier la clé.'));
       });
     }
@@ -2050,8 +1981,8 @@
     const promoMessage = "Tu veux gagner de l'argent en ligne? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
     if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
     if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
-    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
-    if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
+    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`极速飞艇开奖结果开奖记录https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
+    if (shareTelegram) shareTelegram.addEventListener('click极速飞艇开奖结果开奖记录', () => { window.open(`https://极速飞艇开奖结果开奖记录t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
 
     /******** Calendrier ********/
     function updateCalendar() {
@@ -2068,7 +1999,7 @@
       for (let day=1; day <= daysInMonth; day++) {
         const dateCell = document.createElement('div');
         dateCell.className = 'calendar-date';
-        dateCell.textContent = day;
+        dateCell.text极速飞艇开奖结果开奖记录Content = day;
         const today = new Date();
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
         if (Math.random() > 0.7) dateCell.classList.add('has-task'); // Logique de tâche à dynamiser
@@ -2088,7 +2019,7 @@
       if (typeof value === 'number') return value === 1;
       return false;
     }
-    function isUserPaidFromDoc(docData) {
+    function isUserPaid极速飞艇开奖结果开奖记录FromDoc(docData) {
       if (!docData) return false;
       const candidates = [
         docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
@@ -2130,7 +2061,7 @@
               retire: Number(data.retire || data.withdrawn || 0),
               parrainage: Number(data.parrainage || data.referralEarnings || 0),
               bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
-              whatsappGains: Number(data.whatsappGains || 0),
+              whatsappGains: Number(data.whatsapp极速飞艇开奖结果开奖记录Gains || 0),
               triviaGains: Number(data.triviaGains || 0),
               publiciteGains: Number(data.publiciteGains || 0),
               tiktokGains: Number(data.tiktokGains || 0),
@@ -2163,11 +2094,11 @@
         document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
         document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
         document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
-        document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
+        document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.trivia极速飞艇开奖结果开奖记录Gains)}`;
         document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
         document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
         document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
-        document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
+        document.querySelector('#depot-solde .gain-stat-value').textContent = `极速飞艇开奖结果开奖记录XAF ${formatNumberSafe(userData.depotSolde)}`;
     }
 
     function updateUserInfoUI(user, dbData = {}) {
@@ -2188,8 +2119,7 @@
         if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
 
         // Mise à jour de la bannière avec le nom de l'utilisateur
-        if (welcomeTitle) welcomeTitle.textContent = `Bienvenue, ${displayName} !`;
-        if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
+        if (welcomeUsername) welcomeUsername.textContent = displayName;
 
         // Génération de clés et liens stables basés sur l'ID utilisateur
         if (fidelityKey) {
@@ -2203,7 +2133,7 @@
     }
     
     function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
+        const isDarkMode = userData.the极速飞艇开奖结果开奖记录me === 'dark';
         document.body.classList.toggle('dark-mode', isDarkMode);
         themeToggle.innerHTML = isDarkMode 
             ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
