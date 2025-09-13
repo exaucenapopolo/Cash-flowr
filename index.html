@@ -412,7 +412,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    // Changement 1 : Import de `collection` et `query`
+    import { getFirestore, doc, setDoc, getDocs, collection, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // --- CONFIG ---
     const firebaseConfig = {
@@ -482,17 +483,20 @@
       document.getElementById('selectedFlag').textContent = flag;
     }
 
-// quick existence check (UI-level)
-    async function checkUsernameExists(username){
-      if(!username) return false;
-      try {
-        const ref = doc(db, 'usernames', username);
-        const snap = await getDoc(ref);
-        return snap.exists();
-      } catch (err) {
-        console.error('checkUsernameExists error', err);
-        return false;
-      }
+    // Changement 2 : Vérifie si le nom d'utilisateur existe directement dans la collection 'users'
+    async function checkUsernameExists(username) {
+        if (!username) return false;
+        try {
+            const usersRef = collection(db, 'users');
+            // Crée une requête pour trouver un utilisateur avec ce nom d'utilisateur
+            const q = query(usersRef, where('username', '==', username));
+            const querySnapshot = await getDocs(q);
+            // Si le snapshot n'est pas vide, le nom d'utilisateur existe
+            return !querySnapshot.empty;
+        } catch (err) {
+            console.error('checkUsernameExists error', err);
+            return false;
+        }
     }
 
     document.getElementById('registrationForm').addEventListener('submit', async function(e){
@@ -504,15 +508,20 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
       const country = document.getElementById('country').value;
       const phone = document.getElementById('phone').value.trim();
-      const parrain = document.getElementById('par').value || null;
+      // Changement 3 : Assure que 'parrain' est une chaîne vide si non défini
+      const parrain = document.getElementById('par').value || '';
 
       // basic validation
       if (!username) { showError('Choisissez un nom d\'utilisateur.'); return; }
       if (password !== confirmPassword) { showError('Les mots de passe ne correspondent pas.'); return; }
       if (!document.getElementById('terms').checked) { showError('Veuillez accepter les conditions.'); return; }
 
-      const quickExists = await checkUsernameExists(username);
-      if (quickExists) { showError('Ce nom d\'utilisateur est déjà pris.'); return; }
+      // Changement 4 : Utilise la nouvelle fonction de vérification d'unicité
+      const usernameExists = await checkUsernameExists(username);
+      if (usernameExists) {
+        showError('Ce nom d\'utilisateur est déjà pris.');
+        return;
+      }
 
       // UI state
       const submitBtn = this.querySelector('button[type="submit"]');
@@ -525,54 +534,44 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2) ensure fresh token (évite race conditions)
-        await user.getIdToken(true);
-
-        // 3) run a transaction: check username unique, then create user and username
-        await runTransaction(db, async (tx) => {
-          const usernameRef = doc(db, 'usernames', username);
-          const usernameSnap = await tx.get(usernameRef);
-          if (usernameSnap.exists()) {
-            throw new Error('USERNAME_TAKEN_IN_TRANSACTION');
-          }
-
-          const userRef = doc(db, 'users', user.uid);
-          
-          // Données utilisateur complètes
-          const userData = {
-            uid: user.uid,
-            username,
-            email,
-            country,
-            phone: document.getElementById('countryCode').textContent + (phone || ''),
-            parrain,
-            status: 'pending_payment', // par défaut - non payé
-            fidelityKey: false, // par défaut - pas encore éligible
-            createdAt: serverTimestamp(),
-            // Ajout des champs financiers à 0 pour respecter les règles de sécurité
-            depense: 0,
-            profit: 0,
-            solde: 0,
-            retire: 0,
-            parrainage: 0,
-            bonusAgent: 0,
-            whatsappGains: 0,
-            triviaGains: 0,
-            publiciteGains: 0,
-            tiktokGains: 0,
-            youtubeGains: 0,
-            depotSolde: 0,
-            activeReferrals: 0,
-          };
-
-          tx.set(userRef, userData);
-          tx.set(usernameRef, { uid: user.uid, createdAt: serverTimestamp() });
-        });
-
-        // 4) update profile displayName (facultatif mais utile)
+        // 2) update profile displayName (facultatif mais utile)
         await updateProfile(user, { displayName: username });
 
-        // 5) success -> redirection vers paiement
+        // 3) Création du document utilisateur dans la collection 'users'
+        // Nous n'avons plus besoin d'une transaction car il n'y a qu'un seul setDoc
+        const userRef = doc(db, 'users', user.uid);
+        
+        // Données utilisateur complètes
+        const userData = {
+          uid: user.uid,
+          username: username, // On stocke le nom d'utilisateur ici
+          email: email,
+          country: country,
+          phone: document.getElementById('countryCode').textContent + (phone || ''),
+          parrain: parrain,
+          status: 'pending_payment',
+          fidelityKey: false,
+          createdAt: serverTimestamp(),
+          // Champs financiers
+          depense: 0,
+          profit: 0,
+          solde: 0,
+          retire: 0,
+          parrainage: 0,
+          bonusAgent: 0,
+          whatsappGains: 0,
+          triviaGains: 0,
+          publiciteGains: 0,
+          tiktokGains: 0,
+          youtubeGains: 0,
+          depotSolde: 0,
+          activeReferrals: 0,
+        };
+
+        // Ajout du document dans Firestore
+        await setDoc(userRef, userData);
+
+        // 4) success -> redirection vers paiement
         showSuccess('Votre compte a été créé avec succès ! Redirection vers la page de paiement...');
         setTimeout(() => {
           window.location.assign('paiement.html');
@@ -586,9 +585,10 @@
         else if (error.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
         else if (error.code === 'auth/operation-not-allowed') message = "L'inscription par email/mot de passe n'est pas activée dans Firebase Auth.";
         else if (error.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
-        else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
+        // On supprime la vérification de l'erreur de transaction, car il n'y a plus de transaction
+        // else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
         else if (error.code === 'permission-denied' || /permission-denied/i.test(error.message)) {
-          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + usernames).";
+          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore.";
         } else {
           message = error.message || message;
         }
