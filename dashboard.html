@@ -540,40 +540,33 @@
       position: relative;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      /* **MODIFICATIONS ICI** */
+      /* Nouvelle forme: Parallelogramme */
+      border-radius: 5px;
+      transform: skewX(-15deg);
+      
+      /* Animation */
+      animation: up-down 4s infinite ease-in-out;
     }
-
+    
+    /* Animation alternative pour la deuxième carte */
     .small-stat-card:nth-child(2) {
       background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
+      animation-delay: 1s; /* Décalage pour un effet de vague */
     }
 
+    /* Animation au survol */
     .small-stat-card:hover {
-      transform: translateY(-5px) scale(1.02);
+      transform: translateY(-5px) scale(1.02) skewX(-15deg);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      animation-play-state: paused; /* Arrête l'animation au survol */
     }
 
-    .small-stat-title {
-      color: white;
-      font-size: 0.85rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 2;
-    }
-
-    .small-stat-value {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 5px;
-      z-index: 2;
-    }
-
-    .arrow-icon {
-      font-size: 1.2rem;
+    /* Animation de montée et de descente */
+    @keyframes up-down {
+        0%, 100% { transform: translateY(0) skewX(-15deg); }
+        50% { transform: translateY(-10px) skewX(-15deg); }
     }
 
     .small-stat-card::after {
@@ -587,10 +580,18 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-
     .small-stat-card:hover::after {
       opacity: 1;
     }
+
+    .small-stat-title,
+    .small-stat-value {
+      /* Pour que le texte ne soit pas déformé, on applique l'inverse du skew */
+      transform: skewX(15deg);
+      z-index: 2; /* S'assure que le texte est au-dessus du pseudo-élément */
+    }
+
+    /* Fin des modifications */
 
     /* Large stats cards */
     .large-stats {
