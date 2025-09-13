@@ -6,207 +6,1939 @@
   <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
-    :root {
-      --primary-color: #3a8ee6; --primary-light: #4da6ff; --primary-dark: #2c75c9; --secondary-color: #4c566a; --accent-color: #5e81ac; --background-light: #f5f7fb; --background-dark: #e5e9f0; --card-bg: #ffffff; --text-color: #2e3440; --text-light: #4c566a; --success-color: #4CD964; --warning-color: #FF9500; --danger-color: #FF3B30; --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); --transition: all 0.3s ease; --username-color: #FFD700;
-    }
-    .dark-mode {
-      --primary-color: #5e81ac; --primary-light: #81a1c1; --primary-dark: #4c566a; --secondary-color: #d8dee9; --accent-color: #88c0d0; --background-light: #2e3440; --background-dark: #3b4252; --card-bg: #434c5e; --text-color: #eceff4; --text-light: #d8dee9; --shadow: 0 4px 12px rgba(0, 0, 0, 0.25); --username-color: #FFA500;
-    }
-    html, body { height: 100%; }
+    /* AMÉLIORÉ : Logique de chargement simplifiée */
     body {
       background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      color: var(--text-color); margin: 0; padding: 0;
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* La visibilité sera gérée par la classe 'loaded' */
+      visibility: hidden; 
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    body.loaded {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    :root {
+      --primary-color: #3a8ee6;
+      --primary-light: #4da6ff;
+      --primary-dark: #2c75c9;
+      --secondary-color: #4c566a;
+      --accent-color: #5e81ac;
+      --background-light: #f5f7fb;
+      --background-dark: #e5e9f0;
+      --card-bg: #ffffff;
+      --text-color: #2e3440;
+      --text-light: #4c566a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    .dark-mode {
+      --primary-color: #5e81ac;
+      --primary-light: #81a1c1;
+      --primary-dark: #4c566a;
+      --secondary-color: #d8dee9;
+      --accent-color: #88c0d0;
+      --background-light: #2e3440;
+      --background-dark: #3b4252;
+      --card-bg: #434c5e;
+      --text-color: #eceff4;
+      --text-light: #d8dee9;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: var(--transition);
     }
-    .dark-mode { background: var(--background-light); }
-    * { box-sizing: border-box; }
 
-    #app-wrapper {
-      display: none; flex-direction: column; min-height: 100vh;
-      visibility: hidden; opacity: 0;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-    #app-wrapper.loaded { display: flex; visibility: visible; opacity: 1; }
-
+    /* Loader pour éviter le flash blanc */
     .loader-container {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      display: flex; justify-content: center; align-items: center; z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
       transition: opacity 0.5s ease, visibility 0.5s ease;
     }
-    .dark-mode .loader-container { background: var(--background-dark); }
-    .loader-container.hidden { opacity: 0; visibility: hidden; }
+
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
     .loader {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       background: conic-gradient(#0000 10%, var(--primary-color));
       -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
       animation: spin 1s infinite linear;
     }
-    @keyframes spin { to { transform: rotate(1turn); } }
 
-    /* Header, Sidebar, Content, Footer et tous les autres styles */
-    .header { background-color: var(--card-bg); box-shadow: var(--shadow); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary-color); font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-    .header-controls { display: flex; align-items: center; gap: 15px; }
-    .theme-toggle { background-color: var(--secondary-color); color: white; border: none; border-radius: 20px; padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-    .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px; border-radius: 50px; transition: background-color 0.3s ease; }
-    .user-profile:hover { background-color: var(--background-dark); }
-    .avatar { width: 45px; height: 45px; border-radius: 50%; background-color: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: bold; border: 2px solid var(--primary-light); }
-    .main-container { display: flex; flex: 1; }
-    .sidebar { width: 280px; background-color: var(--card-bg); box-shadow: var(--shadow); height: calc(100vh - 80px); position: sticky; top: 80px; padding: 25px 0; overflow-y: auto; }
-    .welcome-section { padding: 0 25px 25px; border-bottom: 1px solid var(--background-dark); margin-bottom: 20px; }
-    .welcome-text { color: var(--text-light); font-size: 0.9rem; margin-bottom: 5px; }
-    .username { font-weight: 600; font-size: 1.2rem; color: var(--primary-color); }
-    .menu-category { padding: 15px 25px 5px; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-    .menu-item { padding: 12px 25px; display: flex; align-items: center; justify-content: space-between; color: var(--text-color); text-decoration: none; font-weight: 500; border-left: 4px solid transparent; position: relative; }
-    .menu-item-content { display: flex; align-items: center; gap: 15px; }
-    .menu-item:hover, .menu-item.active { background-color: var(--background-dark); border-left-color: var(--primary-color); color: var(--primary-color); }
-    .menu-item i { width: 20px; text-align: center; transition: transform 0.3s ease; }
-    @keyframes dance { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-3px) rotate(-5deg); } 50% { transform: translateY(0) rotate(0); } 75% { transform: translateY(-3px) rotate(5deg); } }
-    .menu-item:hover i { animation: dance 0.5s ease infinite; }
-    .checkbox-badge { width: 20px; height: 20px; border: 2px solid var(--text-light); border-radius: 5px; display: flex; align-items: center; justify-content: center; position: relative; transition: border-color 0.3s ease, background-color 0.3s ease; }
-    .checkbox-badge.checked { border-color: var(--success-color); background-color: var(--success-color); }
-    .checkbox-badge.banned { border-color: var(--danger-color); background-color: var(--danger-color); }
-    .checkbox-badge.checked::after { content: ''; position: absolute; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); animation: draw-check 0.3s ease forwards; }
-    .checkbox-badge.banned::before, .checkbox-badge.banned::after { content: ''; position: absolute; width: 12px; height: 2px; background-color: white; }
-    .checkbox-badge.banned::before { transform: rotate(45deg); }
-    .checkbox-badge.banned::after { transform: rotate(-45deg); }
-    @keyframes draw-check { from { transform: scale(0) rotate(45deg); } to { transform: scale(1) rotate(45deg); } }
-    .content { flex: 1; padding: 30px; }
-    .page-title { font-size: 1.5rem; margin-bottom: 25px; color: var(--secondary-color); font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .page-title i { color: var(--primary-color); }
-    .banner { background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 30px; color: white; position: relative; overflow: hidden; }
-    .username-display { font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: var(--username-color); font-weight: 700; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); margin: 5px 0; }
-    /* ... (tous vos autres styles de cartes, sections, etc. sont ici et restent inchangés) ... */
-    .footer { background-color: var(--card-bg); padding: 20px 30px; text-align: center; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08); margin-top: auto; }
-    .footer-content { display: flex; flex-direction: column; gap: 10px; }
-    .hamburger-menu { display: none; background: none; border: none; font-size: 1.5rem; color: var(--secondary-color); cursor: pointer; }
-    .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 98; }
-    @media (max-width: 768px) {
-      .main-container { flex-direction: column; }
-      .hamburger-menu { display: block; }
-      .sidebar { width: 70%; max-width: 280px; height: 100vh; position: fixed; top: 0; left: -100%; z-index: 101; box-shadow: 5px 0 15px rgba(0,0,0,0.2); transition: left 0.3s ease-in-out; padding-top: 80px; }
-      .sidebar.active { left: 0; }
-      .overlay.active { display: block; z-index: 100; }
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
     }
-    .notification-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .notification { padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: flex; align-items: center; gap: 10px; max-width: 350px; animation: slideIn 0.3s ease forwards; position: relative; overflow: hidden; color: white; pointer-events: auto; }
-    .notification.success { background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%); }
-    .notification.error { background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%); }
-    .notification.info { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); }
-    @keyframes slideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* Header styles */
+    .header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .language-selector, .theme-toggle {
+      background-color: var(--primary-light);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .theme-toggle {
+      background-color: var(--secondary-color);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid var(--primary-light);
+    }
+
+    /* Main layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      width: 280px;
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      height: calc(100vh - 80px);
+      position: sticky;
+      top: 80px;
+      padding: 25px 0;
+      overflow-y: auto;
+    }
+
+    .welcome-section {
+      padding: 0 25px 25px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .welcome-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .menu-category {
+      padding: 15px 25px 5px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .menu-item {
+      padding: 12px 25px 12px 35px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      position: relative;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-left-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .menu-item i {
+      width: 20px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      animation: dance 0.5s ease infinite;
+    }
+
+    @keyframes dance {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      25% { transform: translateY(-3px) rotate(-5deg); }
+      50% { transform: translateY(0) rotate(0); }
+      75% { transform: translateY(-3px) rotate(5deg); }
+    }
+
+    .menu-badge {
+      position: absolute;
+      right: 25px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--secondary-color);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-title i {
+      color: var(--primary-color);
+    }
+
+    /* Banner - MODIFIÉ avec nom d'utilisateur */
+    .banner {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .banner-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-text {
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-link {
+      display: inline-block;
+      background-color: white;
+      color: var(--primary-color);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .banner-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Small stats cards - MODIFIÉ avec barres de progression améliorées */
+    .small-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .small-stat-card {
+      background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 100px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .small-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
+    }
+
+    .small-stat-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .small-stat-title {
+      color: white;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .small-stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      z-index: 2;
+    }
+
+    .arrow-icon {
+      font-size: 1.2rem;
+    }
+
+    /* Barre de progression améliorée pour Dépense/Profit - STYLE AMÉLIORÉ */
+    .progress-mid-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      z-index: 1;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .progress-mid-bar {
+      height: 100%;
+      border-radius: 4px;
+      width: 0;
+      transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animation de lueur pour les barres de progression */
+    .progress-mid-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      animation: progressGlow 2s infinite;
+    }
+
+    @keyframes progressGlow {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    #depense-card .progress-mid-bar {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 230, 230, 0.9) 100%);
+      width: 20%;
+    }
+
+    #profit-card .progress-mid-bar {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 255, 230, 0.9) 100%);
+      width: 70%;
+    }
+
+    /* Animation spéciale pour les cartes Dépense/Profit */
+    .small-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .small-stat-card:hover::after {
+      opacity: 1;
+    }
+
+    /* Large stats cards - Groupe 2: Animations vagues avec niveau d'eau */
+    .large-stats {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .large-stat-card {
+      background: linear-gradient(135deg, #a2d2ff 0%, #5c9ce6 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      color: white;
+      min-height: 150px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Animation vagues pour les grandes cartes avec niveau d'eau */
+    .large-stat-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 30%; /* Niveau d'eau à 30% */
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
+      z-index: 1;
+      animation: waterWave 6s ease-in-out infinite;
+      border-radius: 50% 50% 0 0;
+    }
+
+    @keyframes waterWave {
+      0%, 100% {
+        transform: translateY(0) scale(1, 1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translateY(-5px) scale(1.05, 0.95);
+        opacity: 0.7;
+      }
+    }
+
+    .large-stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .large-stat-title {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .large-stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      z-index: 2;
+    }
+
+    .large-stat-icon {
+      font-size: 2rem;
+      opacity: 0.7;
+      z-index: 2;
+    }
+
+    /* Medium stats cards - Groupe 2: Animations vagues différentes avec niveau d'eau */
+    .medium-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .medium-stat-card {
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 130px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Animation vagues pour les cartes moyennes avec niveau d'eau */
+    .medium-stat-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 25%; /* Niveau d'eau à 25% */
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
+      z-index: 1;
+      animation: waterWave 5s ease-in-out infinite;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .medium-stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .medium-stat-card:nth-child(1) {
+      background: linear-gradient(135deg, #ffc7a2 0%, #ff9a5c 100%);
+    }
+
+    .medium-stat-card:nth-child(2) {
+      background: linear-gradient(135deg, #c2a2ff 0%, #8c5ce7 100%);
+    }
+
+    .medium-stat-card:nth-child(3) {
+      background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
+    }
+
+    /* Ajustement du niveau d'eau pour chaque carte */
+    #solde-card::before { height: 30%; animation-duration: 6s; }
+    #retire-card::before { height: 20%; animation-duration: 7s; }
+    #parrainage-card::before { height: 35%; animation-duration: 5s; }
+    #bonus-agent-card::before { height: 25%; animation-duration: 8s; }
+
+    .medium-stat-title {
+      color: white;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .medium-stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: white;
+      z-index: 2;
+    }
+
+    .medium-stat-icon {
+      font-size: 2rem;
+      opacity: 0.7;
+      z-index: 2;
+    }
+
+    /* Small gain cards - Groupe 3: Nouvelles animations uniques pour chaque case */
+    .gain-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .gain-stat-card {
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 90px;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gain-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 1;
+    }
+
+    /* Animation de rotation au survol */
+    .gain-stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .gain-stat-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Animations uniques pour chaque carte du groupe 3 */
+    #whatsapp-gains {
+      background: linear-gradient(135deg, #d4ffd4 0%, #a0f0a0 100%);
+      animation: pulseWhatsapp 3s infinite;
+    }
+    
+    @keyframes pulseWhatsapp {
+      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+      50% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
+    }
+    
+    #trivia-gains {
+      background: linear-gradient(135deg, #ffd4f0 0%, #f0a0d4 100%);
+      animation: bounceTrivia 4s infinite;
+    }
+    
+    @keyframes bounceTrivia {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    
+    #publicite-gains {
+      background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
+      animation: rotatePublicite 6s infinite linear;
+    }
+    
+    @keyframes rotatePublicite {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #tiktok-gains {
+      background: linear-gradient(135deg, #fff0d4 0%, #f0d4a0 100%);
+      animation: shakeTiktok 5s infinite;
+    }
+    
+    @keyframes shakeTiktok {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(1deg); }
+      75% { transform: rotate(-1deg); }
+    }
+    
+    #youtube-gains {
+      background: linear-gradient(135deg, #e6d4ff 0%, #c8a0f0 100%);
+      animation: glowYoutube 4s infinite alternate;
+    }
+    
+    @keyframes glowYoutube {
+      0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+      100% { box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4); }
+    }
+    
+    #depot-solde {
+      background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
+      animation: waveDepot 5s infinite linear;
+    }
+    
+    @keyframes waveDepot {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .gain-stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 2;
+    }
+
+    .gain-stat-title {
+      color: var(--text-light);
+      font-size: 0.75rem;
+      font-weight: 500;
+      z-index: 2;
+    }
+
+    .gain-stat-icon {
+      width: 25px;
+      height: 25px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.3);
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      z-index: 2;
+      transition: transform 0.3s ease;
+    }
+
+    .gain-stat-card:hover .gain-stat-icon {
+      transform: scale(1.2);
+    }
+
+    .gain-stat-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-color);
+      z-index: 2;
+    }
+
+    /* Fidelity key section - Animation améliorée */
+    .fidelity-section {
+      background: linear-gradient(135deg, #e6fffd 0%, #b2fff8 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fidelity-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    .fidelity-key {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .fidelity-key:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .key-icon {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      animation: bounceKey 2s infinite;
+    }
+
+    @keyframes bounceKey {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .key-text {
+      flex: 1;
+      font-family: monospace;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    .key-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .copy-key-btn, .send-key-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .copy-key-btn:hover, .send-key-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .send-key-btn {
+      background-color: #25D366;
+    }
+
+    /* Referral section - Animation améliorée */
+    .referral-section {
+      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .referral-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .referral-content {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .referral-link-container {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .link-box {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .link-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .link-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      margin-right: 15px;
+    }
+
+    .copy-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .social-share {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .social-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+      position: relative;
+      z-index: 1;
+      animation: pulseSocial 2s infinite;
+    }
+
+    @keyframes pulseSocial {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .social-btn:hover {
+      animation: none;
+      transform: scale(1.15);
+    }
+
+    .whatsapp { background-color: #25D366; }
+    .facebook { background-color: #3b5998; }
+    .twitter { background-color: #1DA1F2; }
+    .telegram { background-color: #0088cc; }
+
+    /* User info section - Animation améliorée */
+    .user-info-section {
+      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-info-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    .user-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .info-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    /* Task calendar - Animation améliorée */
+    .task-calendar {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-calendar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .calendar-month {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+
+    .day-header {
+      text-align: center;
+      padding: 10px;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .calendar-date {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      background-color: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .calendar-date:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.05);
+    }
+
+    .calendar-date.active {
+      background-color: var(--primary-color);
+      color: white;
+      transform: scale(1.05);
+      animation: pulse 2s infinite;
+    }
+
+    .calendar-date.has-task::after {
+      content: "";
+      position: absolute;
+      bottom: 5px;
+      width: 6px;
+      height: 6px;
+      background-color: var(--success-color);
+      border-radius: 50%;
+    }
+
+    .task-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .task-table th, .task-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .task-table th {
+      background-color: rgba(0, 0, 0, 0.05);
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .task-table tr {
+      transition: background-color 0.2s ease;
+    }
+
+    .task-table tr:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+      transform: scale(1.01);
+    }
+
+    .task-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--card-bg);
+      padding: 20px 30px;
+      text-align: center;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+      color: var(--primary-dark);
+    }
+
+    .footer-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Pulse animation for important elements */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 230px;
+      }
+      
+      .medium-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 50%;
+        height: 100vh;
+        position: fixed;
+        top: 80px;
+        left: -50%;
+        z-index: 99;
+        transition: left 0.3s ease;
+      }
+      
+      .sidebar.active {
+        left: 0;
+      }
+      
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 98;
+      }
+      
+      .overlay.active {
+        display: block;
+      }
+      
+      .header {
+        padding: 15px;
+      }
+      
+      .logo {
+        font-size: 1.5rem;
+      }
+      
+      .content {
+        padding: 20px;
+      }
+      
+      .medium-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .gain-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .key-buttons {
+        flex-direction: column;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .gain-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .user-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .task-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .user-name {
+        display: none;
+      }
+    }
+
+    /* Hamburger menu for mobile */
+    .hamburger-menu {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--secondary-color);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .hamburger-menu {
+        display: block;
+      }
+    }
+
+    /* Animation for notifications */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      pointer-events: auto;
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+    }
+
+    .notification.info { 
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
-
   <div class="loader-container" id="loader">
     <div class="loader"></div>
   </div>
 
-  <div id="app-wrapper">
-    <div class="notification-container" id="notificationContainer"></div>
+  <div class="notification-container" id="notificationContainer"></div>
 
-    <header class="header">
-      <button class="hamburger-menu" id="hamburgerMenu"><i class="fas fa-bars"></i></button>
-      <div class="logo">MULAFLOWR</div>
-      <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><span>Mode nuit</span></button>
-        <div class="user-profile" id="userProfile" title="Se déconnecter">
-          <div class="avatar" id="userAvatar">U</div>
+  <header class="header">
+    <button class="hamburger-menu" id="hamburgerMenu">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="logo">
+      <span>MULAFLOWR</span>
+    </div>
+    
+    <div class="header-controls">
+      <button class="language-selector" id="languageSelector">
+        <i class="fas fa-globe"></i>
+        <span>French</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      
+      <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+        <span>Mode nuit</span>
+      </button>
+      
+      <div class="user-profile" id="userProfile">
+        <div class="avatar" id="userAvatar">U</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="welcome-section">
+        <div class="welcome-text">Dashboard >> MULAFLOWR</div>
+        <div class="username" id="sidebarUsername">Utilisateur</div>
+      </div>
+      
+      <div class="menu-category">PRINCIPAL</div>
+      <a href="dashboard.html" class="menu-item active">
+        <i class="fas fa-home"></i>
+        <span>Tableau de bord</span>
+        <span class="menu-badge">☑</span>
+      </a>
+      
+      <a href="depot.html" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt 💵</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="bonus_bienvenue.html" class="menu-item">
+        <i class="fas fa-gift"></i>
+        <span>Bonus de bienvenue</span>
+        <span class="menu-badge">☒</span>
+      </a>
+      
+      <div class="menu-category">COMPTES</div>
+      <a href="retrait.html" class="menu-item">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Retrait</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="equipe.html" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Équipe</span>
+        <span class="menu-badge">☒</span>
+      </a>
+
+      <div class="menu-category">SPÉCIAL</div>
+      <a href="love_earn.html" class="menu-item">
+        <i class="fas fa-heart"></i>
+        <span>LoveEarn</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="social_boost.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>SBH</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="challenge_reward.html" class="menu-item">
+        <i class="fas fa-medal"></i>
+        <span>Challenge and Reward</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <div class="menu-category">PRODUIT / TACHE</div>
+      <a href="whatsapp_earn.html" class="menu-item">
+        <i class="fab fa-whatsapp"></i>
+        <span>Gagner via Whatsapp</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="movies.html" class="menu-item">
+        <i class="fas fa-film"></i>
+        <span>Movies</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="paris_fixes.html" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Paris fixes</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="gains_publicitaires.html" class="menu-item">
+        <i class="fas fa-ad"></i>
+        <span>Gains publicitaires</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="spin_wheel.html" class="menu-item">
+        <i class="fas fa-trophy"></i>
+        <span>Spin wheel 🏆</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="tiktok_earn.html" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok Earn</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="youtube_earn.html" class="menu-item">
+        <i class="fab fa-youtube"></i>
+        <span>YouTube Earn</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="instagram_earn.html" class="menu-item">
+        <i class="fab fa-instagram"></i>
+        <span>Instagram Earn</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="trivia_challenge.html" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>TRIVIA challenge</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <div class="menu-category">BONUS</div>
+      <a href="liste_contacts.html" class="menu-item">
+        <i class="fas fa-address-book"></i>
+        <span>Liste de contacts gratuit 🆓</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="booster_visibilite.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>Booster ma visibilité</span>
+        <span class="menu-badge">☐</span>
+      </a>
+
+      <a href="canva_pro.html" class="menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Canva Pro</span>
+        <span class="menu-badge">☐</span>
+      </a>
+      
+      <a href="connexion_gratuite.html" class="menu-item">
+        <i class="fas fa-shield-alt"></i>
+        <span>Connexion gratuite</span>
+        <span class="menu-badge">☐</span>
+      </a>
+    </aside>
+
+    <main class="content">
+      <h1 class="page-title">
+        <i class="fas fa-home"></i>
+        <span>Dashboard >> MULAFLOWR</span>
+      </h1>
+      
+      <!-- Bannière modifiée pour afficher le nom d'utilisateur -->
+      <div class="banner" id="welcomeBanner">
+        <div class="banner-title" id="welcomeTitle">Bienvenue sur MULAFLOWR</div>
+        <div class="banner-text" id="welcomeMessage">
+          Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
+        </div>
+        <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
+      </div>
+      
+      <div class="small-stats">
+        <div class="small-stat-card" id="depense-card">
+          <div class="small-stat-title">
+            <i class="fas fa-arrow-down arrow-icon"></i>
+            Dépense:
+          </div>
+          <div class="small-stat-value">XAF 0</div>
+          <div class="progress-mid-container">
+            <div class="progress-mid-bar"></div>
+          </div>
+        </div>
+        
+        <div class="small-stat-card" id="profit-card">
+          <div class="small-stat-title">
+            <i class="fas fa-arrow-up arrow-icon"></i>
+            Profit:
+          </div>
+          <div class="small-stat-value">XAF 0</div>
+          <div class="progress-mid-container">
+            <div class="progress-mid-bar"></div>
+          </div>
         </div>
       </div>
-    </header>
-    
-    <div class="overlay" id="overlay"></div>
-
-    <div class="main-container">
-      <aside class="sidebar" id="sidebar">
-        <div class="welcome-section">
-          <div class="welcome-text">Dashboard >> MULAFLOWR</div>
-          <div class="username" id="sidebarUsername">Utilisateur</div>
+      
+      <div class="large-stats">
+        <div class="large-stat-card" id="solde-card">
+          <div class="large-stat-title">
+            <i class="fas fa-piggy-bank large-stat-icon"></i>
+            SOLDE
+          </div>
+          <div class="large-stat-value">XAF 0</div>
+          <div class="stat-change">
+            <span>Vol:(0%)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="medium-stats">
+        <div class="medium-stat-card" id="retire-card">
+          <div class="medium-stat-title">
+            <i class="fas fa-download medium-stat-icon"></i>
+            Retiré
+          </div>
+          <div class="medium-stat-value">XAF 0</div>
+          <div class="stat-change">
+            <span>Vol:(0%)</span>
+          </div>
         </div>
         
-        <div class="menu-category">PRINCIPAL</div>
-        <a href="dashboard.html" class="menu-item active"><div class="menu-item-content"><i class="fas fa-home"></i><span>Tableau de bord</span></div><span class="checkbox-badge checked"></span></a>
-        <a href="depot.html" class="menu-item"><div class="menu-item-content"><i class="fas fa-wallet"></i><span>Dépôt 💵</span></div><span class="checkbox-badge"></span></a>
-        <a href="bonus_bienvenue.html" class="menu-item"><div class="menu-item-content"><i class="fas fa-gift"></i><span>Bonus de bienvenue</span></div><span class="checkbox-badge banned"></span></a>
-        
-        <div class="menu-category">COMPTES</div>
-        <a href="retrait.html" class="menu-item"><div class="menu-item-content"><i class="fas fa-money-bill-wave"></i><span>Retrait</span></div><span class="checkbox-badge"></span></a>
-        <a href="equipe.html" class="menu-item"><div class="menu-item-content"><i class="fas fa-users"></i><span>Équipe</span></div><span class="checkbox-badge banned"></span></a>
-      </aside>
-
-      <main class="content">
-        <h1 class="page-title"><i class="fas fa-home"></i><span>Dashboard >> MULAFLOWR</span></h1>
-        
-        <div class="banner" id="welcomeBanner">
-          <div class="banner-title">Bienvenue sur MULAFLOWR</div>
-          <div class="username-display" id="welcomeUsername">Utilisateur</div>
-          <div class="banner-text">Débloquez plus de 10 outils numériques avec MULAFLOWR, conçus pour VOUS !</div>
-          <a href="#" class="banner-link">Obtenir l'application Android</a>
+        <div class="medium-stat-card" id="parrainage-card">
+          <div class="medium-stat-title">
+            <i class="fas fa-users medium-stat-icon"></i>
+            Gains de parrainage
+          </div>
+          <div class="medium-stat-value">XAF 0</div>
+          <div class="stat-change">
+            <span>Vol:(0%)</span>
+          </div>
         </div>
         
-        <div class="small-stats">
-          <div class="small-stat-card" id="depense-card"><div class="small-stat-title"><i class="fas fa-arrow-down arrow-icon"></i>Dépense:</div><div class="small-stat-value">XAF 0</div></div>
-          <div class="small-stat-card" id="profit-card"><div class="small-stat-title"><i class="fas fa-arrow-up arrow-icon"></i>Profit:</div><div class="small-stat-value">XAF 0</div></div>
+        <div class="medium-stat-card" id="bonus-agent-card">
+          <div class="medium-stat-title">
+            <i class="fas fa-gift medium-stat-icon"></i>
+            Bonus d'agent
+          </div>
+          <div class="medium-stat-value">XAF 0</div>
+          <div class="stat-change">
+            <span>Vol:(0%)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="fidelity-section">
+        <h2 class="section-title">CLÉ DE FIDÉLITÉ</h2>
+        <p>Utilisez votre clé de fidélité pour accéder à des avantages exclusifs et des bonus supplémentaires.</p>
+        
+        <div class="fidelity-key">
+          <i class="fas fa-key key-icon"></i>
+          <div class="key-text" id="fidelityKey">MULA-USER-2024-0000-0000</div>
+          <div class="key-buttons">
+            <button class="copy-key-btn" id="copyKeyBtn">
+              <i class="fas fa-copy"></i>
+              <span>Copier</span>
+            </button>
+            <button class="send-key-btn" id="sendKeyBtn">
+              <i class="fab fa-whatsapp"></i>
+              <span>Envoyer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="gain-stats">
+        <div class="gain-stat-card" id="whatsapp-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains WhatsApp</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
         </div>
         
-        <div class="large-stats">
-          <div class="large-stat-card" id="solde-card"><div class="large-stat-title"><i class="fas fa-piggy-bank large-stat-icon"></i>SOLDE</div><div class="large-stat-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="trivia-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains Trivia</div>
+            <div class="gain-stat-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
         </div>
         
-        <div class="medium-stats">
-          <div class="medium-stat-card" id="retire-card"><div class="medium-stat-title"><i class="fas fa-download medium-stat-icon"></i>Retiré</div><div class="medium-stat-value">XAF 0</div></div>
-          <div class="medium-stat-card" id="parrainage-card"><div class="medium-stat-title"><i class="fas fa-users medium-stat-icon"></i>Gains de parrainage</div><div class="medium-stat-value">XAF 0</div></div>
-          <div class="medium-stat-card" id="bonus-agent-card"><div class="medium-stat-title"><i class="fas fa-gift medium-stat-icon"></i>Bonus d'agent</div><div class="medium-stat-value">XAF 0</div></div>
+        <div class="gain-stat-card" id="publicite-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains publicitaires</div>
+            <div class="gain-stat-icon">
+              <i class="fas fa-ad"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
         </div>
-
-        <div class="referral-section">
-            <h2 class="section-title">LIEN DE PARRAINAGE</h2>
+        
+        <div class="gain-stat-card" id="tiktok-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains TikTok</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-tiktok"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
+        </div>
+        
+        <div class="gain-stat-card" id="youtube-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains YouTube</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-youtube"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
+        </div>
+        
+        <div class="gain-stat-card" id="depot-solde">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Solde du dépôt</div>
+            <div class="gain-stat-icon">
+              <i class="fas fa-piggy-bank"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
+        </div>
+      </div>
+      
+      <div class="referral-section">
+        <h2 class="section-title">LIEN DE PARRAINAGE</h2>
+        
+        <div class="referral-content">
+          <div class="referral-link-container">
             <div class="link-box">
-                <div class="link-text" id="referralLink">Génération...</div>
-                <button class="copy-btn" id="copyLinkBtn"><i class="fas fa-copy"></i><span>Copier</span></button>
+              <div class="link-text" id="referralLink">mulaflowr.com/?ref=USER000X0</div>
+              <button class="copy-btn" id="copyLinkBtn">
+                <i class="fas fa-copy"></i>
+                <span>Copier</span>
+              </button>
             </div>
-        </div>
-
-        <div class="user-info-section">
-            <h2 class="section-title">INFORMATIONS UTILISATEUR</h2>
-            <div class="user-info-grid">
-                <div class="info-item"><div class="info-label">Nom d'utilisateur</div><div class="info-value" id="info-username">Chargement...</div></div>
-                <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="info-email">Chargement...</div></div>
-                <div class="info-item"><div class="info-label">Téléphone</div><div class="info-value" id="info-phone">Chargement...</div></div>
-                <div class="info-item"><div class="info-label">Pays</div><div class="info-value" id="info-country">Chargement...</div></div>
-                <div class="info-item"><div class="info-label">Parrain</div><div class="info-value" id="info-parrain">Chargement...</div></div>
-                <div class="info-item"><div class="info-label">Parrainage actif</div><div class="info-value" id="info-parrainage">0 personnes</div></div>
+            
+            <div class="social-share">
+              <div class="social-btn whatsapp" id="shareWhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </div>
+              <div class="social-btn facebook" id="shareFacebook">
+                <i class="fab fa-facebook-f"></i>
+              </div>
+              <div class="social-btn twitter" id="shareTwitter">
+                <i class="fab fa-twitter"></i>
+              </div>
+              <div class="social-btn telegram" id="shareTelegram">
+                <i class="fab fa-telegram-plane"></i>
+              </div>
             </div>
+            
+            <p>Partagez ce lien avec vos amis et gagnez des commissions sur leurs activités.</p>
+          </div>
         </div>
-      </main>
-    </div>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="#" class="footer-link">Pro Tech Management</a>
-                <a href="#" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      
+      <div class="user-info-section">
+        <h2 class="section-title">INFORMATIONS UTILISATEUR</h2>
+        
+        <div class="user-info-grid">
+          <div class="info-item">
+            <div class="info-label">Nom d'utilisateur</div>
+            <div class="info-value" id="info-username">Chargement...</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value" id="info-email">Chargement...</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Téléphone</div>
+            <div class="info-value" id="info-phone">Chargement...</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Pays</div>
+            <div class="info-value" id="info-country">Chargement...</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Parrain</div>
+            <div class="info-value" id="info-parrain">Chargement...</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Parrainage actif</div>
+            <div class="info-value" id="info-parrainage">0 personnes</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="task-calendar">
+        <h2 class="section-title">CALENDRIER DES TÂCHES</h2>
+        
+        <div class="calendar-header">
+          <div class="calendar-month">Septembre 2025</div>
+          <div class="calendar-nav">
+            <div class="nav-btn" id="prevMonth">
+              <i class="fas fa-chevron-left"></i>
             </div>
-            <div class="footer-text">© 2025 MULAFLOWR. Tous droits réservés.</div>
+            <div class="nav-btn" id="nextMonth">
+              <i class="fas fa-chevron-right"></i>
+            </div>
+          </div>
         </div>
-    </footer>
+        
+        <div class="calendar-days">
+          <div class="day-header">Lun</div>
+          <div class="day-header">Mar</div>
+          <div class="day-header">Mer</div>
+          <div class="day-header">Jeu</div>
+          <div class="day-header">Ven</div>
+          <div class="day-header">Sam</div>
+          <div class="day-header">Dim</div>
+        </div>
+        
+        <div class="calendar-grid">
+          </div>
+        
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Day1</th>
+              <th>Day2</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Youtube</td>
+              <td>Saturday</td>
+              <td>Sunday</td>
+              <td><span class="task-status">Active</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>triviatz</td>
+              <td>Tuesday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Tiktok</td>
+              <td>Tuesday</td>
+              <td>Wednesday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>whatsapp</td>
+              <td>Monday</td>
+              <td>Wednesday</td>
+              <td><span class="task-status">Pending</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>trivia</td>
+              <td>Tuesday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Completed</span></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>ads</td>
+              <td>Monday</td>
+              <td>Thursday</td>
+              <td><span class="task-status">Pending</span></td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>blogs</td>
+              <td>Monday</td>
+              <td>Friday</td>
+              <td><span class="task-status">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
   </div>
 
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      <div class="footer-text">
+        © 2025 MULAFLOWR. Tous droits réservés.
+      </div>
+    </div>
+  </footer>
+
   <script>
+    /******** CONFIG FIREBASE CORRIGÉE ET INTÉGRÉE ********/
     const firebaseConfig = {
-      apiKey: "AIzaSyC...CeuKP1k", // IMPORTANT: Remplacez par votre clé API complète et valide
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
       projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
+      storageBucket: "cash-flowr.appspot.com", // CORRECTION APPLIQUÉE ICI
       messagingSenderId: "1091928501310",
       appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
       measurementId: "G-5SF6VDLZCB"
@@ -216,15 +1948,57 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
+    /******** DOM Elements ********/
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const referralLink = document.getElementById('referralLink');
+    const languageSelector = document.getElementById('languageSelector');
+    const shareWhatsApp = document.getElementById('shareWhatsApp');
+    const shareFacebook = document.getElementById('shareFacebook');
+    const shareTwitter = document.getElementById('shareTwitter');
+    const shareTelegram = document.getElementById('shareTelegram');
+    const prevMonth = document.getElementById('prevMonth');
+    const nextMonth = document.getElementById('nextMonth');
+    const calendarGrid = document.querySelector('.calendar-grid');
+    const calendarMonth = document.querySelector('.calendar-month');
+    const copyKeyBtn = document.getElementById('copyKeyBtn');
+    const fidelityKey = document.getElementById('fidelityKey');
+    const sendKeyBtn = document.getElementById('sendKeyBtn');
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const infoUsername = document.getElementById('info-username');
+    const infoEmail = document.getElementById('info-email');
+    const infoPhone = document.getElementById('info-phone');
+    const infoCountry = document.getElementById('info-country');
+    const infoParrain = document.getElementById('info-parrain');
+    const infoParrainage = document.getElementById('info-parrainage');
     const loader = document.getElementById('loader');
-    const appWrapper = document.getElementById('app-wrapper');
+    const welcomeBanner = document.getElementById('welcomeBanner');
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const welcomeMessage = document.getElementById('welcomeMessage');
 
+    /******** Variables d'état ********/
+    let currentDate = new Date();
+    let userData = {};
+    let currentUser = null;
+
+    /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
       const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `<i class="fas ${icon}" style="font-size: 1.5rem;"></i><div><strong>${title}</strong><br><span>${message}</span></div>`;
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+          <span>${message}</span>
+        </div>
+      `;
       container.appendChild(notification);
       setTimeout(() => {
         notification.style.animation = 'slideIn 0.3s ease reverse forwards';
@@ -232,99 +2006,251 @@
       }, duration);
     }
 
-    function updateUI(user, userData) {
-        const displayName = userData.displayName || user.displayName || user.email.split('@')[0];
-        const formatCurrency = (value) => `XAF ${Number(value || 0).toLocaleString('fr-FR')}`;
+    /******** Sidebar mobile toggle ********/
+    hamburgerMenu.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    });
 
-        document.getElementById('sidebarUsername').textContent = displayName;
-        document.getElementById('welcomeUsername').textContent = displayName;
-        document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+    /******** Theme toggle (sauvegarde possible) ********/
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      themeToggle.innerHTML = isDarkMode 
+        ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+        : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+      if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+    });
 
-        document.querySelector('#depense-card .small-stat-value').textContent = formatCurrency(userData.depense);
-        document.querySelector('#profit-card .small-stat-value').textContent = formatCurrency(userData.profit);
-        document.querySelector('#solde-card .large-stat-value').textContent = formatCurrency(userData.solde);
-        document.querySelector('#retire-card .medium-stat-value').textContent = formatCurrency(userData.retire);
-        document.querySelector('#parrainage-card .medium-stat-value').textContent = formatCurrency(userData.parrainage);
-        document.querySelector('#bonus-agent-card .medium-stat-value').textContent = formatCurrency(userData.bonusAgent);
-        
-        document.getElementById('info-username').textContent = displayName;
-        document.getElementById('info-email').textContent = user.email;
-        document.getElementById('info-phone').textContent = userData.phoneNumber || 'Non renseigné';
-        document.getElementById('info-country').textContent = userData.country || 'Non renseigné';
-        document.getElementById('info-parrain').textContent = userData.referrer || 'Aucun';
-        document.getElementById('info-parrainage').textContent = `${userData.activeReferrals || 0} personnes`;
-        
-        document.getElementById('referralLink').textContent = `mulaflowr.com/?ref=${user.uid.substring(0, 10)}`;
+    /******** Copy / share actions ********/
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(referralLink.textContent)
+          .then(() => showNotification('success', 'Succès', 'Lien copié dans le presse-papier!'))
+          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier le lien.'));
+      });
+    }
+    if (copyKeyBtn) {
+      copyKeyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(fidelityKey.textContent)
+          .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
+          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier la clé.'));
+      });
+    }
+    if (sendKeyBtn) {
+      sendKeyBtn.addEventListener('click', () => {
+        const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+      });
+    }
+    const promoMessage = "Tu veux gagner de l'argent en ligne? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
+    if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
+    if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
+    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
+    if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
 
+    /******** Calendrier ********/
+    function updateCalendar() {
+      if (!calendarGrid || !calendarMonth) return;
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+      calendarMonth.textContent = `${monthNames[month]} ${year}`;
+      calendarGrid.innerHTML = '';
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDay = firstDay === 0 ? 6 : firstDay - 1;
+      for (let i=0; i < startDay; i++) { calendarGrid.insertAdjacentHTML('beforeend', '<div class="calendar-date"></div>'); }
+      for (let day=1; day <= daysInMonth; day++) {
+        const dateCell = document.createElement('div');
+        dateCell.className = 'calendar-date';
+        dateCell.textContent = day;
+        const today = new Date();
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
+        if (Math.random() > 0.7) dateCell.classList.add('has-task'); // Logique de tâche à dynamiser
+        calendarGrid.appendChild(dateCell);
+      }
+    }
+    if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
+    if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
+    
+    /******** Fonctions Utilitaires de Données ********/
+    function isPaidFlag(value) {
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') {
+        const v = value.toLowerCase().trim();
+        return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1'].includes(v);
+      }
+      if (typeof value === 'number') return value === 1;
+      return false;
+    }
+    function isUserPaidFromDoc(docData) {
+      if (!docData) return false;
+      const candidates = [
+        docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
+        docData.status, docData.statut, docData.payment, docData.paidStatus
+      ];
+      for (const candidate of candidates) {
+        if (candidate !== undefined && candidate !== null) {
+          if (isPaidFlag(candidate)) return true;
+        }
+      }
+      return false;
+    }
+
+    /******** Sauvegarde des données utilisateur ********/
+    async function saveUserData(key = null, value = null) {
+      if (!currentUser) return;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const dataToSave = key ? { [key]: value } : userData;
+        await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
+        console.log('Données utilisateur enregistrées avec succès.');
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde des données :", error);
+        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
+      }
+    }
+
+    /******** Chargement des données utilisateur depuis Firestore ********/
+    async function loadUserData() {
+      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
+      const userRef = db.collection('users').doc(currentUser.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+          const data = doc.data() || {};
+          userData = {
+              depense: Number(data.depense || data.debit || 0),
+              profit: Number(data.profit || data.revenue || 0),
+              solde: Number(data.solde || data.balance || 0),
+              retire: Number(data.retire || data.withdrawn || 0),
+              parrainage: Number(data.parrainage || data.referralEarnings || 0),
+              bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
+              whatsappGains: Number(data.whatsappGains || 0),
+              triviaGains: Number(data.triviaGains || 0),
+              publiciteGains: Number(data.publiciteGains || 0),
+              tiktokGains: Number(data.tiktokGains || 0),
+              youtubeGains: Number(data.youtubeGains || 0),
+              depotSolde: Number(data.depotSolde || data.depositBalance || 0),
+              phoneNumber: data.phoneNumber || data.phone || "",
+              country: data.country || data.pays || "",
+              referrer: data.referrer || data.parrain || "",
+              activeReferrals: Number(data.activeReferrals || data.parrainageCount || 0),
+              displayName: data.displayName || currentUser.displayName,
+              email: data.email || currentUser.email,
+              paid: isUserPaidFromDoc(data),
+              theme: data.theme || 'light'
+          };
+      } else {
+        // Crée un document pour un nouvel utilisateur avec des valeurs par défaut
+        userData = { depense: 0, profit: 0, solde: 0, retire: 0, parrainage: 0, bonusAgent: 0, whatsappGains: 0, triviaGains: 0, publiciteGains: 0, tiktokGains: 0, youtubeGains: 0, depotSolde: 0, paid: false, theme: 'light' };
+        await saveUserData();
+      }
+    }
+
+    /******** Mise à jour de l'interface utilisateur (UI) ********/
+    function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
+
+    function updateDashboardUI() {
+        document.querySelector('#depense-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.depense)}`;
+        document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.profit)}`;
+        document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${formatNumberSafe(userData.solde)}`;
+        document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.retire)}`;
+        document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
+        document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
+        document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
+        document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
+        document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
+        document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
+        document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
+        document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
+    }
+
+    function updateUserInfoUI(user, dbData = {}) {
+        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+        const email = dbData.email || user.email || 'Non spécifié';
+        const phone = dbData.phoneNumber || 'Non spécifié';
+        const country = dbData.country || 'Non spécifié';
+        const referrer = dbData.referrer || 'Aucun';
+        const activeReferrals = dbData.activeReferrals || 0;
+
+        if (sidebarUsername) sidebarUsername.textContent = displayName;
+        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+        if (infoUsername) infoUsername.textContent = displayName;
+        if (infoEmail) infoEmail.textContent = email;
+        if (infoPhone) infoPhone.textContent = phone;
+        if (infoCountry) infoCountry.textContent = country;
+        if (infoParrain) infoParrain.textContent = referrer;
+        if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
+
+        // Mise à jour de la bannière avec le nom de l'utilisateur
+        if (welcomeTitle) welcomeTitle.textContent = `Bienvenue, ${displayName} !`;
+        if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
+
+        // Génération de clés et liens stables basés sur l'ID utilisateur
+        if (fidelityKey) {
+            const uidPart1 = user.uid.substring(0, 4).toUpperCase();
+            const uidPart2 = user.uid.substring(4, 8).toUpperCase();
+            fidelityKey.textContent = `MULA-USER-2024-${uidPart1}-${uidPart2}`;
+        }
+        if (referralLink) {
+            referralLink.textContent = `mulaflowr.com/?ref=${user.uid.substring(0, 10)}`;
+        }
+    }
+    
+    function applyTheme() {
         const isDarkMode = userData.theme === 'dark';
         document.body.classList.toggle('dark-mode', isDarkMode);
-        document.getElementById('themeToggle').innerHTML = isDarkMode 
+        themeToggle.innerHTML = isDarkMode 
             ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
             : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
     }
-    
-    async function initializeApp(user) {
-      try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (!userDoc.exists) { throw new Error("Profil utilisateur introuvable."); }
-        const userData = userDoc.data();
 
-        // **Vérification du paiement** (adaptez `isPaid` au nom de votre champ)
-        if (!userData.isPaid) {
-          showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-          setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-          return;
+    /******** Point d'entrée principal de l'application ********/
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                // 1. Charger les données de l'utilisateur
+                await loadUserData();
+
+                // 2. Vérifier si l'utilisateur a payé
+                if (!userData.paid) {
+                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                    return; // Stoppe l'exécution ici
+                }
+
+                // 3. Mettre à jour toute l'interface
+                updateDashboardUI();
+                updateUserInfoUI(user, userData);
+                applyTheme();
+                
+                // 4. Afficher la page et masquer le loader
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+                
+                showNotification('success', 'Bienvenue !', `Content de vous revoir, ${userData.displayName || user.email.split('@')[0]} !`);
+
+            } catch (error) {
+                console.error("Erreur critique lors de l'initialisation :", error);
+                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                auth.signOut();
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            }
+        } else {
+            // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+            window.location.href = 'login.html';
         }
+    });
 
-        // Mettre à jour l'interface avec les données
-        updateUI(user, userData);
-        
-        // Attacher les écouteurs d'événements qui dépendent des données utilisateur
-        const hamburgerMenu = document.getElementById('hamburgerMenu');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        hamburgerMenu.addEventListener('click', () => { sidebar.classList.toggle('active'); overlay.classList.toggle('active'); });
-        overlay.addEventListener('click', () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); });
-        
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark-mode');
-            db.collection('users').doc(user.uid).set({ theme: isDark ? 'dark' : 'light' }, { merge: true });
-            document.getElementById('themeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i><span>Mode jour</span>' : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        });
-
-        document.getElementById('userProfile').addEventListener('click', () => {
-            auth.signOut().then(() => showNotification('info', 'Déconnexion', 'Vous avez été déconnecté.'));
-        });
-        
-        document.getElementById('copyLinkBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('referralLink').textContent)
-              .then(() => showNotification('success', 'Copié !', 'Lien de parrainage copié.'));
-        });
-
-        // Afficher l'application et cacher le loader
-        appWrapper.classList.add('loaded');
-        loader.classList.add('hidden');
-        showNotification('success', `Bienvenue, ${userData.displayName || user.email.split('@')[0]} !`, 'Votre tableau de bord est prêt.');
-
-      } catch (error) {
-        console.error("Erreur d'initialisation de l'application:", error);
-        loader.innerHTML = `
-          <div style="text-align: center; color: #c0392b; font-family: 'Poppins', sans-serif; padding: 20px; max-width: 400px;">
-            <h3 style="margin-bottom: 15px;">Une erreur est survenue</h3>
-            <p>Impossible de charger vos données. Veuillez rafraîchir la page ou contacter le support si le problème persiste.</p>
-            <p style="font-size: 0.8em; margin-top: 20px; color: #7f8c8d;">Détail : ${error.message}</p>
-          </div>`;
-      }
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // L'utilisateur est connecté, on lance l'application.
-        initializeApp(user);
-      } else {
-        // L'utilisateur n'est pas connecté, on redirige.
-        window.location.href = 'login.html';
-      }
+    /******** Initialisation au chargement de la page ********/
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCalendar(); // Le calendrier peut être initialisé sans données utilisateur
     });
   </script>
 </body>
