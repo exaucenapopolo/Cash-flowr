@@ -238,12 +238,10 @@
   </style>
 </head>
 <body>
-  <!-- Container pour les notifications -->
   <div class="notification-container" id="notificationContainer"></div>
 
   <div class="container">
     <div class="logo-header">
-      <!-- Nouveau logo avec 4 pièces superposées en vert foncé -->
       <div class="logo">
         <div class="coin-container">
           <i class="fas fa-coins coin coin-1"></i>
@@ -297,7 +295,6 @@
             <select id="country" name="country" required onchange="updateCountryCode()">
               <option value="">Sélectionnez votre pays</option>
               
-              <!-- Afrique Centrale -->
               <optgroup label="Afrique Centrale">
                 <option value="cm" data-code="+237" selected>🇨🇲 Cameroun</option>
                 <option value="td" data-code="+235">🇹🇩 Tchad</option>
@@ -309,7 +306,6 @@
                 <option value="st" data-code="+239">🇸🇹 Sao Tomé-et-Principe</option>
               </optgroup>
               
-              <!-- Afrique de l'Ouest -->
               <optgroup label="Afrique de l'Ouest">
                 <option value="ci" data-code="+225">🇨🇮 Côte d'Ivoire</option>
                 <option value="sn" data-code="+221">🇸🇳 Sénégal</option>
@@ -328,7 +324,6 @@
                 <option value="mr" data-code="+222">🇲🇷 Mauritanie</option>
               </optgroup>
               
-              <!-- Afrique de l'Est -->
               <optgroup label="Afrique de l'Est">
                 <option value="ke" data-code="+254">🇰🇪 Kenya</option>
                 <option value="ug" data-code="+256">🇺🇬 Ouganda</option>
@@ -343,7 +338,6 @@
                 <option value="er" data-code="+291">🇪🇷 Érythrée</option>
               </optgroup>
               
-              <!-- Autres pays africains -->
               <optgroup label="Autres pays africains">
                 <option value="dz" data-code="+213">🇩🇿 Algérie</option>
                 <option value="eg" data-code="+20">🇪🇬 Égypte</option>
@@ -410,14 +404,12 @@
         <a href="terms.html">Conditions d'utilisation</a>
         <a href="privacy.html">Politique de confidentialité</a>
         <a href="support.html">Support</a>
-        <!-- Nouveau lien "propulsé par SHB" -->
         <a href="https://social-boost-horizon-new-sbh.vercel.app" target="_blank">Propulsé par SHB</a>
       </div>
     </div>
   </div>
 
-<!-- ---------- Firebase + logique d'inscription (modulaire v9) ---------- -->
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
@@ -475,7 +467,7 @@
         'sl':'🇸🇱','gm':'🇬🇲','mr':'🇲🇷','ke':'🇰🇪','ug':'🇺🇬','tz':'🇹🇿','rw':'🇷🇼',
         'bi':'🇧🇮','et':'🇪🇹','ss':'🇸🇸','sd':'🇸🇩','so':'🇸🇴','dj':'🇩🇯','er':'🇪🇷',
         'dz':'🇩🇿','eg':'🇪🇬','ly':'🇱🇾','ma':'🇲🇦','tn':'🇹🇳','ao':'🇦🇴','mz':'🇲🇿',
-        'zm':'🇿🇲','zw':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
+        'zm':'🇿🇲','🇿🇼':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
         'mg':'🇲🇬','mu':'🇲🇺','sc':'🇸🇨','cv':'🇨🇻'
       };
       return flags[countryCode] || '🇨🇲';
@@ -536,20 +528,7 @@
         // 2) ensure fresh token (évite race conditions)
         await user.getIdToken(true);
 
-        // 3) prepare user data (sensible)
-        const userData = {
-          uid: user.uid,
-          username,
-          email,
-          country,
-          phone: document.getElementById('countryCode').textContent + (phone || ''),
-          parrain,
-          status: 'pending_payment', // par défaut - non payé
-          fidelityKey: false, // par défaut - pas encore éligible
-          createdAt: serverTimestamp()
-        };
-
-        // 4) run a transaction: check username unique, then create users, usernames and user_public
+        // 3) run a transaction: check username unique, then create user and username
         await runTransaction(db, async (tx) => {
           const usernameRef = doc(db, 'usernames', username);
           const usernameSnap = await tx.get(usernameRef);
@@ -558,24 +537,42 @@
           }
 
           const userRef = doc(db, 'users', user.uid);
-          const userPublicRef = doc(db, 'user_public', user.uid);
+          
+          // Données utilisateur complètes
+          const userData = {
+            uid: user.uid,
+            username,
+            email,
+            country,
+            phone: document.getElementById('countryCode').textContent + (phone || ''),
+            parrain,
+            status: 'pending_payment', // par défaut - non payé
+            fidelityKey: false, // par défaut - pas encore éligible
+            createdAt: serverTimestamp(),
+            // Ajout des champs financiers à 0 pour respecter les règles de sécurité
+            depense: 0,
+            profit: 0,
+            solde: 0,
+            retire: 0,
+            parrainage: 0,
+            bonusAgent: 0,
+            whatsappGains: 0,
+            triviaGains: 0,
+            publiciteGains: 0,
+            tiktokGains: 0,
+            youtubeGains: 0,
+            depotSolde: 0,
+            activeReferrals: 0,
+          };
 
           tx.set(userRef, userData);
           tx.set(usernameRef, { uid: user.uid, createdAt: serverTimestamp() });
-
-          // user_public contient uniquement champs non-sensibles nécessaires pour le login
-          tx.set(userPublicRef, {
-            uid: user.uid,
-            email: email,
-            status: 'pending_payment',
-            createdAt: serverTimestamp()
-          });
         });
 
-        // 5) update profile displayName (facultatif mais utile)
+        // 4) update profile displayName (facultatif mais utile)
         await updateProfile(user, { displayName: username });
 
-        // 6) success -> redirection vers paiement
+        // 5) success -> redirection vers paiement
         showSuccess('Votre compte a été créé avec succès ! Redirection vers la page de paiement...');
         setTimeout(() => {
           window.location.assign('paiement.html');
@@ -591,7 +588,7 @@
         else if (error.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
         else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
         else if (error.code === 'permission-denied' || /permission-denied/i.test(error.message)) {
-          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + user_public + usernames).";
+          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore (users + usernames).";
         } else {
           message = error.message || message;
         }
