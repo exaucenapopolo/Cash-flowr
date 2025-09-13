@@ -6,8 +6,7 @@
   <title>MULAFLOWR - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"> <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
@@ -146,7 +145,8 @@
       gap: 15px;
     }
 
-    .language-selector, .theme-toggle {
+    /* MODIFIÉ: Bouton mode nuit déplacé */
+    .language-selector {
       background-color: var(--primary-light);
       color: white;
       border: none;
@@ -160,7 +160,25 @@
     }
 
     .theme-toggle {
-      background-color: var(--secondary-color);
+        background-color: transparent; /* Bouton transparent */
+        border: none;
+        color: var(--secondary-color);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .theme-toggle i {
+        font-size: 1.2rem;
     }
 
     .user-profile {
@@ -168,9 +186,11 @@
       align-items: center;
       gap: 10px;
       cursor: pointer;
+      position: relative; /* Pour positionner l'avatar */
     }
-
-    .avatar {
+    
+    /* MODIFIÉ : Place de l'avatar */
+    .user-profile .avatar {
       width: 45px;
       height: 45px;
       border-radius: 50%;
@@ -182,6 +202,56 @@
       font-size: 1.2rem;
       font-weight: bold;
       border: 2px solid var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+
+    /* MODIFIÉ : Conteneur des boutons de profil */
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 150px;
+        z-index: 200;
+        transform-origin: top right;
+        animation: scaleIn 0.2s ease-out forwards;
+    }
+
+    .profile-dropdown.active {
+        display: flex;
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* MODIFIÉ: Bouton "Mode nuit" dans le dropdown */
+    .profile-dropdown .theme-toggle {
+        width: 100%;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+        justify-content: flex-start;
+        padding: 10px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        text-align: left;
+        gap: 10px;
+    }
+    .profile-dropdown .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .profile-dropdown .theme-toggle span {
+        flex-grow: 1;
+        text-align: left;
     }
 
     /* Main layout */
@@ -294,7 +364,7 @@
       color: var(--primary-color);
     }
 
-    /* Banner - MODIFIÉ avec nom d'utilisateur */
+    /* MODIFIÉ : Bannière avec nom d'utilisateur et nouvelle police/couleur */
     .banner {
       background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
       border-radius: 12px;
@@ -331,6 +401,16 @@
       z-index: 1;
     }
 
+    .username-highlight {
+      font-family: 'Pacifico', cursive; /* Nouvelle police */
+      color: #FFD700; /* Couleur dorée pour le nom */
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 10px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
     .banner-text {
       font-size: 0.9rem;
       margin-bottom: 15px;
@@ -358,10 +438,9 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Small stats cards - MODIFIÉ avec barres de progression améliorées */
+    /* MODIFIÉ : Small stats cards - sans barre de progression */
     .small-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex; /* Utilisation de flexbox pour un meilleur alignement */
       gap: 15px;
       margin-bottom: 20px;
     }
@@ -373,7 +452,9 @@
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      height: 100px;
+      justify-content: center;
+      flex: 1; /* Pour que les cartes aient une taille égale */
+      min-height: 100px;
       position: relative;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -413,56 +494,6 @@
       font-size: 1.2rem;
     }
 
-    /* Barre de progression améliorée pour Dépense/Profit - STYLE AMÉLIORÉ */
-    .progress-mid-container {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      z-index: 1;
-      border-radius: 4px 4px 0 0;
-    }
-
-    .progress-mid-bar {
-      height: 100%;
-      border-radius: 4px;
-      width: 0;
-      transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Animation de lueur pour les barres de progression */
-    .progress-mid-bar::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-      animation: progressGlow 2s infinite;
-    }
-
-    @keyframes progressGlow {
-      0% { left: -100%; }
-      100% { left: 200%; }
-    }
-
-    #depense-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 230, 230, 0.9) 100%);
-      width: 20%;
-    }
-
-    #profit-card .progress-mid-bar {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 255, 230, 0.9) 100%);
-      width: 70%;
-    }
-
     /* Animation spéciale pour les cartes Dépense/Profit */
     .small-stat-card::after {
       content: '';
@@ -480,15 +511,22 @@
       opacity: 1;
     }
 
-    /* Large stats cards - Groupe 2: Animations vagues avec niveau d'eau */
+    /* MODIFIÉ : Large stats cards - Groupe 2: Animations vagues plus visibles */
     .large-stats {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
       gap: 20px;
       margin-bottom: 20px;
     }
+    /* MODIFIÉ : pour positionner mieux les deux groupes de cartes */
+    .stats-group-2 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes pour le groupe 2 */
+        gap: 20px;
+        margin-bottom: 20px;
+    }
 
-    .large-stat-card {
+    .large-stat-card, .medium-stat-card {
       background: linear-gradient(135deg, #a2d2ff 0%, #5c9ce6 100%);
       border-radius: 12px;
       padding: 25px;
@@ -502,15 +540,15 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* Animation vagues pour les grandes cartes avec niveau d'eau */
-    .large-stat-card::before {
+    /* MODIFIÉ : Vagues plus foncées */
+    .large-stat-card::before, .medium-stat-card::before {
       content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 30%; /* Niveau d'eau à 30% */
-      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent); /* Couleur de l'eau plus foncée */
       z-index: 1;
       animation: waterWave 6s ease-in-out infinite;
       border-radius: 50% 50% 0 0;
@@ -519,81 +557,19 @@
     @keyframes waterWave {
       0%, 100% {
         transform: translateY(0) scale(1, 1);
-        opacity: 0.5;
+        opacity: 0.9; /* Opacité augmentée */
       }
       50% {
         transform: translateY(-5px) scale(1.05, 0.95);
-        opacity: 0.7;
+        opacity: 1; /* Opacité augmentée */
       }
     }
 
-    .large-stat-card:hover {
+    .large-stat-card:hover, .medium-stat-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
-
-    .large-stat-title {
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 2;
-    }
-
-    .large-stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-      z-index: 2;
-    }
-
-    .large-stat-icon {
-      font-size: 2rem;
-      opacity: 0.7;
-      z-index: 2;
-    }
-
-    /* Medium stats cards - Groupe 2: Animations vagues différentes avec niveau d'eau */
-    .medium-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .medium-stat-card {
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      min-height: 130px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* Animation vagues pour les cartes moyennes avec niveau d'eau */
-    .medium-stat-card::before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 25%; /* Niveau d'eau à 25% */
-      background: linear-gradient(to top, rgba(255, 255, 255, 0.3), transparent);
-      z-index: 1;
-      animation: waterWave 5s ease-in-out infinite;
-      border-radius: 50% 50% 0 0;
-    }
-
-    .medium-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-    }
-
+    
     .medium-stat-card:nth-child(1) {
       background: linear-gradient(135deg, #ffc7a2 0%, #ff9a5c 100%);
     }
@@ -612,28 +588,43 @@
     #parrainage-card::before { height: 35%; animation-duration: 5s; }
     #bonus-agent-card::before { height: 25%; animation-duration: 8s; }
 
-    .medium-stat-title {
-      color: white;
+    .large-stat-title, .medium-stat-title {
       font-size: 0.9rem;
       margin-bottom: 10px;
+      opacity: 0.9;
       display: flex;
       align-items: center;
       gap: 10px;
       z-index: 2;
+      color: white;
     }
-
-    .medium-stat-value {
-      font-size: 1.6rem;
+    
+    .large-stat-value, .medium-stat-value {
+      font-size: 2rem;
       font-weight: 700;
       color: white;
+      margin-bottom: 5px;
       z-index: 2;
     }
 
-    .medium-stat-icon {
+    .large-stat-icon, .medium-stat-icon {
       font-size: 2rem;
       opacity: 0.7;
       z-index: 2;
     }
+    /* MODIFIÉ : Media query pour les 4 cases */
+    @media (max-width: 992px) {
+        .stats-group-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-group-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
 
     /* Small gain cards - Groupe 3: Nouvelles animations uniques pour chaque case */
     .gain-stats {
@@ -699,14 +690,15 @@
       50% { transform: translateY(-3px); }
     }
     
+    /* MODIFIÉ : Animation de la carte "Gains publicitaires" */
     #publicite-gains {
       background: linear-gradient(135deg, #d4f0ff 0%, #a0d4f0 100%);
-      animation: rotatePublicite 6s infinite linear;
+      animation: bouncePublicite 4s infinite;
     }
     
-    @keyframes rotatePublicite {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes bouncePublicite {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
     
     #tiktok-gains {
@@ -1436,13 +1428,14 @@
         <i class="fas fa-chevron-down"></i>
       </button>
       
-      <button class="theme-toggle" id="themeToggle">
-        <i class="fas fa-moon"></i>
-        <span>Mode nuit</span>
-      </button>
-      
       <div class="user-profile" id="userProfile">
-        <div class="avatar" id="userAvatar">U</div>
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="profile-dropdown" id="profileDropdown">
+              <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                  <span>Mode nuit</span>
+              </button>
+          </div>
       </div>
     </div>
   </header>
@@ -1594,9 +1587,11 @@
         <span>Dashboard >> MULAFLOWR</span>
       </h1>
       
-      <!-- Bannière modifiée pour afficher le nom d'utilisateur -->
       <div class="banner" id="welcomeBanner">
-        <div class="banner-title" id="welcomeTitle">Bienvenue sur MULAFLOWR</div>
+        <div class="banner-title" id="welcomeTitle">
+            Bienvenue,
+            <span class="username-highlight" id="bannerUsername">Utilisateur</span>
+        </div>
         <div class="banner-text" id="welcomeMessage">
           Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
         </div>
@@ -1610,9 +1605,6 @@
             Dépense:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
-          </div>
         </div>
         
         <div class="small-stat-card" id="profit-card">
@@ -1621,13 +1613,10 @@
             Profit:
           </div>
           <div class="small-stat-value">XAF 0</div>
-          <div class="progress-mid-container">
-            <div class="progress-mid-bar"></div>
-          </div>
         </div>
       </div>
       
-      <div class="large-stats">
+      <div class="stats-group-2">
         <div class="large-stat-card" id="solde-card">
           <div class="large-stat-title">
             <i class="fas fa-piggy-bank large-stat-icon"></i>
@@ -1638,9 +1627,7 @@
             <span>Vol:(0%)</span>
           </div>
         </div>
-      </div>
       
-      <div class="medium-stats">
         <div class="medium-stat-card" id="retire-card">
           <div class="medium-stat-title">
             <i class="fas fa-download medium-stat-icon"></i>
@@ -1954,6 +1941,7 @@
     const overlay = document.getElementById('overlay');
     const themeToggle = document.getElementById('themeToggle');
     const userProfile = document.getElementById('userProfile');
+    const profileDropdown = document.getElementById('profileDropdown');
     const copyLinkBtn = document.getElementById('copyLinkBtn');
     const referralLink = document.getElementById('referralLink');
     const languageSelector = document.getElementById('languageSelector');
@@ -1980,6 +1968,7 @@
     const welcomeBanner = document.getElementById('welcomeBanner');
     const welcomeTitle = document.getElementById('welcomeTitle');
     const welcomeMessage = document.getElementById('welcomeMessage');
+    const bannerUsername = document.getElementById('bannerUsername');
 
     /******** Variables d'état ********/
     let currentDate = new Date();
@@ -2016,14 +2005,26 @@
       overlay.classList.remove('active');
     });
 
+    /* MODIFIÉ : Menu déroulant pour le profil et le mode nuit */
+    userProfile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', (event) => {
+        if (!userProfile.contains(event.target)) {
+            profileDropdown.classList.remove('active');
+        }
+    });
+
     /******** Theme toggle (sauvegarde possible) ********/
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDarkMode = document.body.classList.contains('dark-mode');
-      themeToggle.innerHTML = isDarkMode 
-        ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-        : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-      if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+    themeToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
     });
 
     /******** Copy / share actions ********/
@@ -2188,7 +2189,7 @@
         if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
 
         // Mise à jour de la bannière avec le nom de l'utilisateur
-        if (welcomeTitle) welcomeTitle.textContent = `Bienvenue, ${displayName} !`;
+        if (bannerUsername) bannerUsername.textContent = displayName;
         if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
 
         // Génération de clés et liens stables basés sur l'ID utilisateur
