@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MULAFLOWR - Challenge and Reward</title>
+  <title>MULAFLOWR - Challenge and Rewards</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"> 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -14,7 +15,7 @@
   <style>
     /* Styles de base */
     body {
-      background: linear-gradient(135deg, #fff9e6 0%, #fff0cc 100%);
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
       color: var(--text-color);
       min-height: 100vh;
       display: flex;
@@ -30,13 +31,13 @@
     }
 
     :root {
-      --primary-color: #FF9500;
-      --primary-light: #FFAA33;
-      --primary-dark: #CC7700;
+      --primary-color: #3a8ee6;
+      --primary-light: #4da6ff;
+      --primary-dark: #2c75c9;
       --secondary-color: #4c566a;
-      --accent-color: #FF6B00;
-      --background-light: #fff5e6;
-      --background-dark: #ffeccc;
+      --accent-color: #5e81ac;
+      --background-light: #f5f7fb;
+      --background-dark: #e5e9f0;
       --card-bg: #ffffff;
       --text-color: #2e3440;
       --text-light: #4c566a;
@@ -52,14 +53,17 @@
       --badge-active: #4CD964;
       --badge-pending: #FF9500;
       --badge-inactive: #FF3B30;
+      --gold-color: #FFD700;
+      --silver-color: #C0C0C0;
+      --bronze-color: #CD7F32;
     }
 
     .dark-mode {
-      --primary-color: #FFAA33;
-      --primary-light: #FFBB66;
-      --primary-dark: #FF9500;
+      --primary-color: #5e81ac;
+      --primary-light: #81a1c1;
+      --primary-dark: #4c566a;
       --secondary-color: #d8dee9;
-      --accent-color: #FF8C1A;
+      --accent-color: #88c0d0;
       --background-light: #2e3440;
       --background-dark: #3b4252;
       --card-bg: #434c5e;
@@ -76,6 +80,9 @@
       --badge-active: #2ecc71;
       --badge-pending: #f1c40f;
       --badge-inactive: #e74c3c;
+      --gold-color: #FFD700;
+      --silver-color: #C0C0C0;
+      --bronze-color: #CD7F32;
     }
 
     * {
@@ -93,7 +100,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #fff9e6 0%, #fff0cc 100%);
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -295,7 +302,7 @@
       flex: 1;
     }
 
-    /* Sidebar */
+    /* Styles de la Sidebar (Menu) */
     .sidebar {
       width: 280px;
       background: rgba(255, 255, 255, 0.75);
@@ -438,11 +445,11 @@
       color: var(--primary-color);
     }
 
-    /* Bannière */
-    .banner {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+    /* Bannière Challenge */
+    .challenge-banner {
+      background: linear-gradient(135deg, var(--purple-color) 0%, #6a3093 100%);
       border-radius: 12px;
-      padding: 20px;
+      padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
       color: white;
@@ -450,7 +457,7 @@
       overflow: hidden;
     }
 
-    .banner::before {
+    .challenge-banner::before {
       content: '';
       position: absolute;
       top: -50%;
@@ -468,71 +475,29 @@
     }
 
     .banner-title {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
       font-weight: 600;
       position: relative;
       z-index: 1;
-    }
-
-    .username-highlight {
-      font-family: 'Pacifico', cursive;
-      color: #FFD700;
-      font-size: 1.8rem;
-      font-weight: bold;
-      display: inline-block;
-      margin-left: 10px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .banner-text {
-      font-size: 0.9rem;
-      margin-bottom: 15px;
+      font-size: 1rem;
+      margin-bottom: 20px;
       opacity: 0.9;
       position: relative;
       z-index: 1;
+      line-height: 1.6;
     }
 
-    .banner-link {
-      display: inline-block;
-      background-color: white;
-      color: var(--primary-color);
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 0.9rem;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .banner-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Introduction section */
-    .intro-section {
-      background: linear-gradient(135deg, #fff5e6 0%, #ffeccc 100%);
+    /* Sections Challenge */
+    .challenge-section {
+      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .intro-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
     }
 
     .section-title {
@@ -540,110 +505,22 @@
       margin-bottom: 20px;
       color: var(--secondary-color);
       font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-
-    .intro-content {
-      position: relative;
-      z-index: 1;
-    }
-
-    .intro-text {
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 25px;
-    }
-
-    .feature-card {
-      background-color: var(--card-bg);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      text-align: center;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .feature-icon {
-      font-size: 2.5rem;
-      color: var(--primary-color);
-      margin-bottom: 15px;
-    }
-
-    .feature-title {
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: var(--primary-color);
-    }
-
-    .feature-description {
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-
-    /* Rewards section */
-    .rewards-section {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-    }
-
-    .rewards-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .week-selector {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .week-btn {
-      background-color: var(--primary-light);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+    .section-title i {
+      color: var(--purple-color);
     }
 
-    .week-btn:hover {
-      background-color: var(--primary-color);
+    .section-subtitle {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      color: var(--text-light);
     }
 
-    .current-week {
-      font-weight: 600;
-      color: var(--primary-color);
-    }
-
-    /* Leaderboard section */
-    .leaderboard-section {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-    }
-
+    /* Tableau des meilleurs parrains */
     .leaderboard-table {
       width: 100%;
       border-collapse: collapse;
@@ -651,15 +528,15 @@
     }
 
     .leaderboard-table th, .leaderboard-table td {
-      padding: 12px 15px;
+      padding: 15px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .leaderboard-table th {
       background-color: rgba(0, 0, 0, 0.05);
       font-weight: 600;
-      color: var(--text-light);
+      color: var(--text-color);
     }
 
     .leaderboard-table tr {
@@ -670,105 +547,54 @@
       background-color: rgba(0, 0, 0, 0.03);
     }
 
-    .leaderboard-table .rank {
+    .rank-cell {
       font-weight: 700;
       text-align: center;
       width: 60px;
     }
 
-    .leaderboard-table .top-1 {
-      background-color: rgba(255, 215, 0, 0.1);
-    }
-
-    .leaderboard-table .top-2 {
-      background-color: rgba(192, 192, 192, 0.1);
-    }
-
-    .leaderboard-table .top-3 {
-      background-color: rgba(205, 127, 50, 0.1);
-    }
-
-    .rank-badge {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 30px;
-      font-weight: 700;
-      color: white;
-    }
-
     .rank-1 {
-      background-color: #FFD700;
+      color: var(--gold-color);
+      font-size: 1.2rem;
     }
 
     .rank-2 {
-      background-color: #C0C0C0;
+      color: var(--silver-color);
+      font-size: 1.1rem;
     }
 
     .rank-3 {
-      background-color: #CD7F32;
+      color: var(--bronze-color);
     }
 
-    .rank-4-10 {
-      background-color: var(--primary-light);
+    .reward-cell {
+      font-weight: 600;
+      color: var(--success-color);
     }
 
     .user-rank {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      font-weight: 600;
-    }
-
-    .user-rank.highlight {
-      background-color: rgba(255, 149, 0, 0.2);
-      border-left: 4px solid var(--primary-color);
-    }
-
-    /* Rewards info section */
-    .rewards-info {
-      background: linear-gradient(135deg, #fff0cc 0%, #ffe6b3 100%);
+      margin-top: 25px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
       border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      color: white;
+      text-align: center;
     }
 
-    .rewards-list {
-      margin-top: 20px;
+    .user-rank h3 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
     }
 
-    .reward-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
-      padding: 15px;
-      background-color: rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-    }
-
-    .reward-icon {
+    .user-rank-value {
       font-size: 2rem;
-      color: var(--primary-color);
+      font-weight: 700;
+      margin-bottom: 10px;
     }
 
-    .reward-content {
-      flex: 1;
-    }
-
-    .reward-title {
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: var(--primary-color);
-    }
-
-    .reward-description {
-      font-size: 0.9rem;
-      color: var(--text-light);
+    .user-referrals {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
     }
 
     /* Footer */
@@ -810,96 +636,20 @@
       font-size: 0.9rem;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 992px) {
-      .sidebar {
-        width: 230px;
-      }
-      
-      .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    /* Overlay et modal */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 98;
     }
-
-    @media (max-width: 768px) {
-        .main-container {
-            flex-direction: column;
-        }
-        
-        .hamburger-btn {
-            display: flex;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 101;
-        }
-
-        .sidebar {
-            width: 75%;
-            max-width: 300px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: -100%;
-            z-index: 99;
-            transition: left 0.4s ease-in-out;
-        }
-        
-        .sidebar.open {
-            left: 0;
-        }
-        
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 98;
-        }
-        
-        .overlay.active {
-            display: block;
-        }
-        
-        .header {
-            padding: 15px;
-        }
-        
-        .logo {
-            font-size: 1.5rem;
-            margin-left: 50px;
-        }
-        
-        .content {
-            padding: 20px;
-        }
-        
-        .features-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .rewards-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .footer-links {
-            flex-direction: column;
-            gap: 10px;
-        }
-    }
-
-    @media (max-width: 576px) {
-      .leaderboard-table {
-        font-size: 0.85rem;
-      }
-      
-      .leaderboard-table th, .leaderboard-table td {
-        padding: 8px 10px;
-      }
+    
+    .overlay.active {
+      display: block;
     }
 
     /* Animation for notifications */
@@ -951,6 +701,79 @@
         opacity: 1;
       }
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 230px;
+      }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            flex-direction: column;
+        }
+        
+        .hamburger-btn {
+            display: flex;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+        }
+
+        .sidebar {
+            width: 75%;
+            max-width: 300px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            z-index: 99;
+            transition: left 0.4s ease-in-out;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        .header {
+            padding: 15px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            margin-left: 50px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .leaderboard-table {
+          font-size: 0.9rem;
+        }
+        
+        .leaderboard-table th, .leaderboard-table td {
+          padding: 10px;
+        }
+    }
+
+    @media (max-width: 576px) {
+      .leaderboard-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .footer-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -995,7 +818,7 @@
   <div class="main-container">
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">Challenge & Reward >> MULAFLOWR</div>
+        <div class="welcome-text">Challenge and Rewards >> MULAFLOWR</div>
         <div class="username" id="sidebarUsername">Utilisateur</div>
       </div>
       
@@ -1040,10 +863,10 @@
       <a href="challenge_reward.html" class="menu-item active">
         <i class="fas fa-medal"></i>
         <span>Challenge and Reward</span>
-        <span class="menu-badge active">Nouveau</span>
+        <span class="menu-badge active">☑</span>
       </a>
       
-      <div class="menu-category">PRODUIT / TÂCHE</div>
+      <div class="menu-category">PRODUIT / TACHE</div>
       <a href="whatsapp_earn.html" class="menu-item">
         <i class="fab fa-whatsapp"></i>
         <span>Gagner via Whatsapp</span>
@@ -1114,269 +937,61 @@
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
+        <span>Challenge and Rewards</span>
       </h1>
       
-      <div class="banner" id="welcomeBanner">
-        <div class="banner-title" id="welcomeTitle">
-            Bienvenue dans le Challenge,
-            <span class="username-highlight" id="bannerUsername">Utilisateur</span>
-        </div>
-        <div class="banner-text" id="welcomeMessage">
-          Participez à notre challenge hebdomadaire et gagnez des récompenses incroyables ! Les meilleurs parrains sont récompensés chaque semaine.
+      <div class="challenge-banner">
+        <h2 class="banner-title">Défiez-vous et gagnez des récompenses!</h2>
+        <div class="banner-text">
+          Le classement des meilleurs parrains de MULAFLOWR! Ici, nous récompensons les membres les plus actifs qui ont parrainé le plus de personnes. Plus vous parrainez, plus vous grimpez dans le classement et plus vos récompenses sont importantes. Les récompenses sont mises à jour chaque semaine, alors continuez à inviter vos amis!
         </div>
       </div>
       
-      <div class="intro-section">
-        <h2 class="section-title">Comment fonctionne le Challenge and Reward ?</h2>
-        <div class="intro-content">
-          <div class="intro-text">
-            <p>Le Challenge and Reward est un programme hebdomadaire qui récompense les membres les plus actifs de MULAFLOWR, en particulier ceux qui excellent dans le parrainage.</p>
-            <p>Chaque semaine, nous sélectionnons les 20 meilleurs parrains en fonction du nombre de personnes qu'ils ont parrainées et de l'activité de leur équipe. Les 5 premiers reçoivent des récompenses spéciales !</p>
-          </div>
-          
-          <div class="features-grid">
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-trophy"></i>
-              </div>
-              <h3 class="feature-title">Récompenses Hebdomadaires</h3>
-              <p class="feature-description">Chaque semaine, de nouvelles récompenses sont offertes aux meilleurs parrains.</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <h3 class="feature-title">Classement en Temps Réel</h3>
-              <p class="feature-description">Suivez votre position dans le classement en direct et voyez qui sont les meilleurs.</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-gift"></i>
-              </div>
-              <h3 class="feature-title">Cadeaux Variés</h3>
-              <p class="feature-description">Multiplicateurs de solde, argent cash, avantages exclusifs, et bien plus encore!</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h3 class="feature-title">Stimulation d'Équipe</h3>
-              <p class="feature-description">Plus votre équipe est active, plus vous avez de chances de gagner!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="rewards-section">
-        <div class="rewards-header">
-          <h2 class="section-title">Classement Hebdomadaire</h2>
-          <div class="week-selector">
-            <button class="week-btn" id="prevWeekBtn">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <span class="current-week" id="currentWeek">Semaine 38 (16-22 Sept)</span>
-            <button class="week-btn" id="nextWeekBtn">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-        </div>
+      <div class="challenge-section">
+        <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des Meilleurs Parrains</h2>
+        <p class="section-subtitle">Voici le top 20 des parrains les plus actifs cette semaine. Les 5 premiers reçoivent des récompenses spéciales!</p>
         
-        <div class="leaderboard-table-container">
-          <table class="leaderboard-table">
-            <thead>
-              <tr>
-                <th class="rank">#</th>
-                <th>Utilisateur</th>
-                <th>Personnes parrainées</th>
-                <th>Points</th>
-                <th>Récompense</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-              <tr class="top-1">
-                <td class="rank"><span class="rank-badge rank-1">1</span></td>
-                <td>StarParrain</td>
-                <td>42</td>
-                <td>420</td>
-                <td>Multiplicateur x3 + 20 000 XAF</td>
-              </tr>
-              <tr class="top-2">
-                <td class="rank"><span class="rank-badge rank-2">2</span></td>
-                <td>TopRecruteur</td>
-                <td>38</td>
-                <td>380</td>
-                <td>Multiplicateur x2 + 15 000 XAF</td>
-              </tr>
-              <tr class="top-3">
-                <td class="rank"><span class="rank-badge rank-3">3</span></td>
-                <td>MasterMLM</td>
-                <td>35</td>
-                <td>350</td>
-                <td>Multiplicateur x2 + 10 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">4</span></td>
-                <td>GagneurPro</td>
-                <td>32</td>
-                <td>320</td>
-                <td>15 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">5</span></td>
-                <td>BusinessKing</td>
-                <td>30</td>
-                <td>300</td>
-                <td>10 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">6</span></td>
-                <td>ReferralExpert</td>
-                <td>28</td>
-                <td>280</td>
-                <td>5 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">7</span></td>
-                <td>NetworkBuilder</td>
-                <td>25</td>
-                <td>250</td>
-                <td>5 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">8</span></td>
-                <td>TeamLeader</td>
-                <td>23</td>
-                <td>230</td>
-                <td>3 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">9</span></td>
-                <td>SuccessPath</td>
-                <td>21</td>
-                <td>210</td>
-                <td>3 000 XAF</td>
-              </tr>
-              <tr>
-                <td class="rank"><span class="rank-badge rank-4-10">10</span></td>
-                <td>WinMaster</td>
-                <td>20</td>
-                <td>200</td>
-                <td>3 000 XAF</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div class="user-rank" id="userRankSection">
-            Votre rang: <span id="userRank">Chargement...</span> - <span id="userReferrals">0</span> personnes parrainées - <span id="userPoints">0</span> points
-          </div>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th class="rank-cell">Rang</th>
+              <th>Nom d'utilisateur</th>
+              <th>Personnes parrainées</th>
+              <th>Récompense</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Les données seront chargées dynamiquement -->
+          </tbody>
+        </table>
+        
+        <div class="user-rank" id="userRankSection">
+          <h3>Votre classement</h3>
+          <div class="user-rank-value" id="userRank">--</div>
+          <div class="user-referrals" id="userReferrals">Personnes parrainées: 0</div>
+          <p>Continuez à parrainer pour grimper dans le classement et gagner des récompenses!</p>
         </div>
       </div>
       
-      <div class="rewards-info">
-        <h2 class="section-title">Récompenses de la semaine</h2>
-        <p>Découvrez les récompenses exceptionnelles offertes cette semaine aux meilleurs parrains:</p>
+      <div class="challenge-section">
+        <h2 class="section-title"><i class="fas fa-gift"></i> Système de Récompenses</h2>
+        <p class="section-subtitle">Comment fonctionnent les récompenses et comment en bénéficier?</p>
         
-        <div class="rewards-list">
-          <div class="reward-item">
-            <div class="reward-icon">
-              <i class="fas fa-crown"></i>
-            </div>
-            <div class="reward-content">
-              <h3 class="reward-title">1ère Place</h3>
-              <p class="reward-description">Multiplicateur de solde x3 + 20 000 XAF en cash + Accès premium à vie</p>
-            </div>
-          </div>
+        <div style="margin-top: 20px;">
+          <h4>Récompenses hebdomadaires:</h4>
+          <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li><strong>1ère place:</strong> Multipliez votre solde par 4 + 20 000 FCFA</li>
+            <li><strong>2ème place:</strong> Multipliez votre solde par 3 + 15 000 FCFA</li>
+            <li><strong>3ème place:</strong> Multipliez votre solde par 2 + 10 000 FCFA</li>
+            <li><strong>4ème place:</strong> 5 000 FCFA</li>
+            <li><strong>5ème place:</strong> 1 000 FCFA</li>
+          </ul>
           
-          <div class="reward-item">
-            <div class="reward-icon">
-              <i class="fas fa-medal"></i>
-            </div>
-            <div class="reward-content">
-              <h3 class="reward-title">2ème Place</h3>
-              <p class="reward-description">Multiplicateur de solde x2 + 15 000 XAF en cash + Accès premium 3 mois</p>
-            </div>
-          </div>
+          <h4>Comment participer:</h4>
+          <p>Pour participer au challenge, il suffit de parrainer un maximum de personnes en partageant votre lien de parrainage. Chaque personne qui s'inscrit via votre lien augmente votre score dans le classement.</p>
           
-          <div class="reward-item">
-            <div class="reward-icon">
-              <i class="fas fa-award"></i>
-            </div>
-            <div class="reward-content">
-              <h3 class="reward-title">3ème Place</h3>
-              <p class="reward-description">Multiplicateur de solde x2 + 10 000 XAF en cash + Accès premium 1 mois</p>
-            </div>
-          </div>
-          
-          <div class="reward-item">
-            <div class="reward-icon">
-              <i class="fas fa-star"></i>
-            </div>
-            <div class="reward-content">
-              <h3 class="reward-title">4ème à 5ème Place</h3>
-              <p class="reward-description">15 000 XAF (4ème) et 10 000 XAF (5ème) en cash + Badge exclusif</p>
-            </div>
-          </div>
-          
-          <div class="reward-item">
-            <div class="reward-icon">
-              <i class="fas fa-gem"></i>
-            </div>
-            <div class="reward-content">
-              <h3 class="reward-title">6ème à 10ème Place</h3>
-              <p class="reward-description">De 5 000 à 3 000 XAF en cash selon le classement</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="intro-text" style="margin-top: 20px;">
-          <p><strong>Note:</strong> Les récompenses changent chaque semaine pour maintenir l'engagement et offrir toujours de nouvelles surprises. Les multiplicateurs de solde s'appliquent à toutes vos gains pendant 7 jours.</p>
-        </div>
-      </div>
-      
-      <div class="intro-section">
-        <h2 class="section-title">Comment augmenter vos chances de gagner ?</h2>
-        <div class="intro-content">
-          <div class="intro-text">
-            <p>Pour figurer dans le classement et avoir une chance de remporter ces récompenses, voici quelques conseils:</p>
-          </div>
-          
-          <div class="features-grid">
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-share-alt"></i>
-              </div>
-              <h3 class="feature-title">Partagez votre lien de parrainage</h3>
-              <p class="feature-description">Plus vous partagez, plus vous avez de chances de recruter de nouveaux membres.</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-chalkboard-teacher"></i>
-              </div>
-              <h3 class="feature-title">Formez votre équipe</h3>
-              <p class="feature-description">Aidez vos filleuls à réussir pour booster votre propre classement.</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-bullhorn"></i>
-              </div>
-              <h3 class="feature-title">Soyez actif quotidiennement</h3>
-              <p class="feature-description">Plus vous êtes actif sur la plateforme, plus vous gagnez de points.</p>
-            </div>
-            
-            <div class="feature-card">
-              <div class="feature-icon">
-                <i class="fas fa-calendar-check"></i>
-              </div>
-              <h3 class="feature-title">Participez chaque semaine</h3>
-              <p class="feature-description">Le classement est remis à zéro chaque semaine, alors donnez le meilleur de vous-même!</p>
-            </div>
-          </div>
+          <h4>Quand sont distribuées les récompenses:</h4>
+          <p>Les récompenses sont distribuées chaque dimanche à minuit. Le classement est remis à zéro chaque semaine pour donner à tous une chance de gagner.</p>
         </div>
       </div>
     </main>
@@ -1389,7 +1004,7 @@
         <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
       </div>
       <div class="footer-text">
-        © 2025 MULAFLOWR. Tous droits réservés. Challenge and Reward est un programme hebdomadaire.
+        © 2025 MULAFLOWR. Tous droits réservés.
       </div>
     </div>
   </footer>
@@ -1418,22 +1033,17 @@
     const userProfile = document.getElementById('userProfile');
     const profileDropdown = document.getElementById('profileDropdown');
     const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
     const sidebarUsername = document.getElementById('sidebarUsername');
     const userAvatar = document.getElementById('userAvatar');
-    const bannerUsername = document.getElementById('bannerUsername');
-    const prevWeekBtn = document.getElementById('prevWeekBtn');
-    const nextWeekBtn = document.getElementById('nextWeekBtn');
-    const currentWeek = document.getElementById('currentWeek');
+    const loader = document.getElementById('loader');
     const leaderboardBody = document.getElementById('leaderboardBody');
     const userRankSection = document.getElementById('userRankSection');
     const userRank = document.getElementById('userRank');
     const userReferrals = document.getElementById('userReferrals');
-    const userPoints = document.getElementById('userPoints');
 
     /******** Variables d'état ********/
     let currentUser = null;
-    let currentWeekNumber = 38; // Semaine actuelle
+    let userData = {};
 
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
@@ -1489,118 +1099,165 @@
         if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
     });
 
-    /******** Fonctions Challenge and Reward ********/
-    function getWeekDates(weekNumber, year = 2025) {
-      const firstDayOfYear = new Date(year, 0, 1);
-      const daysToFirstMonday = firstDayOfYear.getDay() === 0 ? 1 : (8 - firstDayOfYear.getDay());
-      const firstMonday = new Date(year, 0, daysToFirstMonday);
-      
-      const startDate = new Date(firstMonday);
-      startDate.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
-      
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 6);
-      
-      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-      
-      return {
-        start: `${startDate.getDate()} ${months[startDate.getMonth()]}`,
-        end: `${endDate.getDate()} ${months[endDate.getMonth()]}`
-      };
-    }
-
-    function updateWeekDisplay() {
-      const dates = getWeekDates(currentWeekNumber);
-      currentWeek.textContent = `Semaine ${currentWeekNumber} (${dates.start}-${dates.end})`;
-    }
-
-    async function loadLeaderboardData(weekNumber) {
+    /******** Fonctions Firestore ********/
+    async function saveUserData(key = null, value = null) {
+      if (!currentUser) return;
       try {
-        // En attendant l'implémentation réelle, on simule des données
-        const userData = await db.collection('users').doc(currentUser.uid).get();
-        const userProfile = userData.exists ? userData.data() : {};
-        
-        // Simulation des données de classement
-        const referralsCount = userProfile.activeReferrals || Math.floor(Math.random() * 15);
-        const points = referralsCount * 10;
-        
-        // Mise à jour de la section utilisateur
-        userReferrals.textContent = referralsCount;
-        userPoints.textContent = points;
-        
-        // Déterminer le rang de l'utilisateur
-        let rank = "Hors top 20";
-        if (referralsCount >= 20) rank = "10";
-        if (referralsCount >= 21) rank = "9";
-        if (referralsCount >= 23) rank = "8";
-        if (referralsCount >= 25) rank = "7";
-        if (referralsCount >= 28) rank = "6";
-        if (referralsCount >= 30) rank = "5";
-        if (referralsCount >= 32) rank = "4";
-        if (referralsCount >= 35) rank = "3";
-        if (referralsCount >= 38) rank = "2";
-        if (referralsCount >= 42) rank = "1";
-        
-        userRank.textContent = rank;
-        
-        // Surligner la section utilisateur s'il est dans le top 20
-        if (referralsCount >= 20) {
-          userRankSection.classList.add('highlight');
-        } else {
-          userRankSection.classList.remove('highlight');
-        }
-        
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const dataToSave = key ? { [key]: value } : userData;
+        await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
+        console.log('Données utilisateur enregistrées avec succès.');
       } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-        showNotification('error', 'Erreur', 'Impossible de charger les données du classement.');
+        console.error("Erreur lors de la sauvegarde des données :", error);
+        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
       }
     }
 
-    /******** Gestion des événements ********/
-    prevWeekBtn.addEventListener('click', () => {
-      if (currentWeekNumber > 1) {
-        currentWeekNumber--;
-        updateWeekDisplay();
-        loadLeaderboardData(currentWeekNumber);
+    async function loadUserData() {
+      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
+      const userRef = db.collection('users').doc(currentUser.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+          const data = doc.data() || {};
+          userData = {
+              displayName: data.displayName || currentUser.displayName,
+              email: data.email || currentUser.email,
+              phoneNumber: data.phoneNumber || data.phone || "",
+              country: data.country || data.pays || "",
+              theme: data.theme || 'light',
+              activeReferrals: data.activeReferrals || data.parrainageCount || 0
+          };
+      } else {
+        userData = { theme: 'light', activeReferrals: 0 };
+        await saveUserData();
       }
-    });
+    }
 
-    nextWeekBtn.addEventListener('click', () => {
-      // Limiter à la semaine actuelle ou future (pour l'exemple, on limite à la semaine 40)
-      if (currentWeekNumber < 40) {
-        currentWeekNumber++;
-        updateWeekDisplay();
-        loadLeaderboardData(currentWeekNumber);
+    async function getTopReferrers() {
+      try {
+        const usersRef = db.collection('users');
+        const querySnapshot = await usersRef
+          .where('activeReferrals', '>=', 15)
+          .orderBy('activeReferrals', 'desc')
+          .limit(20)
+          .get();
+        
+        const topReferrers = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          topReferrers.push({
+            id: doc.id,
+            displayName: data.displayName || 'Utilisateur',
+            activeReferrals: data.activeReferrals || 0
+          });
+        });
+        
+        return topReferrers;
+      } catch (error) {
+        console.error("Erreur lors de la récupération des meilleurs parrains :", error);
+        showNotification('error', 'Erreur', 'Impossible de charger le classement.');
+        return [];
       }
-    });
+    }
+
+    function displayLeaderboard(referrers) {
+      if (referrers.length === 0) {
+        leaderboardBody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 30px;">
+              Aucun parrain n'a encore atteint le classement. Soyez le premier!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      let html = '';
+      referrers.forEach((referrer, index) => {
+        const rank = index + 1;
+        let reward = '';
+        
+        // Déterminer la récompense en fonction du rang
+        if (rank === 1) reward = 'x4 solde + 20 000 FCFA';
+        else if (rank === 2) reward = 'x3 solde + 15 000 FCFA';
+        else if (rank === 3) reward = 'x2 solde + 10 000 FCFA';
+        else if (rank === 4) reward = '5 000 FCFA';
+        else if (rank === 5) reward = '1 000 FCFA';
+        else reward = '---';
+        
+        html += `
+          <tr>
+            <td class="rank-cell ${rank <= 3 ? 'rank-' + rank : ''}">${rank}</td>
+            <td>${referrer.displayName}</td>
+            <td>${referrer.activeReferrals}</td>
+            <td class="reward-cell">${reward}</td>
+          </tr>
+        `;
+      });
+      
+      leaderboardBody.innerHTML = html;
+    }
+
+    function updateUserRank(referrers) {
+      if (!currentUser) return;
+      
+      // Trouver le rang de l'utilisateur actuel
+      const userIndex = referrers.findIndex(ref => ref.id === currentUser.uid);
+      
+      if (userIndex !== -1) {
+        userRank.textContent = `#${userIndex + 1}`;
+      } else {
+        userRank.textContent = 'Hors top 20';
+      }
+      
+      userReferrals.textContent = `Personnes parrainées: ${userData.activeReferrals || 0}`;
+    }
 
     /******** Initialisation de l'application ********/
+    function updateUserInfoUI(user, dbData = {}) {
+        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+        if (sidebarUsername) sidebarUsername.textContent = displayName;
+        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+    }
+
+    function applyTheme() {
+        const isDarkMode = userData.theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+    }
+
     auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        
-        try {
-          // Mettre à jour l'interface utilisateur
-          const displayName = user.displayName || user.email.split('@')[0];
-          if (sidebarUsername) sidebarUsername.textContent = displayName;
-          if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-          if (bannerUsername) bannerUsername.textContent = displayName;
-          
-          // Charger les données du classement
-          updateWeekDisplay();
-          loadLeaderboardData(currentWeekNumber);
-          
-          // Cacher le loader
-          document.body.classList.add('loaded');
-          loader.classList.add('hidden');
-          
-        } catch (error) {
-          console.error("Erreur lors du chargement des données:", error);
-          showNotification('error', 'Erreur', "Impossible de charger les données du challenge.");
+        if (user) {
+            currentUser = user;
+            try {
+                await loadUserData();
+                updateUserInfoUI(user, userData);
+                applyTheme();
+                
+                // Charger le classement
+                const topReferrers = await getTopReferrers();
+                displayLeaderboard(topReferrers);
+                updateUserRank(topReferrers);
+                
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+                
+            } catch (error) {
+                console.error("Erreur critique lors de l'initialisation :", error);
+                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                auth.signOut();
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            }
+        } else {
+            window.location.href = 'login.html';
         }
-      } else {
-        window.location.href = 'login.html';
-      }
+    });
+
+    /******** Initialisation au chargement de la page ********/
+    document.addEventListener('DOMContentLoaded', () => {
+      // Rien de spécifique pour le moment
     });
   </script>
 </body>
