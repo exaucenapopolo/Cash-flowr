@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MULAFLOWR - Bonus de Bienvenue</title>
+  <title>MULAFLOWR - Dépôt</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
@@ -439,131 +439,156 @@
       color: var(--primary-color);
     }
 
-    /* Styles spécifiques à la page de bonus */
-    .bonus-container {
+    /* Styles spécifiques à la page de dépôt */
+    .depot-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       gap: 30px;
+      flex-wrap: wrap;
     }
 
-    .bonus-card {
+    .depot-form-container {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .depot-info-container {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .depot-card {
       background-color: var(--card-bg);
       border-radius: 12px;
-      padding: 30px;
+      padding: 25px;
       box-shadow: var(--shadow);
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .bonus-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) rotate(45deg); }
-    }
-
-    .bonus-icon {
-      font-size: 4rem;
-      color: gold;
-      margin-bottom: 20px;
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .bonus-title {
-      font-size: 2rem;
-      color: var(--primary-color);
-      margin-bottom: 15px;
-      font-weight: 700;
-    }
-
-    .bonus-amount {
-      font-size: 3rem;
-      color: var(--success-color);
-      margin-bottom: 20px;
-      font-weight: 800;
-    }
-
-    .bonus-description {
-      color: var(--text-light);
       margin-bottom: 30px;
-      line-height: 1.6;
     }
 
-    .claim-btn {
-      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+    .depot-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .form-input, .form-select {
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--background-light);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(58, 142, 230, 0.2);
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       color: white;
       border: none;
       border-radius: 8px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
+      padding: 15px;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .claim-btn:hover:not(:disabled) {
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(58, 142, 230, 0.4);
+    }
+
+    .payment-methods {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .payment-method {
+      flex: 1;
+      min-width: 120px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .payment-method:hover {
+      border-color: var(--primary-color);
       transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
     }
 
-    .claim-btn:disabled {
-      background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
-      cursor: not-allowed;
+    .payment-method.selected {
+      border-color: var(--primary-color);
+      background-color: rgba(58, 142, 230, 0.1);
     }
 
-    .bonus-info {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
+    .payment-method i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    .depot-history {
+      margin-top: 30px;
+    }
+
+    .history-table {
       width: 100%;
-      max-width: 600px;
+      border-collapse: collapse;
     }
 
-    .info-title {
-      font-size: 1.5rem;
-      color: var(--secondary-color);
-      margin-bottom: 20px;
+    .history-table th, .history-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .history-table th {
+      background-color: rgba(0, 0, 0, 0.05);
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
       font-weight: 600;
     }
 
-    .info-list {
-      list-style-type: none;
+    .status-success {
+      background-color: var(--success-color);
+      color: white;
     }
 
-    .info-item {
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .status-pending {
+      background-color: var(--warning-color);
+      color: white;
     }
 
-    .info-item:last-child {
-      border-bottom: none;
-    }
-
-    .info-item i {
-      color: var(--success-color);
+    .status-failed {
+      background-color: var(--danger-color);
+      color: white;
     }
 
     /* Footer */
@@ -662,12 +687,8 @@
             padding: 20px;
         }
         
-        .bonus-title {
-          font-size: 1.5rem;
-        }
-        
-        .bonus-amount {
-          font-size: 2.5rem;
+        .depot-container {
+            flex-direction: column;
         }
     }
 
@@ -775,16 +796,16 @@
         <span class="menu-badge badge-inactive">☑</span>
       </a>
       
-      <a href="depot.html" class="menu-item">
+      <a href="depot.html" class="menu-item active">
         <i class="fas fa-wallet"></i>
         <span>Dépôt 💵</span>
-        <span class="menu-badge badge-inactive">☐</span>
+        <span class="menu-badge badge-active">☐</span>
       </a>
       
-      <a href="bonus_bienvenue.html" class="menu-item active">
+      <a href="bonus_bienvenue.html" class="menu-item">
         <i class="fas fa-gift"></i>
         <span>Bonus de bienvenue</span>
-        <span class="menu-badge badge-active">☒</span>
+        <span class="menu-badge badge-inactive">☒</span>
       </a>
       
       <div class="menu-category">COMPTES</div>
@@ -902,42 +923,70 @@
 
     <main class="content">
       <h1 class="page-title">
-        <i class="fas fa-gift"></i>
-        <span>Bonus de Bienvenue</span>
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt d'argent</span>
       </h1>
       
-      <div class="bonus-container">
-        <div class="bonus-card">
-          <i class="fas fa-gift bonus-icon"></i>
-          <h2 class="bonus-title">Félicitations!</h2>
-          <div class="bonus-amount">750 XAF</div>
-          <p class="bonus-description">
-            Vous avez reçu un bonus de bienvenue de 750 XAF pour votre inscription sur MULAFLOWR.
-            Cliquez sur le bouton ci-dessous pour réclamer votre bonus et l'ajouter à votre solde.
-          </p>
-          <button class="claim-btn" id="claimBonusBtn">Récupérer mon bonus</button>
+      <div class="depot-container">
+        <div class="depot-form-container">
+          <div class="depot-card">
+            <h2>Effectuer un dépôt</h2>
+            <form class="depot-form" id="depotForm">
+              <div class="form-group">
+                <label class="form-label" for="phone">Numéro de téléphone</label>
+                <input type="tel" id="phone" class="form-input" placeholder="Votre numéro de téléphone" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="amount">Montant à déposer (XAF)</label>
+                <input type="number" id="amount" class="form-input" placeholder="Montant en XAF" min="1000" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Méthode de paiement</label>
+                <div class="payment-methods">
+                  <div class="payment-method" data-method="mtn">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>MTN Mobile Money</div>
+                  </div>
+                  <div class="payment-method" data-method="orange">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>Orange Money</div>
+                  </div>
+                </div>
+                <input type="hidden" id="paymentMethod" required>
+              </div>
+              
+              <button type="submit" class="submit-btn">Effectuer le dépôt</button>
+            </form>
+          </div>
         </div>
         
-        <div class="bonus-info">
-          <h3 class="info-title">À propos du bonus de bienvenue</h3>
-          <ul class="info-list">
-            <li class="info-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Le bonus de bienvenue est offert à tous les nouveaux membres</span>
-            </li>
-            <li class="info-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Le bonus est crédité immédiatement après confirmation</span>
-            </li>
-            <li class="info-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Le bonus peut être utilisé pour toutes les activités sur la plateforme</span>
-            </li>
-            <li class="info-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Le bonus est valable sans limite de temps</span>
-            </li>
-          </ul>
+        <div class="depot-info-container">
+          <div class="depot-card">
+            <h2>Informations de dépôt</h2>
+            <p>Pour effectuer un dépôt, veuillez remplir le formulaire avec vos informations.</p>
+            <p>Le montant minimum de dépôt est de <strong>1000 XAF</strong>.</p>
+            <p>Votre solde sera crédité instantanément après confirmation du paiement.</p>
+          </div>
+          
+          <div class="depot-card depot-history">
+            <h2>Historique des dépôts</h2>
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="depotHistory">
+                <tr>
+                  <td colspan="3" style="text-align: center;">Aucun dépôt effectué</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </main>
@@ -979,7 +1028,12 @@
     const userProfile = document.getElementById('userProfile');
     const profileDropdown = document.getElementById('profileDropdown');
     const languageSelector = document.getElementById('languageSelector');
-    const claimBonusBtn = document.getElementById('claimBonusBtn');
+    const depotForm = document.getElementById('depotForm');
+    const phoneInput = document.getElementById('phone');
+    const amountInput = document.getElementById('amount');
+    const paymentMethodInput = document.getElementById('paymentMethod');
+    const paymentMethods = document.querySelectorAll('.payment-method');
+    const depotHistory = document.getElementById('depotHistory');
     const sidebarUsername = document.getElementById('sidebarUsername');
     const userAvatar = document.getElementById('userAvatar');
     const loader = document.getElementById('loader');
@@ -987,7 +1041,6 @@
     /******** Variables d'état ********/
     let currentUser = null;
     let userData = {};
-    let bonusClaimed = false;
 
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
@@ -1043,35 +1096,90 @@
         if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
     });
 
-    /******** Réclamation du bonus ********/
-    claimBonusBtn.addEventListener('click', async () => {
-      if (bonusClaimed) return;
+    /******** Méthodes de paiement ********/
+    paymentMethods.forEach(method => {
+      method.addEventListener('click', () => {
+        paymentMethods.forEach(m => m.classList.remove('selected'));
+        method.classList.add('selected');
+        paymentMethodInput.value = method.dataset.method;
+      });
+    });
+
+    /******** Formulaire de dépôt ********/
+    depotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!paymentMethodInput.value) {
+        showNotification('error', 'Erreur', 'Veuillez sélectionner une méthode de paiement');
+        return;
+      }
+      
+      const amount = parseInt(amountInput.value);
+      const phone = phoneInput.value;
+      const method = paymentMethodInput.value;
+      
+      if (amount < 1000) {
+        showNotification('error', 'Erreur', 'Le montant minimum est de 1000 XAF');
+        return;
+      }
       
       try {
-        showNotification('info', 'Traitement', 'Votre bonus est en cours de traitement...');
+        // Simulation de dépôt
+        showNotification('info', 'Traitement', 'Votre dépôt est en cours de traitement...');
         
         // Simulation d'un délai de traitement
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Mise à jour des données utilisateur
-        userData.bonusAgent = (userData.bonusAgent || 0) + 750;
-        userData.solde = (userData.solde || 0) + 750;
-        bonusClaimed = true;
+        userData.depotSolde = (userData.depotSolde || 0) + amount;
+        userData.solde = (userData.solde || 0) + amount;
         
         // Sauvegarde des données
         await saveUserData();
         
-        // Désactivation du bouton
-        claimBonusBtn.disabled = true;
-        claimBonusBtn.textContent = 'Bonus déjà réclamé';
+        // Ajout à l'historique
+        addToHistory(new Date(), amount, 'success');
         
-        showNotification('success', 'Félicitations!', 'Votre bonus de 750 XAF a été crédité avec succès!');
+        showNotification('success', 'Succès', `Votre dépôt de ${amount} XAF a été effectué avec succès!`);
+        
+        // Réinitialisation du formulaire
+        depotForm.reset();
+        paymentMethods.forEach(m => m.classList.remove('selected'));
+        paymentMethodInput.value = '';
         
       } catch (error) {
-        console.error('Erreur lors de la réclamation du bonus:', error);
-        showNotification('error', 'Erreur', 'Une erreur est survenue lors de la réclamation du bonus');
+        console.error('Erreur lors du dépôt:', error);
+        showNotification('error', 'Erreur', 'Une erreur est survenue lors du dépôt');
+        addToHistory(new Date(), amount, 'failed');
       }
     });
+
+    function addToHistory(date, amount, status) {
+      const row = document.createElement('tr');
+      
+      const dateCell = document.createElement('td');
+      dateCell.textContent = date.toLocaleDateString('fr-FR');
+      
+      const amountCell = document.createElement('td');
+      amountCell.textContent = `${amount} XAF`;
+      
+      const statusCell = document.createElement('td');
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `status-badge status-${status}`;
+      statusBadge.textContent = status === 'success' ? 'Réussi' : (status === 'pending' ? 'En attente' : 'Échoué');
+      statusCell.appendChild(statusBadge);
+      
+      row.appendChild(dateCell);
+      row.appendChild(amountCell);
+      row.appendChild(statusCell);
+      
+      // Si c'est le premier élément (message vide), on le remplace
+      if (depotHistory.firstChild && depotHistory.firstChild.textContent.includes('Aucun')) {
+        depotHistory.innerHTML = '';
+      }
+      
+      depotHistory.prepend(row);
+    }
 
     /******** Fonctions de gestion des données utilisateur ********/
     async function saveUserData(key = null, value = null) {
@@ -1094,21 +1202,13 @@
       if (doc.exists) {
           const data = doc.data() || {};
           userData = {
-              bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
+              depotSolde: Number(data.depotSolde || data.depositBalance || 0),
               solde: Number(data.solde || data.balance || 0),
               displayName: data.displayName || currentUser.displayName,
-              theme: data.theme || 'light',
-              welcomeBonusClaimed: data.welcomeBonusClaimed || false
+              theme: data.theme || 'light'
           };
-          
-          // Vérifier si le bonus a déjà été réclamé
-          bonusClaimed = userData.welcomeBonusClaimed;
-          if (bonusClaimed) {
-            claimBonusBtn.disabled = true;
-            claimBonusBtn.textContent = 'Bonus déjà réclamé';
-          }
       } else {
-        userData = { bonusAgent: 0, solde: 0, theme: 'light', welcomeBonusClaimed: false };
+        userData = { depotSolde: 0, solde: 0, theme: 'light' };
         await saveUserData();
       }
     }
@@ -1148,6 +1248,11 @@
         } else {
             window.location.href = 'login.html';
         }
+    });
+
+    /******** Initialisation au chargement de la page ********/
+    document.addEventListener('DOMContentLoaded', () => {
+      // Rien de spécifique pour l'instant
     });
   </script>
 </body>
