@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MULAFLOWR - Gagner via WhatsApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Styles de base importés du dashboard */
+        body {
+            background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        :root {
+            --primary-color: #3a8ee6;
+            --primary-light: #4da6ff;
+            --primary-dark: #2c75c9;
+            --secondary-color: #4c566a;
+            --accent-color: #5e81ac;
+            --background-light: #f5f7fb;
+            --background-dark: #e5e9f0;
+            --card-bg: #ffffff;
+            --text-color: #2e3440;
+            --text-light: #4c566a;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-color: #5e81ac;
+            --primary-light: #81a1c1;
+            --primary-dark: #4c566a;
+            --secondary-color: #d8dee9;
+            --accent-color: #88c0d0;
+            --background-light: #2e3440;
+            --background-dark: #3b4252;
+            --card-bg: #434c5e;
+            --text-color: #eceff4;
+            --text-light: #d8dee9;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        /* Styles spécifiques au module */
+        .container {
+            background-color: var(--card-bg);
+            padding: 2em;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .container:hover::before {
+            opacity: 1;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1em;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        #content-to-share {
+            margin: 1.5em 0;
+            padding: 1.5em;
+            border: 2px dashed var(--accent-color);
+            border-radius: 8px;
+            background-color: var(--background-dark);
+        }
+        
+        #share-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        #share-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 1em;
+            box-shadow: var(--shadow);
+        }
+        
+        #whatsapp-share-btn {
+            background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+            color: white;
+            padding: 0.8em 2em;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            font-weight: 600;
+        }
+        
+        #whatsapp-share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #commission-info {
+            margin-top: 2em;
+            background-color: var(--background-dark);
+            padding: 1.5em;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        #commission-info p {
+            font-size: 1rem;
+            margin-bottom: 0.8em;
+            color: var(--text-light);
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        #proof-form label {
+            display: block;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            color: var(--text-color);
+            text-align: left;
+        }
+
+        #proof-form input[type="file"], #proof-form input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--background-dark);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        #proof-form button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1.5em;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+        
+        #proof-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        #total-commission {
+            margin-top: 1.5em;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--success-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Partagez et Gagnez sur WhatsApp !</h2>
+        
+        <div id="content-to-share">
+            <p id="share-text"></p>
+            <img id="share-image" src="" alt="Contenu à partager" style="display:none;">
+        </div>
+        
+        <button id="whatsapp-share-btn">
+            <i class="fab fa-whatsapp"></i> Partager sur WhatsApp
+        </button>
+        
+        <div id="commission-info" style="display:none;">
+            <p>Félicitations ! Vous avez gagné <span class="highlight">50 FCFA</span> en partageant !</p>
+            <p>Pour gagner plus, faites une capture d'écran de votre statut et téléchargez-la ci-dessous. Chaque vue vous rapporte <span class="highlight">10 FCFA</span> de plus !</p>
+            
+            <form id="proof-form">
+                <label for="proof-screenshot">Capture d'écran de votre statut :</label>
+                <input type="file" id="proof-screenshot" accept="image/*" required>
+                
+                <label for="views-count">Nombre de vues :</label>
+                <input type="number" id="views-count" min="0" placeholder="Entrez le nombre de vues" required>
+                
+                <button type="submit">Envoyer la preuve</button>
+            </form>
+            
+            <p id="total-commission" style="display:none;"></p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const shareBtn = document.getElementById('whatsapp-share-btn');
+            const commissionInfo = document.getElementById('commission-info');
+            const proofForm = document.getElementById('proof-form');
+            const totalCommission = document.getElementById('total-commission');
+            const shareTextElement = document.getElementById('share-text');
+            const shareImageElement = document.getElementById('share-image');
+            
+            const shareables = [
+                {
+                    type: 'text',
+                    content: 'Booster votre visibilité avec MULAFLOWR ! C\'est la meilleure plateforme pour propulser votre business.',
+                    url: 'https://mulaflowr.com' 
+                },
+                {
+                    type: 'image',
+                    content: 'https://placehold.co/600x400/3a8ee6/white?text=Boostez%20Votre%20Visibilité',
+                    caption: 'Boostez votre visibilité maintenant !',
+                    url: 'https://mulaflowr.com'
+                },
+                {
+                    type: 'text',
+                    content: 'Nouveau lien de parrainage pour gagner 1000 FCFA ! Inscrivez-vous via ce lien: https://mulaflowr.com/parrainage'
+                }
+            ];
+            
+            const randomShareable = shareables[Math.floor(Math.random() * shareables.length)];
+            
+            if (randomShareable.type === 'image') {
+                shareImageElement.src = randomShareable.content;
+                shareImageElement.style.display = 'block';
+                shareTextElement.textContent = randomShareable.caption;
+            } else {
+                shareTextElement.textContent = randomShareable.content;
+                shareImageElement.style.display = 'none';
+            }
+            
+            shareBtn.addEventListener('click', () => {
+                const text = randomShareable.content;
+                let whatsappUrl = `whatsapp://send?text=${encodeURIComponent(text)}`;
+                
+                if (randomShareable.type === 'image') {
+                    whatsappUrl = `whatsapp://send?text=${encodeURIComponent(randomShareable.caption + '\n' + randomShareable.url)}`;
+                } else {
+                     whatsappUrl = `whatsapp://send?text=${encodeURIComponent(randomShareable.content + '\n' + randomShareable.url)}`;
+                }
+                
+                window.open(whatsappUrl, '_blank');
+                
+                shareBtn.style.display = 'none';
+                commissionInfo.style.display = 'block';
+            });
+            
+            proofForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const viewsCount = document.getElementById('views-count').value;
+                const baseCommission = 50;
+                const commissionPerView = 10;
+                const total = baseCommission + (viewsCount * commissionPerView);
+                
+                totalCommission.textContent = `Votre commission totale est de : ${total} FCFA. Nous allons vérifier votre preuve et vous verser votre argent.`;
+                totalCommission.style.display = 'block';
+                
+                // Ici, il faudra envoyer la preuve au serveur pour vérification. 
+                // Pour l'instant, le code se contente d'afficher le résultat.
+                console.log("Preuve envoyée :", { views: viewsCount, commission: total });
+            });
+        });
+    </script>
+</body>
+</html>

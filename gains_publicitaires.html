@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MULAFLOWR - Gains Publicitaires</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Styles de base importés du dashboard */
+        body {
+            background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 50px;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        :root {
+            --primary-color: #3a8ee6;
+            --primary-light: #4da6ff;
+            --primary-dark: #2c75c9;
+            --secondary-color: #4c566a;
+            --accent-color: #5e81ac;
+            --background-light: #f5f7fb;
+            --background-dark: #e5e9f0;
+            --card-bg: #ffffff;
+            --text-color: #2e3440;
+            --text-light: #4c566a;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        .dark-mode {
+            --primary-color: #5e81ac;
+            --primary-light: #81a1c1;
+            --primary-dark: #4c566a;
+            --secondary-color: #d8dee9;
+            --accent-color: #88c0d0;
+            --background-light: #2e3440;
+            --background-dark: #3b4252;
+            --card-bg: #434c5e;
+            --text-color: #eceff4;
+            --text-light: #d8dee9;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        /* Styles spécifiques au module */
+        .container {
+            background-color: var(--card-bg);
+            padding: 2em;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5em;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .section-description {
+            color: var(--text-light);
+            margin-bottom: 2em;
+        }
+
+        #articles-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5em;
+        }
+
+        .article-card {
+            background-color: var(--background-dark);
+            padding: 1.5em;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: left;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-card.read {
+            background-color: var(--background-light);
+            color: var(--text-light);
+            cursor: default;
+        }
+
+        .article-card h4 {
+            margin: 0 0 0.5em 0;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .article-card p {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        #article-reader {
+            padding: 2em;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        #article-title {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5em;
+        }
+        
+        #article-content {
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 1.5em;
+        }
+
+        #timer-container {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            padding: 1em;
+            background-color: var(--background-dark);
+            border-radius: 8px;
+        }
+
+        #close-reader-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 2em;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+        
+        #close-reader-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        #daily-limit-message, #total-earnings {
+            margin-top: 1.5em;
+            font-weight: 600;
+        }
+        
+        #daily-limit-message {
+            color: var(--warning-color);
+        }
+        
+        #total-earnings {
+            color: var(--success-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gains Publicitaires</h2>
+        <p class="section-description">Lisez les articles publicitaires et gagnez de l'argent. Gagnez <span class="highlight">50 FCFA</span> par article lu (maximum 5 par jour).</p>
+        
+        <div id="articles-list">
+            </div>
+        
+        <div id="article-reader" style="display:none;">
+            <h3 id="article-title"></h3>
+            <p id="article-content"></p>
+            <div id="timer-container">
+                <p>Temps restant : <span id="timer">10</span> secondes</p>
+            </div>
+            <button id="close-reader-btn" style="display:none;">Fermer l'article</button>
+        </div>
+        
+        <p id="daily-limit-message"></p>
+        <p id="total-earnings"></p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const articlesList = document.getElementById('articles-list');
+            const articleReader = document.getElementById('article-reader');
+            const articleTitle = document.getElementById('article-title');
+            const articleContent = document.getElementById('article-content');
+            const timerElement = document.getElementById('timer');
+            const closeReaderBtn = document.getElementById('close-reader-btn');
+            const totalEarningsElement = document.getElementById('total-earnings');
+            const dailyLimitMessage = document.getElementById('daily-limit-message');
+            
+            const articles = [
+                { title: 'Comment le café booste votre productivité', content: 'Le café contient de la caféine, un stimulant naturel qui affecte le système nerveux central. Il est connu pour améliorer la vigilance, la concentration et la performance cognitive. Boire une tasse de café avant de commencer une tâche complexe peut grandement augmenter votre productivité.' },
+                { title: 'Les 5 meilleurs outils de marketing digital', content: 'Le marketing digital est essentiel pour tout business en ligne. Voici une liste d\'outils incontournables pour maximiser votre visibilité : Google Analytics, SEMrush, Mailchimp, Hootsuite et Canva. Chacun de ces outils offre des fonctionnalités uniques pour vous aider à atteindre vos objectifs marketing.' },
+                { title: 'Pourquoi les investissements en ligne sont l\'avenir', content: 'Avec la montée de l\'économie numérique, les investissements en ligne sont devenus accessibles à tous. Des plateformes de trading aux applications d\'épargne automatisée, il n\'a jamais été aussi facile de faire fructifier son argent depuis chez soi. Il est crucial de s\'informer pour choisir les bonnes opportunités.' },
+                { title: '10 astuces pour mieux gérer votre temps', content: 'La gestion du temps est une compétence clé pour le succès. Commencez par identifier vos tâches prioritaires, utilisez la technique Pomodoro pour diviser votre travail en intervalles, et évitez les distractions. Apprendre à dire non est aussi une astuce puissante pour protéger votre temps précieux.' },
+                { title: 'Le guide complet du freelancing en Afrique', content: 'De plus en plus de jeunes se tournent vers le freelancing pour la flexibilité et l\'autonomie qu\'il offre. Ce guide explore les plateformes populaires, les meilleures niches et les conseils pour fixer vos tarifs et trouver vos premiers clients sur le continent africain.' },
+                { title: 'Les avantages des panneaux solaires pour la maison', content: 'L\'énergie solaire est une source d\'énergie renouvelable, propre et durable. L\'installation de panneaux solaires à domicile permet de réduire considérablement la facture d\'électricité tout en contribuant à la protection de l\'environnement. C\'est un investissement à long terme qui prend de la valeur.' },
+                { title: 'La recette du succès pour une petite entreprise', content: 'Démarrer une petite entreprise demande de la planification et de la persévérance. Une bonne stratégie de marché, une gestion financière rigoureuse et un service client irréprochable sont les ingrédients de base. La clé est de rester à l\'écoute de vos clients et de s\'adapter rapidement.' }
+            ];
+            
+            let articlesReadToday = 0;
+            const maxArticlesPerDay = 5;
+            let totalEarnings = 0;
+            
+            function renderArticles() {
+                articlesList.innerHTML = '';
+                articles.forEach((article, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'article-card';
+                    card.dataset.index = index;
+                    card.innerHTML = `<h4>${article.title}</h4>`;
+                    articlesList.appendChild(card);
+                    
+                    card.addEventListener('click', () => {
+                        if (articlesReadToday < maxArticlesPerDay) {
+                            showArticle(article, card);
+                            articlesReadToday++;
+                        } else {
+                            alert('Vous avez atteint la limite quotidienne d\'articles.');
+                        }
+                    });
+                });
+                updateDailyLimitMessage();
+            }
+            
+            function showArticle(article, cardElement) {
+                articlesList.style.display = 'none';
+                articleReader.style.display = 'block';
+                articleTitle.textContent = article.title;
+                articleContent.textContent = article.content;
+                
+                let timer = 10;
+                timerElement.textContent = timer;
+                cardElement.classList.add('read');
+                
+                const interval = setInterval(() => {
+                    timer--;
+                    timerElement.textContent = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        totalEarnings += 50;
+                        totalEarningsElement.textContent = `Gains totaux: ${totalEarnings} FCFA`;
+                        closeReaderBtn.style.display = 'block';
+                        alert('Félicitations ! Vous avez gagné 50 FCFA !');
+                        updateDailyLimitMessage();
+                    }
+                }, 1000);
+            }
+            
+            closeReaderBtn.addEventListener('click', () => {
+                articleReader.style.display = 'none';
+                articlesList.style.display = 'grid';
+                closeReaderBtn.style.display = 'none';
+            });
+            
+            function updateDailyLimitMessage() {
+                dailyLimitMessage.textContent = `Vous avez lu ${articlesReadToday} sur ${maxArticlesPerDay} articles aujourd'hui.`;
+                if (articlesReadToday >= maxArticlesPerDay) {
+                    dailyLimitMessage.style.color = 'var(--danger-color)';
+                } else {
+                    dailyLimitMessage.style.color = 'var(--success-color)';
+                }
+            }
+            
+            renderArticles();
+        });
+    </script>
+</body>
+</html>

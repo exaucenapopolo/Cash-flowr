@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MULAFLOWR - Spin Wheel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Styles de base importés du dashboard */
+        body {
+            background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        :root {
+            --primary-color: #3a8ee6;
+            --primary-light: #4da6ff;
+            --primary-dark: #2c75c9;
+            --secondary-color: #4c566a;
+            --accent-color: #5e81ac;
+            --background-light: #f5f7fb;
+            --background-dark: #e5e9f0;
+            --card-bg: #ffffff;
+            --text-color: #2e3440;
+            --text-light: #4c566a;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        .dark-mode {
+            --primary-color: #5e81ac;
+            --primary-light: #81a1c1;
+            --primary-dark: #4c566a;
+            --secondary-color: #d8dee9;
+            --accent-color: #88c0d0;
+            --background-light: #2e3440;
+            --background-dark: #3b4252;
+            --card-bg: #434c5e;
+            --text-color: #eceff4;
+            --text-light: #d8dee9;
+            --success-color: #4CD964;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --purple-color: #AF52DE;
+            --teal-color: #5AC8FA;
+            --orange-color: #FF9500;
+            --pink-color: #FF2D55;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        /* Styles spécifiques au module */
+        .container {
+            text-align: center;
+            background-color: var(--card-bg);
+            padding: 2.5em;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        
+        p {
+            color: var(--text-light);
+            margin-bottom: 1.5em;
+        }
+        
+        .spin-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 2em auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid var(--accent-color);
+            background-color: var(--background-dark);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .spinner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        
+        .pointer {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid var(--danger-color);
+            z-index: 10;
+        }
+        
+        .sector {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            top: 0;
+            left: 50%;
+            transform-origin: 0% 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .sector-inner {
+            width: 200%;
+            height: 200%;
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            border-radius: 50%;
+        }
+
+        .sector-label {
+            position: absolute;
+            bottom: 55%;
+            left: -10%;
+            transform: rotate(-90deg) translate(-50%, 0);
+            transform-origin: 0% 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+        
+        .controls {
+            margin-top: 2em;
+            background-color: var(--background-dark);
+            padding: 1.5em;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .controls label, .controls p {
+            font-size: 1rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        #bet-amount {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--accent-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            margin: 0.5em 0 1em;
+        }
+        
+        #spin-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        #spin-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        #spin-result {
+            margin-top: 1.5em;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--success-color);
+            min-height: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Faites tourner la Roue !</h2>
+        <p>Tentez votre chance et gagnez des récompenses instantanées !</p>
+        
+        <div class="spin-container">
+            <div id="spinner" class="spinner">
+                </div>
+            <div class="pointer"></div>
+        </div>
+        
+        <div class="controls">
+            <p>Mise actuelle : <span id="current-bet">50</span> FCFA</p>
+            <label for="bet-amount">Sélectionnez votre mise :</label>
+            <select id="bet-amount">
+                <option value="50">50 FCFA</option>
+                <option value="100">100 FCFA</option>
+            </select>
+            <button id="spin-button">Tourner la Roue</button>
+            <p id="spin-result"></p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const spinner = document.getElementById('spinner');
+            const spinButton = document.getElementById('spin-button');
+            const betAmountSelect = document.getElementById('bet-amount');
+            const currentBetElement = document.getElementById('current-bet');
+            const spinResult = document.getElementById('spin-result');
+            
+            const rewards = {
+                '50': {
+                    prizes: [100, 200, 300, 500, 1000, '0'],
+                    colors: ['#4CD964', '#5AC8FA', '#AF52DE', '#FF9500', '#FF3B30', '#c2a2ff']
+                },
+                '100': {
+                    prizes: [1000, 2500, 5000, 10000, 0, 0],
+                    colors: ['#34C759', '#007AFF', '#FF2D55', '#FFCC00', '#5856D6', '#f0a0d4']
+                }
+            };
+
+            function createWheel(bet) {
+                const prizeData = rewards[bet];
+                const prizes = prizeData.prizes;
+                const colors = prizeData.colors;
+                const degreesPerSector = 360 / prizes.length;
+                spinner.innerHTML = '';
+                
+                prizes.forEach((prize, index) => {
+                    const sector = document.createElement('div');
+                    sector.className = 'sector';
+                    sector.style.transform = `rotate(${index * degreesPerSector}deg)`;
+                    
+                    const sectorInner = document.createElement('div');
+                    sectorInner.className = 'sector-inner';
+                    sectorInner.style.backgroundColor = colors[index];
+                    
+                    const prizeText = document.createElement('span');
+                    prizeText.className = 'sector-label';
+                    prizeText.textContent = `${prize} FCFA`;
+                    
+                    sector.appendChild(sectorInner);
+                    sector.appendChild(prizeText);
+                    spinner.appendChild(sector);
+                });
+            }
+
+            betAmountSelect.addEventListener('change', () => {
+                const bet = betAmountSelect.value;
+                currentBetElement.textContent = bet;
+                createWheel(bet);
+                spinResult.textContent = '';
+                spinner.style.transform = 'rotate(0deg)';
+            });
+
+            spinButton.addEventListener('click', () => {
+                spinButton.disabled = true;
+                spinResult.textContent = 'En cours...';
+                
+                const bet = betAmountSelect.value;
+                const prizePool = rewards[bet].prizes;
+                const winningIndex = Math.floor(Math.random() * prizePool.length);
+                const winningPrize = prizePool[winningIndex];
+
+                const degreesPerSector = 360 / prizePool.length;
+                const baseRotation = 360 * 5; // Au moins 5 tours complets
+                const winningRotation = 360 - (winningIndex * degreesPerSector) - (degreesPerSector / 2);
+                const finalRotation = baseRotation + winningRotation;
+                
+                spinner.style.transform = `rotate(${finalRotation}deg)`;
+                
+                setTimeout(() => {
+                    spinResult.textContent = `Félicitations ! Vous avez gagné ${winningPrize} FCFA !`;
+                    spinButton.disabled = false;
+                }, 5000); // La durée de l'animation est de 5 secondes
+            });
+            
+            createWheel('50');
+        });
+    </script>
+</body>
+</html>

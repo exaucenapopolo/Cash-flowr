@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MULAFLOWR - LoveEarn</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"> 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
+  <style>
+    /* Styles de base - Identiques à dashboard.html */
+    body {
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      visibility: hidden; 
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    body.loaded {
+      visibility: visible;
+      opacity: 1;
+    }
+    :root {
+      --primary-color: #3a8ee6;
+      --primary-light: #4da6ff;
+      --primary-dark: #2c75c9;
+      --secondary-color: #4c566a;
+      --accent-color: #5e81ac;
+      --background-light: #f5f7fb;
+      --background-dark: #e5e9f0;
+      --card-bg: #ffffff;
+      --text-color: #2e3440;
+      --text-light: #4c566a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --badge-active: #4CD964;
+      --badge-pending: #FF9500;
+      --badge-inactive: #FF3B30;
+    }
+    .dark-mode {
+      --primary-color: #5e81ac;
+      --primary-light: #81a1c1;
+      --primary-dark: #4c566a;
+      --secondary-color: #d8dee9;
+      --accent-color: #88c0d0;
+      --background-light: #2e3440;
+      --background-dark: #3b4252;
+      --card-bg: #434c5e;
+      --text-color: #eceff4;
+      --text-light: #d8dee9;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --badge-active: #2ecc71;
+      --badge-pending: #f1c40f;
+      --badge-inactive: #e74c3c;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: var(--transition);
+    }
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(#0000 10%, var(--primary-color));
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+      animation: spin 1s infinite linear;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+    .header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .language-selector {
+      background-color: var(--primary-light);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+    .theme-toggle {
+        background-color: transparent;
+        border: none;
+        color: var(--secondary-color);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+    .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .theme-toggle i {
+        font-size: 1.2rem;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    .user-profile .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 150px;
+        z-index: 200;
+        transform-origin: top right;
+        animation: scaleIn 0.2s ease-out forwards;
+    }
+    .profile-dropdown.active {
+        display: flex;
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .profile-dropdown .theme-toggle {
+        width: 100%;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+        justify-content: flex-start;
+        padding: 10px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        text-align: left;
+        gap: 10px;
+    }
+    .profile-dropdown .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    .profile-dropdown .theme-toggle span {
+        flex-grow: 1;
+        text-align: left;
+    }
+    .hamburger-btn {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        padding: 0;
+    }
+    .hamburger-btn .bar {
+        width: 100%;
+        height: 3px;
+        background-color: var(--secondary-color);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .hamburger-btn.open .bar:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-btn.open .bar:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+    .hamburger-btn.open .bar:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.75); 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--shadow);
+      height: calc(100vh - 80px);
+      position: sticky;
+      top: 80px;
+      padding: 25px 0;
+      overflow-y: auto;
+      transition: transform 0.4s ease-in-out; 
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .welcome-section {
+      padding: 0 25px 25px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .welcome-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+    .username {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+    .menu-category {
+      padding: 15px 25px 5px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .menu-item {
+      padding: 12px 25px 12px 35px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      position: relative;
+      overflow: hidden; 
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
+      transition: all 0.5s ease;
+    }
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    .menu-item:hover, .menu-item.active {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-left-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+    .menu-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      transition: transform 0.3s ease;
+    }
+    .menu-item:hover i {
+      transform: scale(1.1) rotate(5deg);
+    }
+    .menu-badge {
+      position: absolute;
+      right: 25px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+      animation: popIn 0.5s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .menu-badge.active {
+      background-color: var(--badge-active);
+      color: white;
+    }
+    .menu-badge.inactive {
+      background-color: var(--badge-inactive);
+      color: white;
+    }
+    .content {
+      flex: 1;
+      padding: 30px;
+    }
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--secondary-color);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-title i {
+      color: var(--primary-color);
+    }
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      pointer-events: auto;
+    }
+    .notification.success {
+      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+    }
+    .notification.error {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+    }
+    .notification.info { 
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @media (max-width: 768px) {
+        .main-container { flex-direction: column; }
+        .hamburger-menu { display: none; }
+        .hamburger-btn { display: flex; position: absolute; top: 20px; left: 20px; z-index: 101; }
+        .sidebar {
+            width: 75%; 
+            max-width: 300px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            z-index: 99;
+            transition: left 0.4s ease-in-out;
+        }
+        .sidebar.open { left: 0; }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 98;
+        }
+        .overlay.active { display: block; }
+        .header { padding: 15px; }
+        .logo { font-size: 1.5rem; margin-left: 50px; }
+        .content { padding: 20px; }
+        .footer-links { flex-direction: column; gap: 10px; }
+    }
+    @media (max-width: 576px) {
+      .user-name { display: none; }
+    }
+    
+    /* Styles spécifiques à LoveEarn */
+    .intro-section {
+      background: linear-gradient(135deg, #ffb3b3 0%, #ff6666 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .intro-section::before {
+      content: '❤️';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10rem;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+    .intro-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .intro-section p {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    
+    .card-section {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+    .card-section h3 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      display: inline-block;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-weight: 500;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+    .form-group input, 
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--background-dark);
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: var(--background-light);
+      color: var(--text-color);
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .button-group button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .button-group .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .button-group .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .button-group .btn-secondary {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+    }
+    .button-group .btn-secondary:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    #search-results {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .partner-card {
+      background-color: var(--background-light);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: popIn 0.5s ease-out;
+      transition: transform 0.3s ease;
+    }
+    .partner-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    .partner-card .partner-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .partner-card .partner-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+    .partner-card .partner-info {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    .partner-card .contact-btn {
+      background-color: #25D366;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: 500;
+      margin-top: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .whatsapp-info {
+      text-align: center;
+      margin-top: 30px;
+      background-color: #e6ffed;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .whatsapp-info i {
+      color: #25D366;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .whatsapp-info p {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .whatsapp-info a {
+      display: inline-block;
+      margin-top: 15px;
+      background-color: #25D366;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .whatsapp-info a:hover {
+      background-color: #128C7E;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .footer {
+      background-color: var(--card-bg);
+      padding: 20px 30px;
+      text-align: center;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      margin-top: auto;
+    }
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+      color: var(--primary-dark);
+    }
+    .footer-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+  </div>
+
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <header class="header">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </button>
+    
+    <div class="logo">
+      <span>MULAFLOWR</span>
+    </div>
+    
+    <div class="header-controls">
+      <button class="language-selector" id="languageSelector">
+        <i class="fas fa-globe"></i>
+        <span>French</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      
+      <div class="user-profile" id="userProfile">
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="profile-dropdown" id="profileDropdown">
+              <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                  <span>Mode nuit</span>
+              </button>
+          </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="welcome-section">
+        <div class="welcome-text">LoveEarn >> MULAFLOWR</div>
+        <div class="username" id="sidebarUsername">Utilisateur</div>
+      </div>
+      
+      <div class="menu-category">PRINCIPAL</div>
+      <a href="dashboard.html" class="menu-item">
+        <i class="fas fa-home"></i>
+        <span>Tableau de bord</span>
+        <span class="menu-badge badge-inactive">☒</span>
+      </a>
+      
+      <a href="depot.html" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt 💵</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="bonus_bienvenue.html" class="menu-item">
+        <i class="fas fa-gift"></i>
+        <span>Bonus de bienvenue</span>
+        <span class="menu-badge badge-inactive">☒</span>
+      </a>
+      
+      <div class="menu-category">COMPTES</div>
+      <a href="retrait.html" class="menu-item">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Retrait</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="equipe.html" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Équipe</span>
+        <span class="menu-badge badge-inactive">☒</span>
+      </a>
+
+      <div class="menu-category">SPÉCIAL</div>
+      <a href="love_earn.html" class="menu-item active">
+        <i class="fas fa-heart"></i>
+        <span>LoveEarn</span>
+        <span class="menu-badge badge-active">☑</span>
+      </a>
+      
+      <a href="social_boost.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>SBH</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="challenge_reward.html" class="menu-item">
+        <i class="fas fa-medal"></i>
+        <span>Challenge and Reward</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <div class="menu-category">PRODUIT / TACHE</div>
+      <a href="whatsapp_earn.html" class="menu-item">
+        <i class="fab fa-whatsapp"></i>
+        <span>Gagner via Whatsapp</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="movies.html" class="menu-item">
+        <i class="fas fa-film"></i>
+        <span>Movies</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="paris_fixes.html" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Paris fixes</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="gains_publicitaires.html" class="menu-item">
+        <i class="fas fa-ad"></i>
+        <span>Gains publicitaires</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="spin_wheel.html" class="menu-item">
+        <i class="fas fa-trophy"></i>
+        <span>Spin wheel 🏆</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="tiktok_earn.html" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok Earn</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="youtube_earn.html" class="menu-item">
+        <i class="fab fa-youtube"></i>
+        <span>YouTube Earn</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="instagram_earn.html" class="menu-item">
+        <i class="fab fa-instagram"></i>
+        <span>Instagram Earn</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="trivia_challenge.html" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>TRIVIA challenge</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <div class="menu-category">BONUS</div>
+      <a href="liste_contacts.html" class="menu-item">
+        <i class="fas fa-address-book"></i>
+        <span>Liste de contacts gratuit 🆓</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="booster_visibilite.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>Booster ma visibilité</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+
+      <a href="canva_pro.html" class="menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Canva Pro</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+      
+      <a href="connexion_gratuite.html" class="menu-item">
+        <i class="fas fa-shield-alt"></i>
+        <span>Connexion gratuite</span>
+        <span class="menu-badge badge-inactive">☐</span>
+      </a>
+    </aside>
+
+    <main class="content">
+      <h1 class="page-title">
+        <i class="fas fa-heart"></i>
+        <span>LoveEarn</span>
+      </h1>
+      
+      <div class="intro-section">
+        <h2>Trouvez votre moitié idéale avec MULAFLOWR ❤️</h2>
+        <p>
+          "LoveEarn" est l'espace où la connexion rencontre la compatibilité. 
+          Que vous cherchiez une relation à distance ou une rencontre en personne, notre algorithme vous aide à trouver des profils qui correspondent à vos préférences. 
+          Remplissez votre profil, trouvez votre âme sœur et lancez-vous dans une nouvelle aventure amoureuse.
+        </p>
+      </div>
+      
+      <div class="card-section" id="profile-creation-section">
+        <h3>Créez votre profil LoveEarn</h3>
+        <p>Pour commencer à chercher, vous devez d'abord compléter votre profil "Lover".</p>
+        <form id="loveearn-form">
+          <div class="form-group">
+            <label for="love-name">Votre nom / pseudo</label>
+            <input type="text" id="love-name" required>
+          </div>
+          <div class="form-group">
+            <label for="love-gender">Votre genre</label>
+            <select id="love-gender" required>
+              <option value="">Sélectionnez...</option>
+              <option value="male">Homme</option>
+              <option value="female">Femme</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="love-age">Votre âge</label>
+            <input type="number" id="love-age" required min="18" max="99">
+          </div>
+          <div class="form-group">
+            <label for="love-country">Votre pays</label>
+            <input type="text" id="love-country" required>
+          </div>
+          <div class="form-group">
+            <label for="love-city">Votre ville</label>
+            <input type="text" id="love-city" required>
+          </div>
+          <div class="form-group">
+            <label for="love-pref-gender">Vous recherchez un(e)...</label>
+            <select id="love-pref-gender" required>
+              <option value="">Sélectionnez...</option>
+              <option value="male">Homme</option>
+              <option value="female">Femme</option>
+              <option value="both">Les deux</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="love-pref-age">Tranche d'âge recherchée</label>
+            <input type="text" id="love-pref-age" placeholder="Ex: 25-35 ans" required>
+          </div>
+          <div class="form-group">
+            <label for="love-pref-relation">Type de relation souhaitée</label>
+            <select id="love-pref-relation" required>
+              <option value="">Sélectionnez...</option>
+              <option value="distance">À distance</option>
+              <option value="in-person">En présentiel</option>
+              <option value="both">Les deux</option>
+            </select>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-save"></i> Enregistrer mon profil
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="card-section" id="search-section" style="display: none;">
+        <h3>Rechercher un partenaire</h3>
+        <p>Utilisez les filtres ci-dessous pour trouver des profils qui vous correspondent.</p>
+        <form id="loveearn-search-form">
+          <div class="form-group">
+            <label for="search-gender">Rechercher un(e)...</label>
+            <select id="search-gender">
+              <option value="all">Tous</option>
+              <option value="male">Homme</option>
+              <option value="female">Femme</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="search-city">Ville</label>
+            <input type="text" id="search-city" placeholder="Ex: Douala">
+          </div>
+          <div class="form-group">
+            <label for="search-country">Pays</label>
+            <input type="text" id="search-country" placeholder="Ex: Cameroun">
+          </div>
+          <div class="form-group">
+            <label for="search-relation">Type de relation</label>
+            <select id="search-relation">
+              <option value="all">Tous les types</option>
+              <option value="distance">À distance</option>
+              <option value="in-person">En présentiel</option>
+            </select>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-search"></i> Rechercher
+            </button>
+            <button type="button" class="btn-secondary" id="reset-search-btn">
+              <i class="fas fa-sync-alt"></i> Réinitialiser
+            </button>
+          </div>
+        </form>
+        
+        <div id="search-results">
+          <p id="no-results-message" style="display: none; text-align: center; color: var(--text-light);">Aucun profil ne correspond à votre recherche.</p>
+        </div>
+        
+        <div class="whatsapp-info">
+          <i class="fab fa-whatsapp"></i>
+          <p>
+            Pour entrer en contact avec les personnes qui vous intéressent, rejoignez notre groupe de discussion exclusif. 
+            C'est là que la magie opère et que les connexions se font !
+          </p>
+          <a href="https://chat.whatsapp.com/HRgWJFxTgkiEkEC0Ou2028?mode=ems_copy_t" target="_blank">
+            <i class="fab fa-whatsapp"></i> Rejoindre le groupe LoveEarn
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      <div class="footer-text">
+        © 2025 MULAFLOWR. Tous droits réservés.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /******** CONFIG FIREBASE CORRIGÉE ET INTÉGRÉE ********/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.appspot.com",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    /******** DOM Elements ********/
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const loader = document.getElementById('loader');
+    const profileCreationSection = document.getElementById('profile-creation-section');
+    const searchSection = document.getElementById('search-section');
+    const loveearnForm = document.getElementById('loveearn-form');
+    const loveearnSearchForm = document.getElementById('loveearn-search-form');
+    const searchResultsDiv = document.getElementById('search-results');
+    const noResultsMessage = document.getElementById('no-results-message');
+
+    /******** Variables d'état ********/
+    let currentUser = null;
+    let userData = {};
+
+    /******** UI helpers ********/
+    function showNotification(type, title, message, duration = 4000) {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+          <span>${message}</span>
+        </div>
+      `;
+      container.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+      }, duration);
+    }
+    
+    function applyTheme() {
+        const isDarkMode = userData.theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+    }
+    
+    function updateSidebarUser(user, dbData = {}) {
+        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+        if (sidebarUsername) sidebarUsername.textContent = displayName;
+        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+    }
+    
+    /* Fonctions du menu et du thème */
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        hamburgerBtn.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburgerBtn.classList.remove('open');
+    });
+    userProfile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', (event) => {
+        if (!userProfile.contains(event.target)) {
+            profileDropdown.classList.remove('active');
+        }
+    });
+    themeToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+        if (currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+    });
+
+    /******** Fonctions de données LoveEarn ********/
+    async function loadUserData() {
+      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
+      const userRef = db.collection('users').doc(currentUser.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+          userData = doc.data() || {};
+      } else {
+        userData = { paid: false, theme: 'light' };
+        await saveUserData();
+      }
+    }
+    
+    async function saveUserData(key, value) {
+      if (!currentUser) return;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await userRef.set({ [key]: value, lastUpdate: new Date() }, { merge: true });
+        console.log('Données utilisateur enregistrées avec succès.');
+        userData[key] = value;
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde des données :", error);
+        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
+      }
+    }
+
+    async function loadLoveEarnProfile() {
+      if (!currentUser) return;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userRef.get();
+        if (doc.exists && doc.data().loveearn) {
+          const profile = doc.data().loveearn;
+          document.getElementById('love-name').value = profile.name || '';
+          document.getElementById('love-gender').value = profile.gender || '';
+          document.getElementById('love-age').value = profile.age || '';
+          document.getElementById('love-country').value = profile.country || '';
+          document.getElementById('love-city').value = profile.city || '';
+          document.getElementById('love-pref-gender').value = profile.prefGender || '';
+          document.getElementById('love-pref-age').value = profile.prefAge || '';
+          document.getElementById('love-pref-relation').value = profile.prefRelation || '';
+          profileCreationSection.style.display = 'none';
+          searchSection.style.display = 'block';
+        } else {
+          profileCreationSection.style.display = 'block';
+          searchSection.style.display = 'none';
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil LoveEarn :", error);
+        showNotification('error', 'Erreur', 'Impossible de charger votre profil LoveEarn.');
+        profileCreationSection.style.display = 'block';
+        searchSection.style.display = 'none';
+      }
+    }
+
+    async function saveLoveEarnProfile(event) {
+      event.preventDefault();
+      const form = new FormData(loveearnForm);
+      const profile = {
+        name: document.getElementById('love-name').value.trim(),
+        gender: document.getElementById('love-gender').value,
+        age: parseInt(document.getElementById('love-age').value),
+        country: document.getElementById('love-country').value.trim(),
+        city: document.getElementById('love-city').value.trim(),
+        prefGender: document.getElementById('love-pref-gender').value,
+        prefAge: document.getElementById('love-pref-age').value.trim(),
+        prefRelation: document.getElementById('love-pref-relation').value,
+        lastUpdate: new Date()
+      };
+      
+      try {
+        await db.collection('users').doc(currentUser.uid).set({ loveearn: profile }, { merge: true });
+        showNotification('success', 'Succès !', 'Votre profil LoveEarn a été enregistré.');
+        await loadLoveEarnProfile();
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde du profil LoveEarn :", error);
+        showNotification('error', 'Erreur', "Impossible d'enregistrer votre profil. Réessayez.");
+      }
+    }
+
+    async function searchPartners(event) {
+      event.preventDefault();
+      searchResultsDiv.innerHTML = '';
+      noResultsMessage.style.display = 'none';
+      
+      const searchGender = document.getElementById('search-gender').value;
+      const searchCity = document.getElementById('search-city').value.trim().toLowerCase();
+      const searchCountry = document.getElementById('search-country').value.trim().toLowerCase();
+      const searchRelation = document.getElementById('search-relation').value;
+
+      try {
+        let query = db.collection('users').where('loveearn.prefGender', 'in', [searchGender, 'both']);
+        
+        if (searchGender !== 'all') {
+            const genderToSearch = searchGender === 'male' ? 'female' : 'male';
+            query = query.where('loveearn.gender', '==', genderToSearch);
+        }
+        
+        if (searchCountry) {
+            query = query.where('loveearn.country', '==', searchCountry);
+        }
+        
+        if (searchCity) {
+            query = query.where('loveearn.city', '==', searchCity);
+        }
+
+        if (searchRelation !== 'all') {
+            query = query.where('loveearn.prefRelation', '==', searchRelation);
+        }
+        
+        const snapshot = await query.get();
+        let resultsFound = false;
+        
+        snapshot.forEach(doc => {
+          const partner = doc.data().loveearn;
+          if (partner && doc.id !== currentUser.uid) { // Exclure le profil de l'utilisateur
+              // Logique supplémentaire pour affiner la recherche côté client (âge, etc.)
+              const userAge = userData.loveearn.age;
+              const partnerPrefAgeRange = partner.prefAge.split('-').map(a => parseInt(a));
+              const isAgeMatch = userAge >= partnerPrefAgeRange[0] && userAge <= partnerPrefAgeRange[1];
+
+              if (isAgeMatch) {
+                const card = document.createElement('div');
+                card.className = 'partner-card';
+                card.innerHTML = `
+                  <div class="partner-avatar">${partner.name.charAt(0).toUpperCase()}</div>
+                  <div class="partner-name">${partner.name}</div>
+                  <div class="partner-info">${partner.age} ans, ${partner.city}, ${partner.country}</div>
+                  <button class="contact-btn" onclick="window.open('https://chat.whatsapp.com/HRgWJFxTgkiEkEC0Ou2028?text=${encodeURIComponent('Bonjour, je vous ai trouvé sur MULAFLOWR LoveEarn. J\'aimerais discuter avec vous.')}')">
+                      <i class="fab fa-whatsapp"></i> Contacter
+                  </button>
+                `;
+                searchResultsDiv.appendChild(card);
+                resultsFound = true;
+              }
+          }
+        });
+
+        if (!resultsFound) {
+          noResultsMessage.style.display = 'block';
+        }
+
+      } catch (error) {
+        console.error("Erreur lors de la recherche de partenaires :", error);
+        showNotification('error', 'Erreur', 'Impossible de rechercher des partenaires pour le moment.');
+      }
+    }
+
+    /******** Point d'entrée principal de l'application ********/
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                await loadUserData();
+                if (!userData.paid) {
+                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                    return;
+                }
+                updateSidebarUser(user, userData);
+                applyTheme();
+                await loadLoveEarnProfile();
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+                showNotification('success', 'Bienvenue !', `Accédez à l'univers LoveEarn !`);
+            } catch (error) {
+                console.error("Erreur critique lors de l'initialisation :", error);
+                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                auth.signOut();
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    /******** Événements du formulaire LoveEarn ********/
+    loveearnForm.addEventListener('submit', saveLoveEarnProfile);
+    loveearnSearchForm.addEventListener('submit', searchPartners);
+    document.getElementById('reset-search-btn').addEventListener('click', () => {
+        loveearnSearchForm.reset();
+        searchResultsDiv.innerHTML = '';
+        noResultsMessage.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
