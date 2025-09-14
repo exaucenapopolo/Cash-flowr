@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MULAFLOWR - Bonus de bienvenue</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
+  <style>
+    /* Styles CSS du tableau de bord (inclus pour une cohérence complète) */
+    body {
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      visibility: hidden; 
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    body.loaded {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    :root {
+      --primary-color: #3a8ee6;
+      --primary-light: #4da6ff;
+      --primary-dark: #2c75c9;
+      --secondary-color: #4c566a;
+      --accent-color: #5e81ac;
+      --background-light: #f5f7fb;
+      --background-dark: #e5e9f0;
+      --card-bg: #ffffff;
+      --text-color: #2e3440;
+      --text-light: #4c566a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --badge-active: #4CD964;
+      --badge-pending: #FF9500;
+      --badge-inactive: #FF3B30;
+    }
+
+    .dark-mode {
+      --primary-color: #5e81ac;
+      --primary-light: #81a1c1;
+      --primary-dark: #4c566a;
+      --secondary-color: #d8dee9;
+      --accent-color: #88c0d0;
+      --background-light: #2e3440;
+      --background-dark: #3b4252;
+      --card-bg: #434c5e;
+      --text-color: #eceff4;
+      --text-light: #d8dee9;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --badge-active: #2ecc71;
+      --badge-pending: #f1c40f;
+      --badge-inactive: #e74c3c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: var(--transition);
+    }
+    
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(#0000 10%, var(--primary-color));
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+      animation: spin 1s infinite linear;
+    }
+    @keyframes spin {
+      to { transform: rotate(1turn); }
+    }
+    
+    .header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .language-selector {
+      background-color: var(--primary-light);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+    .theme-toggle {
+        background-color: transparent;
+        border: none;
+        color: var(--secondary-color);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+    .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .theme-toggle i {
+        font-size: 1.2rem;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    .user-profile .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 150px;
+        z-index: 200;
+        transform-origin: top right;
+        animation: scaleIn 0.2s ease-out forwards;
+    }
+    .profile-dropdown.active {
+        display: flex;
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .profile-dropdown .theme-toggle {
+        width: 100%;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+        justify-content: flex-start;
+        padding: 10px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        text-align: left;
+        gap: 10px;
+    }
+    .profile-dropdown .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    .profile-dropdown .theme-toggle span {
+        flex-grow: 1;
+        text-align: left;
+    }
+    .hamburger-btn {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        padding: 0;
+    }
+    .hamburger-btn .bar {
+        width: 100%;
+        height: 3px;
+        background-color: var(--secondary-color);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .hamburger-btn.open .bar:nth-child(2) { opacity: 0; }
+    .hamburger-btn.open .bar:nth-child(1) { transform: translateY(11px) rotate(45deg); }
+    .hamburger-btn.open .bar:nth-child(3) { transform: translateY(-11px) rotate(-45deg); }
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--shadow);
+      height: calc(100vh - 80px);
+      position: sticky;
+      top: 80px;
+      padding: 25px 0;
+      overflow-y: auto;
+      transition: transform 0.4s ease-in-out;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .welcome-section {
+      padding: 0 25px 25px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .welcome-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+    .username {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+    .menu-category {
+      padding: 15px 25px 5px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .menu-item {
+      padding: 12px 25px 12px 35px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
+      transition: all 0.5s ease;
+    }
+    .menu-item:hover::before { left: 100%; }
+    .menu-item:hover, .menu-item.active {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-left-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+    .menu-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      transition: transform 0.3s ease;
+    }
+    .menu-item:hover i { transform: scale(1.1) rotate(5deg); }
+    .menu-badge {
+      position: absolute;
+      right: 25px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+      animation: popIn 0.5s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .menu-badge.active { background-color: var(--badge-active); color: white; }
+    .menu-badge.inactive { background-color: var(--badge-inactive); color: white; }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+    }
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--secondary-color);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-title i { color: var(--primary-color); }
+    
+    /* Styles spécifiques à la page du bonus */
+    .bonus-card {
+        background: linear-gradient(135deg, #a2ffc7 0%, #5ce78c 100%);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        padding: 40px;
+        max-width: 600px;
+        margin: 50px auto;
+        text-align: center;
+        color: var(--text-color);
+        position: relative;
+        overflow: hidden;
+        animation: pulseBonus 2s infinite;
+    }
+    @keyframes pulseBonus {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    .bonus-card::before {
+        content: "🎁";
+        font-size: 8rem;
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        opacity: 0.2;
+        transform: rotate(-20deg);
+        z-index: 1;
+    }
+    .bonus-card h2 {
+        font-size: 2.2rem;
+        color: var(--primary-dark);
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+    }
+    .bonus-card p {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 2;
+    }
+    .bonus-amount {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        display: block;
+        margin: 20px 0;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 2;
+    }
+    .claim-btn {
+        width: 100%;
+        padding: 15px;
+        background-color: #f1c40f;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        position: relative;
+        z-index: 2;
+    }
+    .claim-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #e67e22;
+    }
+    .claim-btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      pointer-events: auto;
+    }
+    .notification.success { background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%); }
+    .notification.error { background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%); }
+    .notification.info { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); }
+    @keyframes slideIn {
+      from { transform: translateX(110%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(110%); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+        .main-container { flex-direction: column; }
+        .hamburger-menu { display: none; }
+        .hamburger-btn { display: flex; position: absolute; top: 20px; left: 20px; z-index: 101; }
+        .sidebar { width: 75%; max-width: 300px; height: 100vh; position: fixed; top: 0; left: -100%; z-index: 99; transition: left 0.4s ease-in-out; }
+        .sidebar.open { left: 0; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 98; }
+        .overlay.active { display: block; }
+        .header { padding: 15px; }
+        .logo { font-size: 1.5rem; margin-left: 50px; }
+        .content { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+  </div>
+
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <header class="header">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </button>
+    
+    <div class="logo">
+      <span>MULAFLOWR</span>
+    </div>
+    
+    <div class="header-controls">
+      <div class="user-profile" id="userProfile">
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="profile-dropdown" id="profileDropdown">
+              <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                  <span>Mode nuit</span>
+              </button>
+          </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="welcome-section">
+        <div class="welcome-text">Menu >> Bonus</div>
+        <div class="username" id="sidebarUsername">Utilisateur</div>
+      </div>
+      
+      <div class="menu-category">PRINCIPAL</div>
+      <a href="dashboard.html" class="menu-item">
+        <i class="fas fa-home"></i>
+        <span>Tableau de bord</span>
+      </a>
+      
+      <a href="depot.html" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt 💵</span>
+      </a>
+      
+      <a href="bonus_bienvenue.html" class="menu-item active">
+        <i class="fas fa-gift"></i>
+        <span>Bonus de bienvenue</span>
+      </a>
+      
+      <div class="menu-category">COMPTES</div>
+      <a href="retrait.html" class="menu-item">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Retrait</span>
+      </a>
+      
+      <a href="equipe.html" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Équipe</span>
+      </a>
+      
+      <div class="menu-category">SPÉCIAL</div>
+      <a href="love_earn.html" class="menu-item">
+        <i class="fas fa-heart"></i>
+        <span>LoveEarn</span>
+      </a>
+      
+      <a href="social_boost.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>SBH</span>
+      </a>
+      
+      <a href="challenge_reward.html" class="menu-item">
+        <i class="fas fa-medal"></i>
+        <span>Challenge and Reward</span>
+      </a>
+      
+      <div class="menu-category">PRODUIT / TACHE</div>
+      <a href="whatsapp_earn.html" class="menu-item">
+        <i class="fab fa-whatsapp"></i>
+        <span>Gagner via Whatsapp</span>
+      </a>
+      
+      <a href="movies.html" class="menu-item">
+        <i class="fas fa-film"></i>
+        <span>Movies</span>
+      </a>
+      
+      <a href="paris_fixes.html" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Paris fixes</span>
+      </a>
+      
+      <a href="gains_publicitaires.html" class="menu-item">
+        <i class="fas fa-ad"></i>
+        <span>Gains publicitaires</span>
+      </a>
+      
+      <a href="spin_wheel.html" class="menu-item">
+        <i class="fas fa-trophy"></i>
+        <span>Spin wheel 🏆</span>
+      </a>
+      
+      <a href="tiktok_earn.html" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok Earn</span>
+      </a>
+      
+      <a href="youtube_earn.html" class="menu-item">
+        <i class="fab fa-youtube"></i>
+        <span>YouTube Earn</span>
+      </a>
+      
+      <a href="instagram_earn.html" class="menu-item">
+        <i class="fab fa-instagram"></i>
+        <span>Instagram Earn</span>
+      </a>
+      
+      <a href="trivia_challenge.html" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>TRIVIA challenge</span>
+      </a>
+      
+      <div class="menu-category">BONUS</div>
+      <a href="liste_contacts.html" class="menu-item">
+        <i class="fas fa-address-book"></i>
+        <span>Liste de contacts gratuit 🆓</span>
+      </a>
+      
+      <a href="booster_visibilite.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>Booster ma visibilité</span>
+      </a>
+
+      <a href="canva_pro.html" class="menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Canva Pro</span>
+      </a>
+      
+      <a href="connexion_gratuite.html" class="menu-item">
+        <i class="fas fa-shield-alt"></i>
+        <span>Connexion gratuite</span>
+      </a>
+    </aside>
+
+    <main class="content">
+      <h1 class="page-title">
+        <i class="fas fa-gift"></i>
+        <span>Bonus de bienvenue</span>
+      </h1>
+      
+      <div class="bonus-card">
+        <h2>🎉 Félicitations ! 🎉</h2>
+        <p>Vous avez reçu un bonus de bienvenue pour votre inscription.</p>
+        <div class="bonus-amount">XAF 750</div>
+        <p>Cliquez sur le bouton ci-dessous pour transférer ce bonus sur votre solde "Bonus d'agent".</p>
+        <button class="claim-btn" id="claimBonusBtn">Récupérer mon bonus</button>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      <div class="footer-text">
+        © 2025 MULAFLOWR. Tous droits réservés.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /******** CONFIG FIREBASE ********/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.appspot.com",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
+    /******** DOM Elements ********/
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const loader = document.getElementById('loader');
+    const claimBonusBtn = document.getElementById('claimBonusBtn');
+    
+    /******** Fonctions Utilitaires UI ********/
+    function showNotification(type, title, message, duration = 4000) {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+          <span>${message}</span>
+        </div>
+      `;
+      container.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+      }, duration);
+    }
+    
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(110%); opacity: 0; }
+    }
+
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        hamburgerBtn.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburgerBtn.classList.remove('open');
+    });
+    userProfile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', (event) => {
+        if (!userProfile.contains(event.target)) {
+            profileDropdown.classList.remove('active');
+        }
+    });
+    themeToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.body.classList.toggle('dark-mode');
+    });
+
+    /******** Logique de la page Bonus ********/
+    claimBonusBtn.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            showNotification('error', 'Non connecté', 'Veuillez vous connecter pour réclamer votre bonus.');
+            setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+            return;
+        }
+
+        try {
+            const userRef = db.collection('users').doc(user.uid);
+            await db.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists) {
+                    throw "Document utilisateur introuvable!";
+                }
+                const userData = userDoc.data();
+                const bonusClaimed = userData.bonusClaimed || false;
+
+                if (bonusClaimed) {
+                    showNotification('info', 'Déjà réclamé', 'Votre bonus de bienvenue a déjà été réclamé.');
+                    return;
+                }
+
+                const currentBonusAgent = userData.bonusAgent || 0;
+                const newBonusAgent = currentBonusAgent + 750;
+
+                transaction.update(userRef, {
+                    bonusAgent: newBonusAgent,
+                    bonusClaimed: true,
+                });
+                
+                showNotification('success', 'Bonus réclamé !', 'Votre bonus de 750 XAF a été ajouté à votre solde "Bonus d\'agent".');
+                claimBonusBtn.disabled = true;
+                claimBonusBtn.textContent = "Bonus récupéré ✅";
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 2500);
+            });
+
+        } catch (e) {
+            console.error("Échec de la transaction de bonus :", e);
+            showNotification('error', 'Erreur', 'Impossible de réclamer le bonus. Réessayez.');
+        }
+    });
+
+    /******** Point d'entrée principal de l'application ********/
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const userRef = db.collection('users').doc(user.uid);
+            const doc = await userRef.get();
+            const userData = doc.exists ? doc.data() : {};
+            const displayName = userData.displayName || user.displayName || user.email.split('@')[0];
+            if (sidebarUsername) sidebarUsername.textContent = displayName;
+            if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+
+            // Vérifier si le bonus a déjà été réclamé
+            if (userData.bonusClaimed) {
+                claimBonusBtn.disabled = true;
+                claimBonusBtn.textContent = "Bonus récupéré ✅";
+            }
+            
+            // Vérifier le thème
+            if (userData.theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Mode jour</span>';
+            }
+            
+            document.body.classList.add('loaded');
+            loader.classList.add('hidden');
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+  </script>
+</body>
+</html>
