@@ -1,309 +1,1565 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULAFLOWR - Gains Publicitaires</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MULAFLOWR - Gains Publicitaires</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"> 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
+  <style>
+    /* Styles de base */
+    body {
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      visibility: hidden; 
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    body.loaded {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    :root {
+      --primary-color: #3a8ee6;
+      --primary-light: #4da6ff;
+      --primary-dark: #2c75c9;
+      --secondary-color: #4c566a;
+      --accent-color: #5e81ac;
+      --background-light: #f5f7fb;
+      --background-dark: #e5e9f0;
+      --card-bg: #ffffff;
+      --text-color: #2e3440;
+      --text-light: #4c566a;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --badge-active: #4CD964;
+      --badge-pending: #FF9500;
+      --badge-inactive: #FF3B30;
+      --ad-color: #FF9500;
+      --ad-light: #FFE0B2;
+    }
+
+    .dark-mode {
+      --primary-color: #5e81ac;
+      --primary-light: #81a1c1;
+      --primary-dark: #4c566a;
+      --secondary-color: #d8dee9;
+      --accent-color: #88c0d0;
+      --background-light: #2e3440;
+      --background-dark: #3b4252;
+      --card-bg: #434c5e;
+      --text-color: #eceff4;
+      --text-light: #d8dee9;
+      --success-color: #4CD964;
+      --warning-color: #FF9500;
+      --danger-color: #FF3B30;
+      --purple-color: #AF52DE;
+      --teal-color: #5AC8FA;
+      --orange-color: #FF9500;
+      --pink-color: #FF2D55;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --badge-active: #2ecc71;
+      --badge-pending: #f1c40f;
+      --badge-inactive: #e74c3c;
+      --ad-color: #FFB74D;
+      --ad-light: #5D4037;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: var(--transition);
+    }
     
-    <style>
-        /* Styles de base importés du dashboard */
-        body {
-            background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-            color: var(--text-color);
-            min-height: 100vh;
+    /* Loader */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(#0000 10%, var(--primary-color));
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+
+    /* Header styles */
+    .header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .language-selector {
+      background-color: var(--primary-light);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .theme-toggle {
+        background-color: transparent;
+        border: none;
+        color: var(--secondary-color);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .theme-toggle i {
+        font-size: 1.2rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .user-profile .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid var(--primary-light);
+      box-shadow: var(--shadow);
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 150px;
+        z-index: 200;
+        transform-origin: top right;
+        animation: scaleIn 0.2s ease-out forwards;
+    }
+
+    .profile-dropdown.active {
+        display: flex;
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .profile-dropdown .theme-toggle {
+        width: 100%;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+        justify-content: flex-start;
+        padding: 10px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        text-align: left;
+        gap: 10px;
+    }
+    .profile-dropdown .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .profile-dropdown .theme-toggle span {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    /* Styles du bouton hamburger animé */
+    .hamburger-btn {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        padding: 0;
+    }
+    
+    .hamburger-btn .bar {
+        width: 100%;
+        height: 3px;
+        background-color: var(--secondary-color);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .hamburger-btn.open .bar:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .hamburger-btn.open .bar:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+    
+    .hamburger-btn.open .bar:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+
+    /* Main layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Styles de la Sidebar (Menu) */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--shadow);
+      height: calc(100vh - 80px);
+      position: sticky;
+      top: 80px;
+      padding: 25px 0;
+      overflow-y: auto;
+      transition: transform 0.4s ease-in-out; 
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .welcome-section {
+      padding: 0 25px 25px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .welcome-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .menu-category {
+      padding: 15px 25px 5px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .menu-item {
+      padding: 12px 25px 12px 35px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
+      transition: all 0.5s ease;
+    }
+    .menu-item:hover::before {
+      left: 100%;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-left-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .menu-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .menu-badge {
+      position: absolute;
+      right: 25px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+      animation: popIn 0.5s ease-out;
+    }
+    
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .menu-badge.active {
+      background-color: var(--badge-active);
+      color: white;
+    }
+    
+    .menu-badge.inactive {
+      background-color: var(--badge-inactive);
+      color: white;
+    }
+
+    /* Contenu principal */
+    .content {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--secondary-color);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-title i {
+      color: var(--ad-color);
+    }
+
+    /* Bannière Publicité */
+    .ad-banner {
+      background: linear-gradient(135deg, var(--ad-color) 0%, #F57C00 100%);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ad-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .banner-title {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-text {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+      line-height: 1.6;
+    }
+
+    /* Sections Publicité */
+    .ad-section {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title i {
+      color: var(--ad-color);
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      color: var(--text-light);
+    }
+
+    /* Articles */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+    }
+
+    .article-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .article-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .article-content {
+      padding: 20px;
+    }
+
+    .article-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+
+    .article-excerpt {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .article-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .article-time {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .article-earning {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--success-color);
+    }
+
+    .read-article-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--ad-color) 0%, #F57C00 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .read-article-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .read-article-btn.completed {
+      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+    }
+
+    .read-article-btn.completed:hover {
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Modal de lecture */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .article-modal {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+
+    .modal-content {
+      padding: 20px;
+    }
+
+    .modal-image {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .modal-body {
+      line-height: 1.6;
+      color: var(--text-color);
+    }
+
+    .modal-body p {
+      margin-bottom: 15px;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .timer-display {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-color);
+    }
+
+    .timer-progress {
+      width: 100%;
+      height: 8px;
+      background-color: var(--background-light);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .timer-progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, var(--ad-color) 0%, #F57C00 100%);
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    /* Statistiques */
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+    }
+
+    .stat-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      color: var(--ad-color);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--card-bg);
+      padding: 20px 30px;
+      text-align: center;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+      color: var(--primary-dark);
+    }
+
+    .footer-text {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Overlay et modal */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 98;
+    }
+    
+    .overlay.active {
+      display: block;
+    }
+
+    /* Animation for notifications */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      pointer-events: auto;
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+    }
+
+    .notification.info { 
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 230px;
+      }
+      
+      .articles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            flex-direction: column;
+        }
+        
+        .hamburger-btn {
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 50px;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
         }
 
-        :root {
-            --primary-color: #3a8ee6;
-            --primary-light: #4da6ff;
-            --primary-dark: #2c75c9;
-            --secondary-color: #4c566a;
-            --accent-color: #5e81ac;
-            --background-light: #f5f7fb;
-            --background-dark: #e5e9f0;
-            --card-bg: #ffffff;
-            --text-color: #2e3440;
-            --text-light: #4c566a;
-            --success-color: #4CD964;
-            --warning-color: #FF9500;
-            --danger-color: #FF3B30;
-            --purple-color: #AF52DE;
-            --teal-color: #5AC8FA;
-            --orange-color: #FF9500;
-            --pink-color: #FF2D55;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s ease;
+        .sidebar {
+            width: 75%;
+            max-width: 300px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            z-index: 99;
+            transition: left 0.4s ease-in-out;
         }
         
-        .dark-mode {
-            --primary-color: #5e81ac;
-            --primary-light: #81a1c1;
-            --primary-dark: #4c566a;
-            --secondary-color: #d8dee9;
-            --accent-color: #88c0d0;
-            --background-light: #2e3440;
-            --background-dark: #3b4252;
-            --card-bg: #434c5e;
-            --text-color: #eceff4;
-            --text-light: #d8dee9;
-            --success-color: #4CD964;
-            --warning-color: #FF9500;
-            --danger-color: #FF3B30;
-            --purple-color: #AF52DE;
-            --teal-color: #5AC8FA;
-            --orange-color: #FF9500;
-            --pink-color: #FF2D55;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        .sidebar.open {
+            left: 0;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: var(--transition);
+        
+        .overlay.active {
+            display: block;
         }
-
-        /* Styles spécifiques au module */
-        .container {
-            background-color: var(--card-bg);
-            padding: 2em;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
+        
+        .header {
+            padding: 15px;
         }
-
-        h2 {
-            color: var(--secondary-color);
-            margin-bottom: 0.5em;
+        
+        .logo {
             font-size: 1.5rem;
-            font-weight: 600;
+            margin-left: 50px;
         }
         
-        .section-description {
-            color: var(--text-light);
-            margin-bottom: 2em;
-        }
-
-        #articles-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5em;
-        }
-
-        .article-card {
-            background-color: var(--background-dark);
-            padding: 1.5em;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-align: left;
+        .content {
+            padding: 20px;
         }
         
-        .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .article-card.read {
-            background-color: var(--background-light);
-            color: var(--text-light);
-            cursor: default;
-        }
-
-        .article-card h4 {
-            margin: 0 0 0.5em 0;
-            color: var(--primary-color);
-            font-weight: 600;
+        .articles-grid {
+            grid-template-columns: 1fr;
         }
         
-        .article-card p {
-            font-size: 0.9rem;
-            color: var(--text-color);
+        .stats-cards {
+            grid-template-columns: 1fr;
         }
+    }
 
-        #article-reader {
-            padding: 2em;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-        }
-
-        #article-title {
-            color: var(--secondary-color);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5em;
-        }
-        
-        #article-content {
-            line-height: 1.6;
-            color: var(--text-light);
-            margin-bottom: 1.5em;
-        }
-
-        #timer-container {
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            padding: 1em;
-            background-color: var(--background-dark);
-            border-radius: 8px;
-        }
-
-        #close-reader-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 2em;
-            font-weight: 600;
-            box-shadow: var(--shadow);
-        }
-        
-        #close-reader-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-        }
-        
-        #daily-limit-message, #total-earnings {
-            margin-top: 1.5em;
-            font-weight: 600;
-        }
-        
-        #daily-limit-message {
-            color: var(--warning-color);
-        }
-        
-        #total-earnings {
-            color: var(--success-color);
-        }
-    </style>
+    @media (max-width: 576px) {
+      .footer-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .article-modal {
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Gains Publicitaires</h2>
-        <p class="section-description">Lisez les articles publicitaires et gagnez de l'argent. Gagnez <span class="highlight">50 FCFA</span> par article lu (maximum 5 par jour).</p>
-        
-        <div id="articles-list">
-            </div>
-        
-        <div id="article-reader" style="display:none;">
-            <h3 id="article-title"></h3>
-            <p id="article-content"></p>
-            <div id="timer-container">
-                <p>Temps restant : <span id="timer">10</span> secondes</p>
-            </div>
-            <button id="close-reader-btn" style="display:none;">Fermer l'article</button>
-        </div>
-        
-        <p id="daily-limit-message"></p>
-        <p id="total-earnings"></p>
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+  </div>
+
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <header class="header">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </button>
+    
+    <div class="logo">
+      <span>MULAFLOWR</span>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const articlesList = document.getElementById('articles-list');
-            const articleReader = document.getElementById('article-reader');
-            const articleTitle = document.getElementById('article-title');
-            const articleContent = document.getElementById('article-content');
-            const timerElement = document.getElementById('timer');
-            const closeReaderBtn = document.getElementById('close-reader-btn');
-            const totalEarningsElement = document.getElementById('total-earnings');
-            const dailyLimitMessage = document.getElementById('daily-limit-message');
-            
-            const articles = [
-                { title: 'Comment le café booste votre productivité', content: 'Le café contient de la caféine, un stimulant naturel qui affecte le système nerveux central. Il est connu pour améliorer la vigilance, la concentration et la performance cognitive. Boire une tasse de café avant de commencer une tâche complexe peut grandement augmenter votre productivité.' },
-                { title: 'Les 5 meilleurs outils de marketing digital', content: 'Le marketing digital est essentiel pour tout business en ligne. Voici une liste d\'outils incontournables pour maximiser votre visibilité : Google Analytics, SEMrush, Mailchimp, Hootsuite et Canva. Chacun de ces outils offre des fonctionnalités uniques pour vous aider à atteindre vos objectifs marketing.' },
-                { title: 'Pourquoi les investissements en ligne sont l\'avenir', content: 'Avec la montée de l\'économie numérique, les investissements en ligne sont devenus accessibles à tous. Des plateformes de trading aux applications d\'épargne automatisée, il n\'a jamais été aussi facile de faire fructifier son argent depuis chez soi. Il est crucial de s\'informer pour choisir les bonnes opportunités.' },
-                { title: '10 astuces pour mieux gérer votre temps', content: 'La gestion du temps est une compétence clé pour le succès. Commencez par identifier vos tâches prioritaires, utilisez la technique Pomodoro pour diviser votre travail en intervalles, et évitez les distractions. Apprendre à dire non est aussi une astuce puissante pour protéger votre temps précieux.' },
-                { title: 'Le guide complet du freelancing en Afrique', content: 'De plus en plus de jeunes se tournent vers le freelancing pour la flexibilité et l\'autonomie qu\'il offre. Ce guide explore les plateformes populaires, les meilleures niches et les conseils pour fixer vos tarifs et trouver vos premiers clients sur le continent africain.' },
-                { title: 'Les avantages des panneaux solaires pour la maison', content: 'L\'énergie solaire est une source d\'énergie renouvelable, propre et durable. L\'installation de panneaux solaires à domicile permet de réduire considérablement la facture d\'électricité tout en contribuant à la protection de l\'environnement. C\'est un investissement à long terme qui prend de la valeur.' },
-                { title: 'La recette du succès pour une petite entreprise', content: 'Démarrer une petite entreprise demande de la planification et de la persévérance. Une bonne stratégie de marché, une gestion financière rigoureuse et un service client irréprochable sont les ingrédients de base. La clé est de rester à l\'écoute de vos clients et de s\'adapter rapidement.' }
-            ];
-            
-            let articlesReadToday = 0;
-            const maxArticlesPerDay = 5;
-            let totalEarnings = 0;
-            
-            function renderArticles() {
-                articlesList.innerHTML = '';
-                articles.forEach((article, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'article-card';
-                    card.dataset.index = index;
-                    card.innerHTML = `<h4>${article.title}</h4>`;
-                    articlesList.appendChild(card);
-                    
-                    card.addEventListener('click', () => {
-                        if (articlesReadToday < maxArticlesPerDay) {
-                            showArticle(article, card);
-                            articlesReadToday++;
-                        } else {
-                            alert('Vous avez atteint la limite quotidienne d\'articles.');
-                        }
-                    });
-                });
-                updateDailyLimitMessage();
-            }
-            
-            function showArticle(article, cardElement) {
-                articlesList.style.display = 'none';
-                articleReader.style.display = 'block';
-                articleTitle.textContent = article.title;
-                articleContent.textContent = article.content;
-                
-                let timer = 10;
-                timerElement.textContent = timer;
-                cardElement.classList.add('read');
-                
-                const interval = setInterval(() => {
-                    timer--;
-                    timerElement.textContent = timer;
-                    if (timer <= 0) {
-                        clearInterval(interval);
-                        totalEarnings += 50;
-                        totalEarningsElement.textContent = `Gains totaux: ${totalEarnings} FCFA`;
-                        closeReaderBtn.style.display = 'block';
-                        alert('Félicitations ! Vous avez gagné 50 FCFA !');
-                        updateDailyLimitMessage();
-                    }
-                }, 1000);
-            }
-            
-            closeReaderBtn.addEventListener('click', () => {
-                articleReader.style.display = 'none';
-                articlesList.style.display = 'grid';
-                closeReaderBtn.style.display = 'none';
-            });
-            
-            function updateDailyLimitMessage() {
-                dailyLimitMessage.textContent = `Vous avez lu ${articlesReadToday} sur ${maxArticlesPerDay} articles aujourd'hui.`;
-                if (articlesReadToday >= maxArticlesPerDay) {
-                    dailyLimitMessage.style.color = 'var(--danger-color)';
-                } else {
-                    dailyLimitMessage.style.color = 'var(--success-color)';
-                }
-            }
-            
-            renderArticles();
+    <div class="header-controls">
+      <button class="language-selector" id="languageSelector">
+        <i class="fas fa-globe"></i>
+        <span>French</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      
+      <div class="user-profile" id="userProfile">
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="profile-dropdown" id="profileDropdown">
+              <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                  <span>Mode nuit</span>
+              </button>
+          </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="welcome-section">
+        <div class="welcome-text">Gains Publicitaires >> MULAFLOWR</div>
+        <div class="username" id="sidebarUsername">Utilisateur</div>
+      </div>
+      
+      <div class="menu-category">PRINCIPAL</div>
+      <a href="dashboard.html" class="menu-item">
+        <i class="fas fa-home"></i>
+        <span>Tableau de bord</span>
+      </a>
+      
+      <a href="depot.html" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt 💵</span>
+      </a>
+      
+      <a href="bonus_bienvenue.html" class="menu-item">
+        <i class="fas fa-gift"></i>
+        <span>Bonus de bienvenue</span>
+      </a>
+      
+      <div class="menu-category">COMPTES</div>
+      <a href="retrait.html" class="menu-item">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Retrait</span>
+      </a>
+      
+      <a href="equipe.html" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Équipe</span>
+      </a>
+
+      <div class="menu-category">SPÉCIAL</div>
+      <a href="love_earn.html" class="menu-item">
+        <i class="fas fa-heart"></i>
+        <span>LoveEarn</span>
+      </a>
+      
+      <a href="social_boost.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>SBH</span>
+      </a>
+      
+      <a href="challenge_reward.html" class="menu-item">
+        <i class="fas fa-medal"></i>
+        <span>Challenge and Reward</span>
+      </a>
+      
+      <div class="menu-category">PRODUIT / TACHE</div>
+      <a href="whatsapp_earn.html" class="menu-item">
+        <i class="fab fa-whatsapp"></i>
+        <span>Gagner via Whatsapp</span>
+      </a>
+      
+      <a href="movies.html" class="menu-item">
+        <i class="fas fa-film"></i>
+        <span>Movies</span>
+      </a>
+      
+      <a href="paris_fixes.html" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Paris fixes</span>
+      </a>
+      
+      <a href="gains_publicitaires.html" class="menu-item active">
+        <i class="fas fa-ad"></i>
+        <span>Gains publicitaires</span>
+        <span class="menu-badge active">☑</span>
+      </a>
+      
+      <a href="spin_wheel.html" class="menu-item">
+        <i class="fas fa-trophy"></i>
+        <span>Spin wheel 🏆</span>
+      </a>
+      
+      <a href="tiktok_earn.html" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok Earn</span>
+      </a>
+      
+      <a href="youtube_earn.html" class="menu-item">
+        <i class="fab fa-youtube"></i>
+        <span>YouTube Earn</span>
+      </a>
+      
+      <a href="instagram_earn.html" class="menu-item">
+        <i class="fab fa-instagram"></i>
+        <span>Instagram Earn</span>
+      </a>
+      
+      <a href="trivia_challenge.html" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>TRIVIA challenge</span>
+      </a>
+      
+      <div class="menu-category">BONUS</div>
+      <a href="liste_contacts.html" class="menu-item">
+        <i class="fas fa-address-book"></i>
+        <span>Liste de contacts gratuit 🆓</span>
+      </a>
+      
+      <a href="booster_visibilite.html" class="menu-item">
+        <i class="fas fa-rocket"></i>
+        <span>Booster ma visibilité</span>
+      </a>
+
+      <a href="canva_pro.html" class="menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Canva Pro</span>
+      </a>
+      
+      <a href="connexion_gratuite.html" class="menu-item">
+        <i class="fas fa-shield-alt"></i>
+        <span>Connexion gratuite</span>
+      </a>
+    </aside>
+
+    <main class="content">
+      <h1 class="page-title">
+        <i class="fas fa-ad"></i>
+        <span>Gains Publicitaires</span>
+      </h1>
+      
+      <div class="ad-banner">
+        <h2 class="banner-title">Gagnez de l'argent en lisant des articles!</h2>
+        <div class="banner-text">
+          Lisez des articles publicitaires et gagnez 50 FCFA par article! Vous pouvez lire jusqu'à 5 articles par jour. Il suffit de cliquer sur un article, de rester 10 secondes sur la page de lecture, et vous recevrez automatiquement votre récompense. Simple et efficace!
+        </div>
+      </div>
+      
+      <div class="ad-section">
+        <h2 class="section-title"><i class="fas fa-newspaper"></i> Articles Disponibles Aujourd'hui</h2>
+        <p class="section-subtitle">Cliquez sur un article, lisez-le pendant 10 secondes et gagnez 50 FCFA!</p>
+        
+        <div class="articles-grid" id="articlesGrid">
+          <!-- Les articles seront chargés dynamiquement -->
+        </div>
+      </div>
+      
+      <div class="ad-section">
+        <h2 class="section-title"><i class="fas fa-chart-line"></i> Vos Statistiques</h2>
+        
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-book-open"></i>
+            </div>
+            <div class="stat-value" id="articlesReadToday">0/5</div>
+            <div class="stat-label">Articles lus aujourd'hui</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-value" id="earnedToday">0 FCFA</div>
+            <div class="stat-label">Gagné aujourd'hui</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-value" id="totalEarned">0 FCFA</div>
+            <div class="stat-label">Total gagné</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de lecture d'article -->
+  <div class="modal-overlay" id="articleModal">
+    <div class="article-modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalArticleTitle">Titre de l'article</h3>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-content">
+        <img src="" id="modalArticleImage" class="modal-image">
+        <div class="modal-body" id="modalArticleContent">
+          <!-- Contenu de l'article -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="timer-display" id="timerDisplay">10 secondes restantes</div>
+        <div class="timer-progress">
+          <div class="timer-progress-bar" id="timerProgressBar"></div>
+        </div>
+        <button class="read-article-btn" id="claimEarningBtn" disabled>En cours de lecture...</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+      </div>
+      <div class="footer-text">
+        © 2025 MULAFLOWR. Tous droits réservés.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /******** CONFIG FIREBASE ********/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.appspot.com",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    /******** DOM Elements ********/
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const languageSelector = document.getElementById('languageSelector');
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const loader = document.getElementById('loader');
+    const articlesGrid = document.getElementById('articlesGrid');
+    const articlesReadToday = document.getElementById('articlesReadToday');
+    const earnedToday = document.getElementById('earnedToday');
+    const totalEarned = document.getElementById('totalEarned');
+    const articleModal = document.getElementById('articleModal');
+    const modalArticleTitle = document.getElementById('modalArticleTitle');
+    const modalArticleImage = document.getElementById('modalArticleImage');
+    const modalArticleContent = document.getElementById('modalArticleContent');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerProgressBar = document.getElementById('timerProgressBar');
+    const claimEarningBtn = document.getElementById('claimEarningBtn');
+    const closeModal = document.getElementById('closeModal');
+
+    /******** Variables d'état ********/
+    let currentUser = null;
+    let userData = {};
+    let articles = [];
+    let currentArticle = null;
+    let readArticlesToday = 0;
+    let earnedTodayAmount = 0;
+    let totalEarnedAmount = 0;
+    let countdownTimer = null;
+    let timeLeft = 10;
+
+    /******** UI helpers ********/
+    function showNotification(type, title, message, duration = 4000) {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+          <span>${message}</span>
+        </div>
+      `;
+      container.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+      }, duration);
+    }
+
+    /******** Gestion du menu ********/
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        hamburgerBtn.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburgerBtn.classList.remove('open');
+    });
+
+    /******** Gestion du profil utilisateur ********/
+    userProfile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', (event) => {
+        if (!userProfile.contains(event.target)) {
+            profileDropdown.classList.remove('active');
+        }
+    });
+
+    /******** Gestion du thème ********/
+    themeToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+    });
+
+    /******** Articles ********/
+    function loadArticles() {
+      // Articles factices pour la démonstration
+      articles = [
+        {
+          id: 1,
+          title: "Les tendances du marketing digital en 2025",
+          image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+          excerpt: "Découvrez les nouvelles tendances qui vont révolutionner le marketing digital l'année prochaine.",
+          content: `<p>Le marketing digital évolue à une vitesse fulgurante. En 2025, nous nous attendons à voir plusieurs tendances émergentes qui vont transformer la façon dont les marques interagissent avec leurs audiences.</p>
+                    <p>L'intelligence artificielle continuera de jouer un rôle crucial, avec des chatbots plus sophistiqués et une personnalisation accrue des expériences client.</p>
+                    <p>La réalité augmentée et virtuelle deviendront plus accessibles, permettant aux marques de créer des expériences d'achat immersives.</p>
+                    <p>Le content marketing évoluera vers des formats plus interactifs et engaging, avec une emphasis sur la valeur ajoutée plutôt que la promotion pure.</p>
+                    <p>Enfin, la privacy et la transparence deviendront des éléments différenciateurs clés, alors que les consommateurs deviennent de plus en plus conscients de l'utilisation de leurs données.</p>`,
+          read: false
+        },
+        {
+          id: 2,
+          title: "Comment optimiser votre présence sur les réseaux sociaux",
+          image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f5a07a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+          excerpt: "Des conseils pratiques pour améliorer votre stratégie sur les plateformes sociales.",
+          content: `<p>Une présence efficace sur les réseaux sociaux nécessite plus que de simples publications aléatoires. Voici comment optimiser votre stratégie:</p>
+                    <p><strong>1. Connaissez votre audience:</strong> Comprenez qui sont vos followers, leurs intérêts et quand ils sont les plus actifs.</p>
+                    <p><strong>2. Créez un calendrier de contenu:</strong> Planifiez vos publications à l'avance pour maintenir une présence constante.</p>
+                    <p><strong>3. Utilisez des visuels de qualité:</strong> Les images et vidéos attirent beaucoup plus d'engagement que le texte seul.</p>
+                    <p><strong>4. Interagissez avec votre audience:</strong> Répondez aux commentaires et messages pour construire une communauté.</p>
+                    <p><strong>5. Analysez vos performances:</strong> Utilisez les analytics pour comprendre ce qui fonctionne et ajustez votre stratégie en conséquence.</p>`,
+          read: false
+        },
+        {
+          id: 3,
+          title: "Les secrets d'un référencement SEO réussi",
+          image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+          excerpt: "Découvrez les techniques essentielles pour améliorer votre classement dans les moteurs de recherche.",
+          content: `<p>Le référencement naturel (SEO) est crucial pour la visibilité en ligne. Voici les secrets d'une stratégie SEO réussie:</p>
+                    <p><strong>Recherche de mots-clés:</strong> Identifiez les termes que votre audience cible recherche et intégrez-les naturellement dans votre contenu.</p>
+                    <p><strong>Contenu de qualité:</strong> Créez un contenu valuable, original et bien structuré qui répond aux questions de votre audience.</p>
+                    <p><strong>Optimisation technique:</strong> Assurez-vous que votre site se charge rapidement, soit mobile-friendly et ait une structure claire.</p>
+                    <p><strong>Backlinks de qualité:</strong> Obtenez des liens provenant de sites autoritaires dans votre domaine.</p>
+                    <p><strong>Expérience utilisateur:</strong> Offrez une navigation intuitive et un design agréable pour réduire le taux de rebond.</p>`,
+          read: false
+        },
+        {
+          id: 4,
+          title: "L'avenir de la monétisation des contenus en ligne",
+          image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+          excerpt: "Comment les créateurs de contenu peuvent-ils tirer profit de leur audience?",
+          content: `<p>La monétisation des contenus en ligne évolue rapidement. Voici les tendances à surveiller:</p>
+                    <p><strong>Abonnements et membreships:</strong> Les plateformes comme Patreon et Substack permettent aux créateurs de monétiser directement leur audience.</p>
+                    <p><strong>Contenu exclusif:</strong> Offrez du contenu premium accessible uniquement aux supporters payants.</p>
+                    <p><strong>Commerce électronique:</strong> Vendez des produits physiques ou digitaux directement à votre audience.</p>
+                    <p><strong>Sponsoring et partenariats:</strong> Collaborez avec des marques alignées avec vos valeurs et votre contenu.</p>
+                    <p><strong>Formations et consulting:</strong> Monétisez votre expertise through des cours en ligne ou des services de consulting.</p>`,
+          read: false
+        },
+        {
+          id: 5,
+          title: "5 applications indispensables pour les travailleurs distants",
+          image: "https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+          excerpt: "Optimisez votre productivité en télétravail avec ces outils essentiels.",
+          content: `<p>Le travail à distance nécessite les bons outils pour rester productif. Voici 5 applications indispensables:</p>
+                    <p><strong>1. Slack:</strong> Pour la communication d'équipe et la collaboration en temps réel.</p>
+                    <p><strong>2. Trello ou Asana:</strong> Pour la gestion de projets et le suivi des tâches.</p>
+                    <p><strong>3. Zoom ou Google Meet:</strong> Pour les réunions vidéo de qualité professionnelle.</p>
+                    <p><strong>4. Google Drive ou Dropbox:</strong> Pour le stockage et le partage de fichiers.</p>
+                    <p><strong>5. Toggl ou Harvest:</strong> Pour le suivi du temps et la gestion de la productivité.</p>
+                    <p>Ces outils vous aideront à maintenir une communication efficace, à rester organisé et à optimiser votre temps lorsque vous travaillez à distance.</p>`,
+          read: false
+        }
+      ];
+      
+      displayArticles();
+    }
+
+    function displayArticles() {
+      let html = '';
+      
+      articles.forEach(article => {
+        html += `
+          <div class="article-card">
+            <img src="${article.image}" alt="${article.title}" class="article-image">
+            <div class="article-content">
+              <h3 class="article-title">${article.title}</h3>
+              <p class="article-excerpt">${article.excerpt}</p>
+              <div class="article-meta">
+                <span class="article-time"><i class="fas fa-clock"></i> 2 min de lecture</span>
+                <span class="article-earning">+50 FCFA</span>
+              </div>
+              <button class="read-article-btn ${article.read ? 'completed' : ''}" data-id="${article.id}" ${article.read ? 'disabled' : ''}>
+                ${article.read ? '<i class="fas fa-check-circle"></i> Déjà lu' : '<i class="fas fa-book-open"></i> Lire et gagner'}
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      articlesGrid.innerHTML = html;
+      
+      // Ajouter les événements aux boutons
+      document.querySelectorAll('.read-article-btn:not(.completed)').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const articleId = parseInt(e.target.dataset.id);
+          openArticle(articleId);
         });
-    </script>
+      });
+    }
+
+    function openArticle(articleId) {
+      currentArticle = articles.find(a => a.id === articleId);
+      
+      if (!currentArticle) return;
+      
+      // Mettre à jour le modal avec le contenu de l'article
+      modalArticleTitle.textContent = currentArticle.title;
+      modalArticleImage.src = currentArticle.image;
+      modalArticleImage.alt = currentArticle.title;
+      modalArticleContent.innerHTML = currentArticle.content;
+      
+      // Réinitialiser le timer
+      timeLeft = 10;
+      timerDisplay.textContent = `${timeLeft} secondes restantes`;
+      timerProgressBar.style.width = '0%';
+      claimEarningBtn.disabled = true;
+      claimEarningBtn.textContent = 'En cours de lecture...';
+      
+      // Afficher le modal
+      articleModal.classList.add('active');
+      
+      // Démarrer le compte à rebours
+      startCountdown();
+    }
+
+    function startCountdown() {
+      clearInterval(countdownTimer);
+      
+      countdownTimer = setInterval(() => {
+        timeLeft--;
+        
+        // Mettre à jour l'affichage
+        timerDisplay.textContent = `${timeLeft} secondes restantes`;
+        timerProgressBar.style.width = `${((10 - timeLeft) / 10) * 100}%`;
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdownTimer);
+          claimEarningBtn.disabled = false;
+          claimEarningBtn.textContent = 'Cliquer pour gagner 50 FCFA';
+        }
+      }, 1000);
+    }
+
+    function claimArticleEarning() {
+      if (!currentArticle) return;
+      
+      // Marquer l'article comme lu
+      currentArticle.read = true;
+      
+      // Mettre à jour les statistiques
+      readArticlesToday++;
+      earnedTodayAmount += 50;
+      totalEarnedAmount += 50;
+      
+      // Mettre à jour l'UI
+      updateStatsUI();
+      
+      // Mettre à jour l'affichage des articles
+      displayArticles();
+      
+      // Fermer le modal
+      articleModal.classList.remove('active');
+      
+      // Afficher une notification
+      showNotification('success', 'Félicitations!', 'Vous avez gagné 50 FCFA en lisant cet article!');
+      
+      // Sauvegarder les données utilisateur
+      saveUserData();
+    }
+
+    function updateStatsUI() {
+      articlesReadToday.textContent = `${readArticlesToday}/5`;
+      earnedToday.textContent = `${earnedTodayAmount} FCFA`;
+      totalEarned.textContent = `${totalEarnedAmount} FCFA`;
+    }
+
+    /******** Gestion du modal ********/
+    closeModal.addEventListener('click', () => {
+      articleModal.classList.remove('active');
+      clearInterval(countdownTimer);
+    });
+
+    claimEarningBtn.addEventListener('click', claimArticleEarning);
+
+    /******** Fonctions Firestore ********/
+    async function saveUserData(key = null, value = null) {
+      if (!currentUser) return;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const dataToSave = key ? { [key]: value } : userData;
+        await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
+        console.log('Données utilisateur enregistrées avec succès.');
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde des données :", error);
+        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
+      }
+    }
+
+    async function loadUserData() {
+      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
+      const userRef = db.collection('users').doc(currentUser.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+          const data = doc.data() || {};
+          userData = {
+              displayName: data.displayName || currentUser.displayName,
+              email: data.email || currentUser.email,
+              phoneNumber: data.phoneNumber || data.phone || "",
+              country: data.country || data.pays || "",
+              theme: data.theme || 'light',
+              publiciteGains: data.publiciteGains || 0,
+              articlesReadToday: data.articlesReadToday || 0,
+              earnedToday: data.earnedToday || 0
+          };
+          
+          // Initialiser les statistiques
+          readArticlesToday = userData.articlesReadToday;
+          earnedTodayAmount = userData.earnedToday;
+          totalEarnedAmount = userData.publiciteGains;
+      } else {
+        userData = { 
+          theme: 'light', 
+          publiciteGains: 0, 
+          articlesReadToday: 0, 
+          earnedToday: 0 
+        };
+        await saveUserData();
+      }
+    }
+
+    /******** Initialisation de l'application ********/
+    function updateUserInfoUI(user, dbData = {}) {
+        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+        if (sidebarUsername) sidebarUsername.textContent = displayName;
+        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+    }
+
+    function applyTheme() {
+        const isDarkMode = userData.theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                await loadUserData();
+                updateUserInfoUI(user, userData);
+                applyTheme();
+                
+                loadArticles();
+                updateStatsUI();
+                
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+                
+            } catch (error) {
+                console.error("Erreur critique lors de l'initialisation :", error);
+                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                auth.signOut();
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    /******** Initialisation au chargement de la page ********/
+    document.addEventListener('DOMContentLoaded', () => {
+      // Rien de spécifique pour le moment
+    });
+  </script>
 </body>
 </html>
