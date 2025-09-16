@@ -1295,9 +1295,6 @@
       if (doc.exists) {
           const data = doc.data() || {};
           userData = data;
-          
-          // Vérifier la limite quotidienne
-          checkDailyLimit();
       } else {
         userData = {};
         await saveUserData();
@@ -1326,17 +1323,21 @@
             try {
                 await loadUserData();
 
-                // Correction : Rediriger vers paiement.html seulement si l'utilisateur n'a pas payé.
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
                     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    // Arrêter l'exécution ici pour ne pas charger le reste de l'UI
-                    return; 
+                    return;
                 }
 
+                // C'est ici que j'ai ajouté la correction.
+                // Si l'utilisateur a payé, on charge l'interface.
+                // Sinon, la condition ci-dessus s'occupera de la redirection.
                 updateUserInfoUI(user, userData);
                 applyTheme();
                 
+                // Vérifier la limite quotidienne APRÈS avoir chargé les données
+                checkDailyLimit();
+
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
                 
@@ -1349,7 +1350,6 @@
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
-            // L'utilisateur n'est pas connecté, le rediriger
             window.location.href = 'login.html';
         }
     });
@@ -1359,4 +1359,6 @@
       // Précharger la vidéo
       tiktokVideo.load();
     });
-</script>
+  </script>
+</body>
+</html>

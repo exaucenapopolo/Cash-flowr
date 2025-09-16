@@ -1212,16 +1212,24 @@
       // Mettre à jour les statistiques du jour
       videosWatchedToday++;
       earningsToday += 250;
-      updateDailyStats();
+      userData.youTubeWatchesToday = videosWatchedToday;
+      userData.youTubeEarningsToday = earningsToday;
       
       // Sauvegarder les données
       saveUserData();
       
       // Mettre à jour l'UI
       claimButton.disabled = true;
-      startButton.disabled = canWatchMore && videosWatchedToday < 2;
+      canWatchMore = videosWatchedToday < 2;
+      if (canWatchMore) {
+        startButton.disabled = false;
+        showNotification('info', 'Prêt pour la prochaine!', 'Vous pouvez regarder une autre vidéo pour gagner plus.');
+      } else {
+        startButton.disabled = true;
+        showNotification('info', 'Limite atteinte!', 'Vous avez atteint la limite quotidienne de vidéos.');
+      }
       
-      showNotification('success', 'Récompense ajoutée!', '250 FCFA ont été ajoutés à votre solde!');
+      updateDailyStats();
     }
     
     function updateDailyStats() {
@@ -1256,10 +1264,12 @@
     playButton.addEventListener('click', () => {
       youtubeVideo.play();
       playButton.style.display = 'none';
+      startTimer();
+      startButton.disabled = true;
     });
     
     startButton.addEventListener('click', () => {
-      if (canWatchMore && videosWatchedToday < 2) {
+      if (canWatchMore) {
         youtubeVideo.currentTime = 0;
         youtubeVideo.play();
         playButton.style.display = 'none';
@@ -1280,7 +1290,7 @@
       if (!currentUser) return;
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : userData;
+        const dataToSave = key ? { [key]: value } : { ...userData, lastYouTubeWatchDate: new Date().toDateString() };
         await userRef.set(dataToSave, { merge: true });
         console.log('Données utilisateur enregistrées avec succès.');
       } catch (error) {
@@ -1343,6 +1353,7 @@
                 loader.classList.add('hidden');
                 
                 showNotification('success', 'Bienvenue!', 'Prêt à gagner avec YouTube!');
+                checkDailyLimit(); // Vérifier la limite dès le chargement
 
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
