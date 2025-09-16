@@ -1107,7 +1107,7 @@
     </div>
   </footer>
 
-  <script>
+    <script>
     /******** CONFIG FIREBASE ********/
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
@@ -1138,6 +1138,7 @@
     // Trivia Challenge specific elements
     const progressText = document.getElementById('progressText');
     const progressFill = document.getElementById('progressFill');
+    const questionContainer = document.getElementById('questionContainer');
     const questionText = document.getElementById('questionText');
     const optionsContainer = document.getElementById('optionsContainer');
     const submitButton = document.getElementById('submitButton');
@@ -1157,9 +1158,9 @@
     let currentQuestionIndex = 0;
     let selectedOption = null;
     let score = 0;
-    let isFirstSession = true;
     let quizzesCompletedToday = 0;
     let earningsToday = 0;
+    let isEasyMode = true;
 
     /******** Questions pour le Trivia Challenge ********/
     const easyQuestions = [
@@ -1267,34 +1268,25 @@
         const isDarkMode = document.body.classList.contains('dark-mode');
         themeToggle.innerHTML = isDarkMode 
             ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon'></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+        if(currentUser) saveUserData({ theme: isDarkMode ? 'dark' : 'light' });
     });
 
     /******** Fonctions pour Trivia Challenge ********/
-    function loadQuestions() {
-      // Déterminer si c'est la première session ou non
+    function initQuiz() {
+      // Déterminer si c'est la première session du jour
       const today = new Date().toDateString();
-      const lastQuizDate = userData.lastTriviaDate || '';
-      
-      if (lastQuizDate !== today) {
-        // Nouveau jour, réinitialiser le compteur
-        isFirstSession = true;
-        quizzesCompletedToday = 0;
-        earningsToday = 0;
+      if (userData.lastTriviaDate !== today) {
         userData.triviaCompletedToday = 0;
         userData.triviaEarningsToday = 0;
         userData.lastTriviaDate = today;
-      } else {
-        // Même jour, récupérer les valeurs sauvegardées
-        isFirstSession = userData.triviaCompletedToday === 0;
-        quizzesCompletedToday = userData.triviaCompletedToday || 0;
-        earningsToday = userData.triviaEarningsToday || 0;
+        saveUserData({ lastTriviaDate: today, triviaCompletedToday: 0, triviaEarningsToday: 0 });
       }
       
-      // Choisir le niveau de difficulté
-      currentQuestions = isFirstSession ? easyQuestions : hardQuestions;
-      
+      quizzesCompletedToday = userData.triviaCompletedToday || 0;
+      earningsToday = userData.triviaEarningsToday || 0;
+      isEasyMode = (quizzesCompletedToday === 0);
+
       updateDailyStats();
       startQuiz();
     }
@@ -1303,11 +1295,12 @@
       currentQuestionIndex = 0;
       score = 0;
       selectedOption = null;
+      currentQuestions = isEasyMode ? easyQuestions : hardQuestions;
       
-      // Masquer les résultats
+      // Afficher les conteneurs du quiz
       resultsContainer.style.display = 'none';
       questionContainer.style.display = 'block';
-      submitButton.style.display = 'block';
+      submitButton.style.display = 'inline-flex';
       nextButton.style.display = 'none';
       
       loadQuestion();
@@ -1326,10 +1319,8 @@
       question.options.forEach((option, index) => {
         const optionElement = document.createElement('div');
         optionElement.className = 'option';
-        optionElement.innerHTML = `
-          <input type="radio" name="trivia-option" id="option-${index}" value="${index}">
-          <label class="option-label" for="option-${index}">${option}</label>
-        `;
+        optionElement.innerHTML = `<label class="option-label">${option}</label>`;
+        optionElement.dataset.index = index;
         optionElement.addEventListener('click', () => selectOption(optionElement, index));
         optionsContainer.appendChild(optionElement);
       });
@@ -1363,22 +1354,25 @@
       });
       
       // Afficher les bonnes/mauvaises réponses
-      options[question.correctAnswer].classList.add('correct');
+      const correctOption = options[question.correctAnswer];
+      correctOption.classList.add('correct');
       if (selectedOption !== question.correctAnswer) {
-        options[selectedOption].classList.add('incorrect');
+        const selectedOpt = options[selectedOption];
+        selectedOpt.classList.add('incorrect');
       }
       
       // Mettre à jour le score
       if (selectedOption === question.correctAnswer) {
         score++;
-        showNotification('success', 'Bonne réponse!', `Vous avez gagné ${isFirstSession ? 100 : 150} FCFA pour cette question.`);
+        const reward = isEasyMode ? 100 : 150;
+        showNotification('success', 'Bonne réponse!', `Vous avez gagné ${reward} FCFA pour cette question.`);
       } else {
         showNotification('error', 'Mauvaise réponse', `La bonne réponse était: ${question.options[question.correctAnswer]}`);
       }
       
       // Afficher le bouton pour la question suivante
       submitButton.style.display = 'none';
-      nextButton.style.display = 'block';
+      nextButton.style.display = 'inline-flex';
     }
     
     function nextQuestion() {
@@ -1386,7 +1380,7 @@
       
       if (currentQuestionIndex < currentQuestions.length) {
         loadQuestion();
-        submitButton.style.display = 'block';
+        submitButton.style.display = 'inline-flex';
         nextButton.style.display = 'none';
       } else {
         showResults();
@@ -1395,7 +1389,7 @@
     
     function showResults() {
       // Calculer les gains
-      const questionReward = isFirstSession ? 100 : 150;
+      const questionReward = isEasyMode ? 100 : 150;
       const totalEarnings = score * questionReward;
       
       // Mettre à jour les résultats
@@ -1414,15 +1408,17 @@
       // Mettre à jour les données utilisateur
       userData.triviaGains = (userData.triviaGains || 0) + totalEarnings;
       userData.solde = (userData.solde || 0) + totalEarnings;
-      
-      // Mettre à jour les statistiques du jour
-      quizzesCompletedToday++;
-      earningsToday += totalEarnings;
-      updateDailyStats();
+      userData.triviaCompletedToday = (userData.triviaCompletedToday || 0) + 1;
+      userData.triviaEarningsToday = (userData.triviaEarningsToday || 0) + totalEarnings;
       
       // Sauvegarder les données
-      saveUserData();
+      saveUserData(userData);
       
+      // Mettre à jour les statistiques du jour après sauvegarde
+      quizzesCompletedToday = userData.triviaCompletedToday;
+      earningsToday = userData.triviaEarningsToday;
+      updateDailyStats();
+
       // Afficher les résultats
       questionContainer.style.display = 'none';
       resultsContainer.style.display = 'block';
@@ -1435,9 +1431,7 @@
         return;
       }
       
-      // Charger de nouvelles questions (difficiles pour les sessions suivantes)
-      isFirstSession = false;
-      currentQuestions = hardQuestions;
+      isEasyMode = false;
       startQuiz();
     }
     
@@ -1452,11 +1446,10 @@
     restartButton.addEventListener('click', restartQuiz);
 
     /******** Sauvegarde des données utilisateur ********/
-    async function saveUserData(key = null, value = null) {
+    async function saveUserData(dataToSave) {
       if (!currentUser) return;
       try {
         const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : userData;
         await userRef.set(dataToSave, { merge: true });
         console.log('Données utilisateur enregistrées avec succès.');
       } catch (error) {
@@ -1471,16 +1464,18 @@
       const userRef = db.collection('users').doc(currentUser.uid);
       const doc = await userRef.get();
       if (doc.exists) {
-          const data = doc.data() || {};
-          userData = data;
-          
-          // Charger les questions
-          loadQuestions();
+          userData = doc.data() || {};
       } else {
-        userData = {};
-        await saveUserData();
-        loadQuestions();
+        userData = {
+          triviaCompletedToday: 0,
+          triviaEarningsToday: 0,
+          lastTriviaDate: null,
+          solde: 0,
+          triviaGains: 0
+        };
+        await saveUserData(userData);
       }
+      return userData;
     }
 
     /******** Mise à jour de l'interface utilisateur ********/
@@ -1503,16 +1498,15 @@
         if (user) {
             currentUser = user;
             try {
-                await loadUserData();
+                userData = await loadUserData();
 
-                // Vérification du paiement - NE PAS rediriger automatiquement
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour accéder à toutes les fonctionnalités.');
-                    // On ne redirige plus automatiquement
                 }
-
+                
                 updateUserInfoUI(user, userData);
                 applyTheme();
+                initQuiz();
                 
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
@@ -1530,5 +1524,3 @@
         }
     });
   </script>
-</body>
-</html>
