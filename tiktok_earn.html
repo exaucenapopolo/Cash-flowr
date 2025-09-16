@@ -1326,10 +1326,12 @@
             try {
                 await loadUserData();
 
+                // Correction : Rediriger vers paiement.html seulement si l'utilisateur n'a pas payé.
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
                     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    return;
+                    // Arrêter l'exécution ici pour ne pas charger le reste de l'UI
+                    return; 
                 }
 
                 updateUserInfoUI(user, userData);
@@ -1347,6 +1349,7 @@
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
+            // L'utilisateur n'est pas connecté, le rediriger
             window.location.href = 'login.html';
         }
     });
@@ -1356,6 +1359,4 @@
       // Précharger la vidéo
       tiktokVideo.load();
     });
-  </script>
-</body>
-</html>
+</script>
