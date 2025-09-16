@@ -1112,14 +1112,15 @@
     let currentUser = null;
     let userData = {};
     let timerInterval = null;
-    let currentVideoDuration = 0;
     let youtubePlayer;
     let videoIndex = 0;
 
-    // TODO: Remplace par tes propres IDs de vidéos YouTube
+    // ATTENTION: Remplace ces IDs et durées par tes propres vidéos YouTube
+    // La durée est le nombre de secondes que l'utilisateur doit regarder pour être récompensé.
     const videos = [
-        { id: 'VIDEO_ID_1', duration: 20, reward: 250 },
-        { id: 'VIDEO_ID_2', duration: 30, reward: 300 }
+        { id: 'tq6T9fP6xJ8', duration: 30, reward: 250 },
+        { id: '1k8g7H10t8w', duration: 45, reward: 300 },
+        { id: 'oD_J3T1gB8U', duration: 25, reward: 200 }
         // Ajoute d'autres vidéos ici
     ];
     
@@ -1143,7 +1144,7 @@
       }, duration);
     }
 
-    /******** Gestion du menu ********/
+    /******** Gestion du menu et du thème ********/
     hamburgerBtn.addEventListener('click', () => {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
@@ -1165,7 +1166,6 @@
         }
     });
 
-    /******** Theme toggle ********/
     themeToggle.addEventListener('click', (event) => {
         event.stopPropagation();
         document.body.classList.toggle('dark-mode');
@@ -1177,19 +1177,23 @@
     });
 
     /******** Fonctions pour YouTube Earn ********/
-    function updateTimerUI(progress, time) {
-      const percentage = (progress / currentVideoDuration) * 100;
-      const angle = (percentage / 100) * 360;
-      timerProgress.style.transform = `rotate(${angle}deg)`;
-      timerText.textContent = `${Math.max(0, currentVideoDuration - Math.round(time))}s`;
+    
+    // Fonction qui met à jour l'UI du minuteur
+    function updateTimerUI(currentTime) {
+      const duration = videos[videoIndex].duration;
+      const remainingTime = Math.max(0, Math.ceil(duration - currentTime));
+      const progress = ((duration - remainingTime) / duration) * 360;
+      timerProgress.style.transform = `rotate(${progress}deg)`;
+      timerText.textContent = `${remainingTime}s`;
     }
     
-    function videoEnded() {
-        // Le minuteur est terminé, le bouton de réclamation est activé.
+    // Fonction appelée quand la vidéo est terminée ou le temps minimum atteint
+    function videoCompleted() {
         claimButton.disabled = false;
         showNotification('success', 'Vidéo terminée!', 'Vous pouvez maintenant réclamer votre récompense.');
     }
-    
+
+    // Fonction pour réclamer la récompense
     async function claimReward() {
         if (!currentUser || claimButton.disabled) return;
         
@@ -1201,6 +1205,7 @@
             const videoReward = videos[videoIndex].reward;
             
             // On appelle la fonction Cloud pour valider et attribuer la récompense
+            // Note: Pour que cela fonctionne, tu dois créer cette fonction dans Firebase Functions
             const claimRewardFunction = functions.httpsCallable('claimYouTubeReward');
             const result = await claimRewardFunction({ amount: videoReward });
 
@@ -1218,6 +1223,7 @@
                 showNotification('info', 'Toutes les vidéos vues!', 'Revenez demain pour de nouvelles vidéos.');
                 startButton.textContent = 'Limite atteinte';
                 startButton.disabled = true;
+                rewardAmountElement.textContent = 'Terminé';
             }
 
         } catch (error) {
@@ -1226,11 +1232,11 @@
             claimButton.disabled = false;
         } finally {
             claimButton.textContent = 'Réclamer la récompense';
-            // Mettre à jour les statistiques même en cas d'erreur pour refléter le dernier état
             updateDailyStats();
         }
     }
     
+    // Fonction pour mettre à jour les statistiques sur l'interface
     function updateDailyStats() {
       const videosWatchedCount = userData.youTubeWatchesToday || 0;
       const earningsCount = userData.youTubeEarningsToday || 0;
@@ -1243,6 +1249,7 @@
       }
     }
 
+    // Fonction pour vérifier la limite quotidienne
     function checkDailyLimit() {
         const today = new Date().toDateString();
         if (userData.lastYouTubeWatchDate !== today) {
@@ -1252,6 +1259,8 @@
         }
         
         const watchedCount = userData.youTubeWatchesToday || 0;
+        videoIndex = watchedCount; // Commence à l'index de la prochaine vidéo à regarder
+        
         if (watchedCount >= videos.length) {
             startButton.disabled = true;
             startButton.textContent = 'Limite atteinte';
@@ -1263,24 +1272,27 @@
     }
 
     /******** Fonctions YouTube IFrame API ********/
+    // Cette fonction est appelée automatiquement par l'API
     function onYouTubeIframeAPIReady() {
         loadNextVideo();
     }
     
+    // Fonction pour charger la vidéo suivante
     function loadNextVideo() {
         if (videoIndex >= videos.length) {
-            console.log("Toutes les vidéos ont été regardées.");
+            // Pas de vidéos restantes
+            console.log("Toutes les vidéos ont été regardées pour aujourd'hui.");
             return;
         }
         
         const videoId = videos[videoIndex].id;
-        const videoDuration = videos[videoIndex].duration;
-        currentVideoDuration = videoDuration;
         
+        // Détruire l'ancien lecteur si il existe
         if (youtubePlayer) {
             youtubePlayer.destroy();
         }
         
+        // Créer un nouveau lecteur
         youtubePlayer = new YT.Player('youtube-player', {
             height: '100%',
             width: '100%',
@@ -1291,7 +1303,7 @@
                 'controls': 1,
                 'showinfo': 0,
                 'rel': 0,
-                'modestbranding': 1
+                'modestbranding': 1,
             },
             events: {
                 'onReady': onPlayerReady,
@@ -1300,62 +1312,53 @@
         });
         
         // Réinitialiser l'UI pour la nouvelle vidéo
-        timerText.textContent = `${videoDuration}s`;
-        timerProgress.style.transform = `rotate(0deg)`;
+        updateTimerUI(0);
         startButton.disabled = false;
         claimButton.disabled = true;
     }
 
+    // Fonction appelée quand le lecteur est prêt
     function onPlayerReady(event) {
-        // Le lecteur est prêt
-        const watchedCount = userData.youTubeWatchesToday || 0;
-        if (watchedCount >= videos.length) {
-            startButton.disabled = true;
-            startButton.textContent = 'Limite atteinte';
-        }
+        // Mettre à jour l'UI avec la durée de la vidéo
+        updateTimerUI(0);
+        checkDailyLimit();
     }
 
+    // Fonction gérant les changements d'état du lecteur (lecture, pause, fin)
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            // La lecture a commencé
-            startButton.disabled = true;
-            claimButton.disabled = true;
-            let timeElapsed = youtubePlayer.getCurrentTime();
-            
+            // Démarrer le minuteur en se basant sur le temps de lecture
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                timeElapsed = youtubePlayer.getCurrentTime();
-                updateTimerUI(timeElapsed, timeElapsed);
-                
-                if (timeElapsed >= currentVideoDuration) {
+                const currentTime = youtubePlayer.getCurrentTime();
+                updateTimerUI(currentTime);
+                if (currentTime >= videos[videoIndex].duration) {
                     clearInterval(timerInterval);
                     youtubePlayer.pauseVideo();
-                    videoEnded();
+                    videoCompleted();
                 }
             }, 500);
         } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-            // Lecture en pause
+            // Mettre le minuteur en pause
             clearInterval(timerInterval);
         } else if (event.data === YT.PlayerState.ENDED) {
-            // La vidéo est terminée
+            // Si la vidéo se termine, on arrête le minuteur et on complète la tâche
             clearInterval(timerInterval);
-            videoEnded();
+            videoCompleted();
         }
     }
     
-    /******** Sauvegarde des données utilisateur ********/
+    /******** Sauvegarde et chargement des données utilisateur ********/
     async function saveUserData(key, value) {
         if (!currentUser) return;
         try {
             const userRef = db.collection('users').doc(currentUser.uid);
             await userRef.set({ [key]: value }, { merge: true });
-            console.log('Données utilisateur enregistrées avec succès.');
         } catch (error) {
             console.error("Erreur lors de la sauvegarde des données :", error);
         }
     }
 
-    /******** Chargement des données utilisateur ********/
     async function loadUserData() {
         if (!currentUser) {
             throw new Error("Aucun utilisateur connecté pour charger les données.");
@@ -1375,13 +1378,6 @@
             });
         }
         checkDailyLimit();
-        // Déterminer la prochaine vidéo à regarder
-        videoIndex = userData.youTubeWatchesToday || 0;
-        if (videoIndex >= videos.length) {
-            videoIndex = videos.length - 1; // S'assurer que l'index ne dépasse pas le tableau
-            startButton.disabled = true;
-            startButton.textContent = 'Limite atteinte';
-        }
     }
 
     /******** Mise à jour de l'interface utilisateur ********/
@@ -1405,15 +1401,6 @@
             currentUser = user;
             try {
                 await loadUserData();
-
-                // --- Début du code retiré pour enlever la redirection ---
-                // if (!userData.paid) {
-                //     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                //     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                //     return; 
-                // }
-                // --- Fin du code retiré ---
-
                 updateUserInfoUI(user);
                 applyTheme();
                 
@@ -1421,8 +1408,6 @@
                 loader.classList.add('hidden');
                 
                 showNotification('success', 'Bienvenue!', 'Prêt à gagner avec YouTube!');
-                
-                // Le chargement du joueur YouTube se fait via l'API onYouTubeIframeAPIReady
                 
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
@@ -1447,3 +1432,4 @@
   </script>
 </body>
 </html>
+
