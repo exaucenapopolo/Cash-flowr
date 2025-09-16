@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
   
   <style>
     /* Styles de base */
@@ -488,7 +489,7 @@
 
     .video-placeholder {
       width: 100%;
-      padding-top: 177.78%; /* 16:9 Aspect Ratio */
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
       background-color: #000;
       position: relative;
     }
@@ -1010,29 +1011,21 @@
         <h2 class="section-title">Gagnez de l'argent en regardant des vidéos YouTube</h2>
         
         <div class="video-container">
-          <div class="video-placeholder">
-            <video class="video-player" id="youtubeVideo" playsinline>
-              <source src="https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4" type="video/mp4">
-              Votre navigateur ne supporte pas la lecture de vidéos.
-            </video>
-            <div class="play-button" id="playButton">
-              <i class="fas fa-play"></i>
-            </div>
-          </div>
+          <div id="youtube-player"></div>
         </div>
         
         <div class="timer-container">
           <div class="timer-circle">
             <div class="timer-bg"></div>
             <div class="timer-progress" id="timerProgress"></div>
-            <div class="timer-text" id="timerText">20s</div>
+            <div class="timer-text" id="timerText">--s</div>
           </div>
           <div class="timer-label">Temps restant</div>
         </div>
         
         <div class="reward-info">
-          <div class="reward-amount">+250 FCFA</div>
-          <div class="reward-text">Gagnez 250 FCFA pour chaque vidéo regardée jusqu'au bout</div>
+          <div class="reward-amount" id="rewardAmount"></div>
+          <div class="reward-text">Gagnez cette somme pour chaque vidéo regardée jusqu'au bout</div>
         </div>
         
         <div class="action-buttons">
@@ -1049,7 +1042,7 @@
       
       <div class="daily-stats">
         <div class="stat-card">
-          <div class="stat-value" id="videosWatched">0/2</div>
+          <div class="stat-value" id="videosWatched">0/0</div>
           <div class="stat-label">Vidéos regardées aujourd'hui</div>
         </div>
         
@@ -1073,6 +1066,7 @@
     </div>
   </footer>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     /******** CONFIG FIREBASE ********/
     const firebaseConfig = {
@@ -1088,6 +1082,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    const functions = firebase.functions();
+    
+    // Décommente cette ligne si tu testes en local avec Firebase Emulator
+    // functions.useEmulator('localhost', 5001);
 
     /******** DOM Elements ********/
     const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -1102,24 +1100,29 @@
     const userAvatar = document.getElementById('userAvatar');
     
     // YouTube Earn specific elements
-    const youtubeVideo = document.getElementById('youtubeVideo');
-    const playButton = document.getElementById('playButton');
     const timerProgress = document.getElementById('timerProgress');
     const timerText = document.getElementById('timerText');
     const startButton = document.getElementById('startButton');
     const claimButton = document.getElementById('claimButton');
     const videosWatched = document.getElementById('videosWatched');
     const earnedToday = document.getElementById('earnedToday');
+    const rewardAmountElement = document.getElementById('rewardAmount');
 
     /******** Variables d'état ********/
     let currentUser = null;
     let userData = {};
     let timerInterval = null;
-    let remainingTime = 20;
-    let videosWatchedToday = 0;
-    let earningsToday = 0;
-    let canWatchMore = true;
+    let currentVideoDuration = 0;
+    let youtubePlayer;
+    let videoIndex = 0;
 
+    // TODO: Remplace par tes propres IDs de vidéos YouTube
+    const videos = [
+        { id: 'VIDEO_ID_1', duration: 20, reward: 250 },
+        { id: 'VIDEO_ID_2', duration: 30, reward: 300 }
+        // Ajoute d'autres vidéos ici
+    ];
+    
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
       const container = document.getElementById('notificationContainer');
@@ -1174,151 +1177,216 @@
     });
 
     /******** Fonctions pour YouTube Earn ********/
-    function startTimer() {
-      clearInterval(timerInterval);
-      remainingTime = 20;
-      updateTimerUI();
-      
-      timerInterval = setInterval(() => {
-        remainingTime--;
-        updateTimerUI();
+    function updateTimerUI(progress, time) {
+      const percentage = (progress / currentVideoDuration) * 100;
+      const angle = (percentage / 100) * 360;
+      timerProgress.style.transform = `rotate(${angle}deg)`;
+      timerText.textContent = `${Math.max(0, currentVideoDuration - Math.round(time))}s`;
+    }
+    
+    function videoEnded() {
+        // Le minuteur est terminé, le bouton de réclamation est activé.
+        claimButton.disabled = false;
+        showNotification('success', 'Vidéo terminée!', 'Vous pouvez maintenant réclamer votre récompense.');
+    }
+    
+    async function claimReward() {
+        if (!currentUser || claimButton.disabled) return;
         
-        if (remainingTime <= 0) {
-          clearInterval(timerInterval);
-          videoCompleted();
-        }
-      }, 1000);
-    }
-    
-    function updateTimerUI() {
-      const progress = ((20 - remainingTime) / 20) * 360;
-      timerProgress.style.transform = `rotate(${progress}deg)`;
-      timerText.textContent = `${remainingTime}s`;
-    }
-    
-    function videoCompleted() {
-      claimButton.disabled = false;
-      startButton.disabled = true;
-      showNotification('success', 'Félicitations!', 'Vous avez regardé la vidéo avec succès. Cliquez pour réclamer votre récompense!');
-    }
-    
-    function claimReward() {
-      if (!currentUser) return;
-      
-      // Mettre à jour les données utilisateur
-      userData.youtubeGains = (userData.youtubeGains || 0) + 250;
-      userData.solde = (userData.solde || 0) + 250;
-      
-      // Mettre à jour les statistiques du jour
-      videosWatchedToday++;
-      earningsToday += 250;
-      userData.youTubeWatchesToday = videosWatchedToday;
-      userData.youTubeEarningsToday = earningsToday;
-      
-      // Sauvegarder les données
-      saveUserData();
-      
-      // Mettre à jour l'UI
-      claimButton.disabled = true;
-      canWatchMore = videosWatchedToday < 2;
-      if (canWatchMore) {
-        startButton.disabled = false;
-        showNotification('info', 'Prêt pour la prochaine!', 'Vous pouvez regarder une autre vidéo pour gagner plus.');
-      } else {
+        claimButton.disabled = true;
         startButton.disabled = true;
-        showNotification('info', 'Limite atteinte!', 'Vous avez atteint la limite quotidienne de vidéos.');
-      }
-      
-      updateDailyStats();
+        claimButton.textContent = 'Réclamation...';
+
+        try {
+            const videoReward = videos[videoIndex].reward;
+            
+            // On appelle la fonction Cloud pour valider et attribuer la récompense
+            const claimRewardFunction = functions.httpsCallable('claimYouTubeReward');
+            const result = await claimRewardFunction({ amount: videoReward });
+
+            // Mise à jour de l'UI avec les données du serveur
+            userData = result.data.userData;
+            updateDailyStats();
+            
+            showNotification('success', 'Récompense réclamée!', `${videoReward} FCFA ajoutés à votre solde.`);
+            
+            // Préparer la prochaine vidéo si disponible
+            if (videoIndex < videos.length - 1) {
+                videoIndex++;
+                loadNextVideo();
+            } else {
+                showNotification('info', 'Toutes les vidéos vues!', 'Revenez demain pour de nouvelles vidéos.');
+                startButton.textContent = 'Limite atteinte';
+                startButton.disabled = true;
+            }
+
+        } catch (error) {
+            console.error("Erreur lors de la réclamation :", error);
+            showNotification('error', 'Erreur de réclamation', 'Une erreur est survenue. Veuillez réessayer.');
+            claimButton.disabled = false;
+        } finally {
+            claimButton.textContent = 'Réclamer la récompense';
+            // Mettre à jour les statistiques même en cas d'erreur pour refléter le dernier état
+            updateDailyStats();
+        }
     }
     
     function updateDailyStats() {
-      videosWatched.textContent = `${videosWatchedToday}/2`;
-      earnedToday.textContent = `${earningsToday} FCFA`;
-    }
-    
-    function checkDailyLimit() {
-      const today = new Date().toDateString();
-      const lastWatchDate = userData.lastYouTubeWatchDate || '';
-      
-      if (lastWatchDate !== today) {
-        // Nouveau jour, réinitialiser le compteur
-        videosWatchedToday = 0;
-        earningsToday = 0;
-        userData.youTubeWatchesToday = 0;
-        userData.youTubeEarningsToday = 0;
-        userData.lastYouTubeWatchDate = today;
+      const videosWatchedCount = userData.youTubeWatchesToday || 0;
+      const earningsCount = userData.youTubeEarningsToday || 0;
+      videosWatched.textContent = `${videosWatchedCount}/${videos.length}`;
+      earnedToday.textContent = `${earningsCount} FCFA`;
+      if (videoIndex < videos.length) {
+          rewardAmountElement.textContent = `+${videos[videoIndex].reward} FCFA`;
       } else {
-        // Même jour, récupérer les valeurs sauvegardées
-        videosWatchedToday = userData.youTubeWatchesToday || 0;
-        earningsToday = userData.youTubeEarningsToday || 0;
+          rewardAmountElement.textContent = 'Terminé';
       }
-      
-      canWatchMore = videosWatchedToday < 2;
-      startButton.disabled = !canWatchMore;
-      
-      updateDailyStats();
     }
 
-    /******** Gestion des événements YouTube ********/
-    playButton.addEventListener('click', () => {
-      youtubeVideo.play();
-      playButton.style.display = 'none';
-      startTimer();
-      startButton.disabled = true;
-    });
-    
-    startButton.addEventListener('click', () => {
-      if (canWatchMore) {
-        youtubeVideo.currentTime = 0;
-        youtubeVideo.play();
-        playButton.style.display = 'none';
-        startTimer();
-        startButton.disabled = true;
-      }
-    });
-    
-    claimButton.addEventListener('click', claimReward);
-    
-    youtubeVideo.addEventListener('ended', () => {
-      clearInterval(timerInterval);
-      videoCompleted();
-    });
+    function checkDailyLimit() {
+        const today = new Date().toDateString();
+        if (userData.lastYouTubeWatchDate !== today) {
+            userData.youTubeWatchesToday = 0;
+            userData.youTubeEarningsToday = 0;
+            userData.lastYouTubeWatchDate = today;
+        }
+        
+        const watchedCount = userData.youTubeWatchesToday || 0;
+        if (watchedCount >= videos.length) {
+            startButton.disabled = true;
+            startButton.textContent = 'Limite atteinte';
+        } else {
+            startButton.disabled = false;
+            startButton.textContent = 'Commencer à regarder';
+        }
+        updateDailyStats();
+    }
 
+    /******** Fonctions YouTube IFrame API ********/
+    function onYouTubeIframeAPIReady() {
+        loadNextVideo();
+    }
+    
+    function loadNextVideo() {
+        if (videoIndex >= videos.length) {
+            console.log("Toutes les vidéos ont été regardées.");
+            return;
+        }
+        
+        const videoId = videos[videoIndex].id;
+        const videoDuration = videos[videoIndex].duration;
+        currentVideoDuration = videoDuration;
+        
+        if (youtubePlayer) {
+            youtubePlayer.destroy();
+        }
+        
+        youtubePlayer = new YT.Player('youtube-player', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                'playsinline': 1,
+                'autoplay': 0,
+                'controls': 1,
+                'showinfo': 0,
+                'rel': 0,
+                'modestbranding': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+        
+        // Réinitialiser l'UI pour la nouvelle vidéo
+        timerText.textContent = `${videoDuration}s`;
+        timerProgress.style.transform = `rotate(0deg)`;
+        startButton.disabled = false;
+        claimButton.disabled = true;
+    }
+
+    function onPlayerReady(event) {
+        // Le lecteur est prêt
+        const watchedCount = userData.youTubeWatchesToday || 0;
+        if (watchedCount >= videos.length) {
+            startButton.disabled = true;
+            startButton.textContent = 'Limite atteinte';
+        }
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            // La lecture a commencé
+            startButton.disabled = true;
+            claimButton.disabled = true;
+            let timeElapsed = youtubePlayer.getCurrentTime();
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeElapsed = youtubePlayer.getCurrentTime();
+                updateTimerUI(timeElapsed, timeElapsed);
+                
+                if (timeElapsed >= currentVideoDuration) {
+                    clearInterval(timerInterval);
+                    youtubePlayer.pauseVideo();
+                    videoEnded();
+                }
+            }, 500);
+        } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+            // Lecture en pause
+            clearInterval(timerInterval);
+        } else if (event.data === YT.PlayerState.ENDED) {
+            // La vidéo est terminée
+            clearInterval(timerInterval);
+            videoEnded();
+        }
+    }
+    
     /******** Sauvegarde des données utilisateur ********/
-    async function saveUserData(key = null, value = null) {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : { ...userData, lastYouTubeWatchDate: new Date().toDateString() };
-        await userRef.set(dataToSave, { merge: true });
-        console.log('Données utilisateur enregistrées avec succès.');
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
+    async function saveUserData(key, value) {
+        if (!currentUser) return;
+        try {
+            const userRef = db.collection('users').doc(currentUser.uid);
+            await userRef.set({ [key]: value }, { merge: true });
+            console.log('Données utilisateur enregistrées avec succès.');
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde des données :", error);
+        }
     }
 
     /******** Chargement des données utilisateur ********/
     async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      if (doc.exists) {
-          const data = doc.data() || {};
-          userData = data;
-          
-          // Vérifier la limite quotidienne
-          checkDailyLimit();
-      } else {
-        userData = {};
-        await saveUserData();
-      }
+        if (!currentUser) {
+            throw new Error("Aucun utilisateur connecté pour charger les données.");
+        }
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userRef.get();
+        if (doc.exists) {
+            userData = doc.data() || {};
+        } else {
+            userData = {};
+            await userRef.set({
+                youTubeWatchesToday: 0,
+                youTubeEarningsToday: 0,
+                lastYouTubeWatchDate: new Date().toDateString(),
+                solde: 0,
+                youtubeGains: 0
+            });
+        }
+        checkDailyLimit();
+        // Déterminer la prochaine vidéo à regarder
+        videoIndex = userData.youTubeWatchesToday || 0;
+        if (videoIndex >= videos.length) {
+            videoIndex = videos.length - 1; // S'assurer que l'index ne dépasse pas le tableau
+            startButton.disabled = true;
+            startButton.textContent = 'Limite atteinte';
+        }
     }
 
     /******** Mise à jour de l'interface utilisateur ********/
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+    function updateUserInfoUI(user) {
+        const displayName = userData.displayName || user.displayName || user.email.split('@')[0];
         if (sidebarUsername) sidebarUsername.textContent = displayName;
         if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
     }
@@ -1338,23 +1406,22 @@
             try {
                 await loadUserData();
 
-                // Correction : Rediriger vers paiement.html seulement si l'utilisateur n'a pas payé.
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
                     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    // Arrêter l'exécution ici pour ne pas charger le reste de l'UI
                     return; 
                 }
 
-                updateUserInfoUI(user, userData);
+                updateUserInfoUI(user);
                 applyTheme();
                 
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
                 
                 showNotification('success', 'Bienvenue!', 'Prêt à gagner avec YouTube!');
-                checkDailyLimit(); // Vérifier la limite dès le chargement
-
+                
+                // Le chargement du joueur YouTube se fait via l'API onYouTubeIframeAPIReady
+                
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
                 showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
@@ -1362,14 +1429,19 @@
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
-            // L'utilisateur n'est pas connecté, le rediriger
             window.location.href = 'login.html';
         }
     });
 
-    /******** Initialisation ********/
-    document.addEventListener('DOMContentLoaded', () => {
-      // Précharger la vidéo
-      youtubeVideo.load();
+    /******** Événements ********/
+    startButton.addEventListener('click', () => {
+        if (youtubePlayer && youtubePlayer.playVideo) {
+            youtubePlayer.playVideo();
+        }
     });
-</script>
+    
+    claimButton.addEventListener('click', claimReward);
+    
+  </script>
+</body>
+</html>

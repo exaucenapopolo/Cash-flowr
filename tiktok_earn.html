@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
+    /* ... (Le CSS reste le même, aucun changement nécessaire) ... */
     /* Styles de base */
     body {
       background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
@@ -1322,16 +1323,15 @@
             currentUser = user;
             try {
                 await loadUserData();
+                
+                // --- Début du code retiré pour enlever la redirection ---
+                // if (!userData.paid) {
+                //     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                //     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                //     return;
+                // }
+                // --- Fin du code retiré ---
 
-                if (!userData.paid) {
-                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    return;
-                }
-
-                // C'est ici que j'ai ajouté la correction.
-                // Si l'utilisateur a payé, on charge l'interface.
-                // Sinon, la condition ci-dessus s'occupera de la redirection.
                 updateUserInfoUI(user, userData);
                 applyTheme();
                 
