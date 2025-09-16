@@ -1406,11 +1406,13 @@
             try {
                 await loadUserData();
 
-                if (!userData.paid) {
-                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    return; 
-                }
+                // --- Début du code retiré pour enlever la redirection ---
+                // if (!userData.paid) {
+                //     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                //     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                //     return; 
+                // }
+                // --- Fin du code retiré ---
 
                 updateUserInfoUI(user);
                 applyTheme();
