@@ -236,7 +236,7 @@
       color: var(--text);
     }
     
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
@@ -244,8 +244,33 @@
       background: #fff;
     }
     
-    .whatsapp-btn {
-      background: #25D366;
+    .file-input {
+      border: 2px dashed #ddd;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-input:hover {
+      border-color: var(--accent);
+      background: #f0f9f4;
+    }
+    
+    .file-input i {
+      font-size: 24px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    
+    .file-name {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .activate-btn {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -258,6 +283,16 @@
       cursor: pointer;
       margin-top: 15px;
       width: 100%;
+    }
+    
+    .capture-notice {
+      background: #fff8e6;
+      border: 1px solid #ffecb5;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #8a623a;
     }
     
     @media (max-width: 900px) {
@@ -286,9 +321,13 @@
         <h1>Activez votre compte</h1>
         <p class="lead">Pour commencer à accéder à votre tableau de bord complet et gagner de l'argent, vous devez activer votre compte avec un paiement unique.</p>
 
+        <div class="capture-notice">
+          <i class="fas fa-camera"></i> <strong>Important :</strong> Dès que votre paiement est validé, faites impérativement une capture d'écran de la confirmation.
+        </div>
+
         <div class="row">
           <div><span class="muted">Utilisateur connecté :</span> <strong id="displayName">—</strong></div>
-          <div class="amount">3 100 FCFA</div>
+          <div class="amount">3 200 FCFA</div>
           <div class="small">Montant unique d'activation. Une fois payé, vous aurez accès à votre tableau de bord.</div>
 
           <div class="methods">
@@ -325,28 +364,57 @@
             <h3>Activer mon compte</h3>
             <p class="small">Remplissez ces informations et envoyez la preuve de votre paiement pour activer votre compte.</p>
             
+            <div class="capture-notice">
+              <i class="fas fa-exclamation-triangle"></i> <strong>Attention :</strong> Vous devez impérativement faire une capture d'écran de votre paiement validé avant de remplir ce formulaire.
+            </div>
+            
             <div class="form-group">
               <label for="username">Nom d'utilisateur</label>
-              <input type="text" id="username" placeholder="Votre nom d'utilisateur">
+              <input type="text" id="username" placeholder="Votre nom d'utilisateur" readonly>
             </div>
             
             <div class="form-group">
               <label for="email">Adresse e-mail</label>
-              <input type="email" id="email" placeholder="Votre adresse e-mail">
+              <input type="email" id="email" placeholder="Votre adresse e-mail" readonly>
             </div>
             
             <div class="form-group">
               <label for="country">Pays</label>
-              <input type="text" id="country" placeholder="Votre pays">
+              <input type="text" id="country" placeholder="Votre pays" readonly>
             </div>
             
             <div class="form-group">
               <label for="amount">Montant payé</label>
-              <input type="text" id="amount" value="3 100 FCFA" readonly>
+              <input type="text" id="amount" value="3 200 FCFA" readonly>
             </div>
             
-            <button class="whatsapp-btn" id="whatsappBtn">
-              <i class="fab fa-whatsapp"></i> Envoyer via WhatsApp
+            <div class="form-group">
+              <label for="paymentMethod">Moyen de paiement utilisé</label>
+              <select id="paymentMethod">
+                <option value="">Sélectionnez votre moyen de paiement</option>
+                <option value="mobile_money">Mobile Money (MTN/Orange)</option>
+                <option value="card">Carte bancaire (Visa/Mastercard)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="phoneNumber">Numéro de téléphone utilisé pour le paiement</label>
+              <input type="tel" id="phoneNumber" placeholder="Ex: +237 6XX XX XX XX">
+            </div>
+            
+            <div class="form-group">
+              <label>Preuve de paiement (capture d'écran)</label>
+              <div class="file-input" id="fileInput">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div>Cliquez pour sélectionner votre capture d'écran</div>
+                <div class="small">Formats acceptés: JPG, PNG (max 5MB)</div>
+                <div class="file-name" id="fileName">Aucun fichier sélectionné</div>
+              </div>
+              <input type="file" id="paymentProof" accept="image/*" style="display: none">
+            </div>
+            
+            <button class="activate-btn" id="activateBtn">
+              <i class="fas fa-check-circle"></i> Activer mon compte
             </button>
           </div>
         </div>
@@ -357,7 +425,7 @@
       <div class="card">
         <h3 style="margin-bottom:8px">Résumé</h3>
         <div class="row">
-          <div><span class="muted">Montant</span><div style="font-weight:800;font-size:18px">3 100 FCFA</div></div>
+          <div><span class="muted">Montant</span><div style="font-weight:800;font-size:18px">3 200 FCFA</div></div>
           <div><span class="muted">Statut du compte</span><div id="accountStatus" style="font-weight:700;color:#b76b00">En attente de paiement</div></div>
           <div id="paymentInfo" class="muted">Méthode : Non sélectionnée</div>
           <div style="margin-top:8px"><button id="logoutBtn" class="btn secondary">Me déconnecter</button></div>
@@ -401,10 +469,13 @@
     const activationForm = document.getElementById('activationForm');
     const mobileMoneyMethod = document.getElementById('mobileMoneyMethod');
     const cardMethod = document.getElementById('cardMethod');
-    const whatsappBtn = document.getElementById('whatsappBtn');
+    const fileInput = document.getElementById('fileInput');
+    const paymentProof = document.getElementById('paymentProof');
+    const fileName = document.getElementById('fileName');
 
     let selectedMethod = null;
     let currentUser = null;
+    let selectedFile = null;
 
     // Vérifier si l'utilisateur est connecté ; sinon rediriger vers login
     onAuthStateChanged(auth, async (user) => {
@@ -473,8 +544,8 @@
         return; 
       }
 
-      // Redirection vers la boutique Shario
-      window.location.href = 'https://nglypvpl.mychariow.com/prd_yo7mq0/checkout';
+      // Redirection vers le nouveau lien de paiement
+      window.location.href = 'https://soleaspay.com/qr/pay/sb.html?l=ZnI=&a=MzIwMA==&d=QWN0aXZlciB0b24gY29tcHRlIE1VTEFGTE9XUiA=&m=Yg==&c=WEFG&k=Vnp3Zm12RWRKam5BQzM1dXVIQ2VJb3RqWXpqN3FHdk5LS09KNFBFejMyWQ==&s=TVVMQUZMT1dSIA==&q=SkJIQlJOQUY3QQ==';
     });
 
     // Toggle du formulaire d'activation
@@ -488,29 +559,80 @@
       }
     });
 
-    // Handler du bouton WhatsApp
-    whatsappBtn.addEventListener('click', () => {
+    // Gestion de l'upload de fichier
+    fileInput.addEventListener('click', () => {
+      paymentProof.click();
+    });
+
+    paymentProof.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        selectedFile = e.target.files[0];
+        fileName.textContent = selectedFile.name;
+      } else {
+        selectedFile = null;
+        fileName.textContent = 'Aucun fichier sélectionné';
+      }
+    });
+
+    // Handler du bouton d'activation
+    document.getElementById('activateBtn').addEventListener('click', async () => {
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const country = document.getElementById('country').value;
-      const amount = document.getElementById('amount').value;
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const phoneNumber = document.getElementById('phoneNumber').value;
 
-      if (!username || !email || !country) {
+      if (!username || !email || !country || !paymentMethod || !phoneNumber) {
         alert('Veuillez remplir tous les champs requis.');
         return;
       }
 
-      // Message préformaté pour WhatsApp avec demande de capture
-      const message = `Bonjour, j'ai effectué mon paiement pour activer mon compte MULAFLOWR.%0A%0A` +
-                    `Nom d'utilisateur: ${username}%0A` +
-                    `Email: ${email}%0A` +
-                    `Pays: ${country}%0A` +
-                    `Montant payé: ${amount}%0A%0A` +
-                    `Je joins la capture d'écran de mon paiement.%0A` +
-                    `Veuillez activer mon compte. Merci !`;
+      if (!selectedFile) {
+        alert('Veuillez sélectionner une capture d\'écran de votre paiement.');
+        return;
+      }
 
-      // Ouvrir WhatsApp avec le numéro spécifique et le message prérempli
-      window.open(`https://wa.me/237699853665?text=${message}`, '_blank');
+      // Afficher un message de chargement
+      const activateBtn = document.getElementById('activateBtn');
+      const originalText = activateBtn.innerHTML;
+      activateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+      activateBtn.disabled = true;
+
+      try {
+        // Créer un FormData pour envoyer le fichier
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('country', country);
+        formData.append('paymentMethod', paymentMethod);
+        formData.append('phoneNumber', phoneNumber);
+        formData.append('amount', '3200 FCFA');
+        formData.append('paymentProof', selectedFile);
+
+        // Envoyer les données au backend (URL temporaire)
+        const response = await fetch('https://votre-backend-replit.temporaire/activation', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          alert('Votre demande d\'activation a été envoyée avec succès! Notre équipe va traiter votre demande sous peu.');
+          // Réinitialiser le formulaire
+          document.getElementById('paymentMethod').value = '';
+          document.getElementById('phoneNumber').value = '';
+          paymentProof.value = '';
+          fileName.textContent = 'Aucun fichier sélectionné';
+          selectedFile = null;
+        } else {
+          throw new Error('Erreur lors de l\'envoi');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de l\'envoi. Veuillez réessayer ou contacter le support.');
+      } finally {
+        activateBtn.innerHTML = originalText;
+        activateBtn.disabled = false;
+      }
     });
 
     // logout button
