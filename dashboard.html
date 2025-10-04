@@ -1997,7 +1997,7 @@
       </div>
     </div>
   </footer>
-
+  
 <script>
 /******** CONFIG FIREBASE ********/
 const firebaseConfig = {
@@ -2266,7 +2266,7 @@ function updateDashboardUI() {
     if(parrainageCard) parrainageCard.textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
 
     const bonusCard = document.querySelector('#bonus-agent-card .medium-stat-value');
-    if(bonusCard) bonusCard.textContent = `XAF ${formatNumberSafe(userData.bonusArgent)}`;
+    if(bonusCard) bonusCard.textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
 
     if(document.querySelector('#whatsapp-gains .gain-stat-value')) document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
     if(document.querySelector('#trivia-gains .gain-stat-value')) document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
@@ -2300,7 +2300,7 @@ function updateUserInfoUI(user, dbData = {}) {
   if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
 }
 
-/******** Communication serveur pour créer lien avec username ********/
+/******** CORRIGÉ: Communication serveur pour créer lien avec username ********/
 async function requestReferralLinkFromServer(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/create-referral-link`, {
@@ -2318,7 +2318,7 @@ async function requestReferralLinkFromServer(username) {
   }
 }
 
-/******** Récupérer les statistiques de parrainage depuis le serveur ********/
+/******** NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur ********/
 async function fetchReferralStats(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/referral-stats/${username}`);
@@ -2331,7 +2331,7 @@ async function fetchReferralStats(username) {
   }
 }
 
-/******** Récupérer la liste des filleuls depuis le serveur ********/
+/******** NOUVEAU: Récupérer la liste des filleuls depuis le serveur ********/
 async function fetchMyReferrals(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/my-referrals/${username}`);
@@ -2344,7 +2344,7 @@ async function fetchMyReferrals(username) {
   }
 }
 
-/******** CORRIGÉ: Watcher détecte 'paid' OU 'preuves reçues' et appelle le serveur ********/
+/******** Start watcher: détecte passage status -> 'paid' et appelle le serveur ********/
 async function startStatusWatcherAndTriggerProcessing() {
   if (!currentUser) return;
   try {
@@ -2356,7 +2356,7 @@ async function startStatusWatcherAndTriggerProcessing() {
       const status = (d.status || d.statut || '').toString().toLowerCase();
       const alreadyProcessed = !!d.referralProcessed;
 
-      if ((status === 'paid' || status === 'preuves reçues') && !alreadyProcessed) {
+      if (status === 'paid' && !alreadyProcessed) {
         showNotification('info', 'Parrainage', 'Paiement détecté — distribution en cours...');
         try {
           const idToken = await currentUser.getIdToken();
@@ -2393,6 +2393,15 @@ auth.onAuthStateChanged(async (user) => {
     try {
       await loadUserData();
 
+      // 🔒 SÉCURITÉ: Vérifier que le statut est "paid" avant d'autoriser l'accès au dashboard
+      const userStatus = (userData.status || userData.statut || '').toString().toLowerCase();
+      if (userStatus !== 'paid') {
+        console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid")');
+        showNotification('warning', 'Paiement requis', 'Vous devez finaliser votre paiement pour accéder au dashboard.');
+        setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
+        return;
+      }
+
       if (!userData.paid) {
         showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription. Nous surveillons le statut et appliquerons le parrainage dès que "paid" sera détecté.');
       }
@@ -2401,17 +2410,18 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
-      // Générer/obtenir le lien de parrainage via serveur avec username
+      // CORRIGÉ: Générer/obtenir le lien de parrainage via serveur avec username
       try {
         if (userData.username) {
           const serverResp = await requestReferralLinkFromServer(userData.username);
           if (serverResp && serverResp.referralLink) {
             referralLink.textContent = serverResp.referralLink;
             
-            // Récupérer les statistiques de parrainage depuis le serveur
+            // NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur
             const stats = await fetchReferralStats(userData.username);
             if (stats) {
               console.log('Stats de parrainage du serveur:', stats);
+              // Mettre à jour l'UI avec les stats du serveur si nécessaire
               userData.solde = stats.solde;
               userData.activeReferrals = stats.totalReferrals;
               userData.refEarnings = stats.earnings;
@@ -2420,9 +2430,11 @@ auth.onAuthStateChanged(async (user) => {
               updateUserInfoUI(user, userData);
             }
           } else {
+            // Fallback si le serveur ne répond pas
             referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userData.username)}`;
           }
         } else {
+          // Si pas de username, utiliser displayName/uid en fallback
           const userReferralId = userData.displayName || currentUser.uid;
           referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
         }
@@ -2432,7 +2444,7 @@ auth.onAuthStateChanged(async (user) => {
         referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
       }
 
-      // Démarrer le watcher qui déclenchera la répartition au moment où 'status' devient 'paid' ou 'preuves reçues'
+      // Démarrer le watcher qui déclenchera la répartition au moment où 'status' devient 'paid'
       startStatusWatcherAndTriggerProcessing();
 
       document.body.classList.add('loaded');
@@ -2471,5 +2483,8 @@ window._mulaflowr = {
   fetchMyReferrals
 };
 </script>
+</body>
+</html>
+
 </body>
 </html>
