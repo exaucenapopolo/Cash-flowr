@@ -370,17 +370,17 @@
             
             <div class="form-group">
               <label for="username">Nom d'utilisateur</label>
-              <input type="text" id="username" placeholder="Votre nom d'utilisateur" readonly>
+              <input type="text" id="username" placeholder="Votre nom d'utilisateur">
             </div>
             
             <div class="form-group">
               <label for="email">Adresse e-mail</label>
-              <input type="email" id="email" placeholder="Votre adresse e-mail" readonly>
+              <input type="email" id="email" placeholder="Votre adresse e-mail">
             </div>
             
             <div class="form-group">
               <label for="country">Pays</label>
-              <input type="text" id="country" placeholder="Votre pays" readonly>
+              <input type="text" id="country" placeholder="Votre pays">
             </div>
             
             <div class="form-group">
@@ -477,7 +477,7 @@
     let selectedMethod = null;
     let currentUser = null;
     let selectedFile = null;
-    let userCountryCode = null; // Stocke le code pays (cm, sn, etc.)
+    let userCountryCode = null;
 
     // Mapping code pays → nom complet
     const countryNames = {
@@ -497,31 +497,7 @@
       'cv': 'Cap-Vert'
     };
 
-    // Fonction pour charger les données utilisateur depuis le serveur
-    async function loadUserDataFromServer(idToken) {
-      try {
-        const response = await fetch(`${SERVER_URL}/api/user-data`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Erreur lors du chargement des données');
-        }
-
-        const data = await response.json();
-        return data.user;
-
-      } catch (error) {
-        console.error('Erreur loadUserDataFromServer:', error);
-        return null;
-      }
-    }
-
-    // Vérifier si l'utilisateur est connecté ; sinon rediriger vers login
+    // Vérifier si l'utilisateur est connecté
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'login.html';
@@ -529,74 +505,58 @@
       }
 
       currentUser = user;
-      
-      // Afficher le nom si disponible
       displayNameEl.textContent = user.displayName || user.email || user.uid;
 
       try {
-        // Obtenir le token Firebase
-        const idToken = await user.getIdToken();
-
-        // Charger les données depuis le serveur
-        const userData = await loadUserDataFromServer(idToken);
-
-        if (userData) {
-          // Pré-remplir le formulaire avec les données du serveur
-          document.getElementById('username').value = userData.username || userData.displayName || '';
-          document.getElementById('email').value = userData.email || '';
-
-          // Stocker le code pays et afficher le nom complet
-          if (userData.country) {
-            userCountryCode = userData.country; // Stocke "cm", "sn", etc.
-            const countryName = countryNames[userData.country] || userData.country;
+        // CHARGER DIRECTEMENT DEPUIS FIRESTORE (méthode la plus fiable)
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        
+        if (snap.exists()) {
+          const data = snap.data();
+          console.log('Données Firestore chargées:', data);
+          
+          // Pré-remplir tous les champs
+          document.getElementById('username').value = data.username || data.displayName || user.displayName || '';
+          document.getElementById('email').value = data.email || user.email || '';
+          
+          // Pays
+          if (data.country) {
+            userCountryCode = data.country;
+            const countryName = countryNames[data.country] || data.country;
             document.getElementById('country').value = countryName;
+            console.log('Pays chargé:', data.country, '→', countryName);
+          } else {
+            console.warn('⚠️ Aucun pays trouvé dans Firestore pour cet utilisateur');
           }
 
-          // Pré-remplir le numéro de téléphone
-          if (userData.phoneNumber) {
-            document.getElementById('phoneNumber').value = userData.phoneNumber;
+          // Téléphone
+          if (data.phoneNumber || data.phone) {
+            document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
+            console.log('Téléphone chargé:', data.phoneNumber || data.phone);
+          } else {
+            console.warn('⚠️ Aucun téléphone trouvé dans Firestore');
           }
 
           // Vérifier le statut
-          if (userData.status === 'active' || userData.status === 'paid' || userData.status === 'preuves reçues') {
+          if (data.status === 'active' || data.status === 'paid' || data.status === 'preuves reçues') {
             accountStatusEl.textContent = 'Actif';
-            // Rediriger vers le dashboard si déjà activé
             window.location.href = 'dashboard.html';
             return;
           } else {
             accountStatusEl.textContent = 'En attente de paiement';
           }
-
-          console.log('Données utilisateur chargées:', userData);
         } else {
-          // Fallback: charger depuis Firestore directement
-          const userRef = doc(db, 'users', user.uid);
-          const snap = await getDoc(userRef);
-          if (snap.exists()) {
-            const data = snap.data();
-            
-            document.getElementById('username').value = data.username || data.displayName || '';
-            document.getElementById('email').value = data.email || user.email || '';
-            
-            if (data.country) {
-              userCountryCode = data.country;
-              const countryName = countryNames[data.country] || data.country;
-              document.getElementById('country').value = countryName;
-            }
-
-            if (data.phoneNumber || data.phone) {
-              document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
-            }
-
-            if (data.status === 'active' || data.status === 'paid' || data.status === 'preuves reçues') {
-              accountStatusEl.textContent = 'Actif';
-              window.location.href = 'dashboard.html';
-              return;
-            }
-          }
+          console.warn('⚠️ Aucun document utilisateur trouvé dans Firestore');
+          // Remplir au moins avec les données Firebase Auth
+          document.getElementById('username').value = user.displayName || '';
+          document.getElementById('email').value = user.email || '';
         }
       } catch (err) {
-        console.error('Erreur chargement données utilisateur:', err);
+        console.error('❌ Erreur chargement données:', err);
+        // Remplir au moins avec les données Firebase Auth
+        document.getElementById('username').value = user.displayName || '';
+        document.getElementById('email').value = user.email || '';
       }
     });
 
@@ -628,7 +588,6 @@
         return; 
       }
 
-      // Redirection vers le nouveau lien de paiement Soleaspay
       window.location.href = 'https://soleaspay.com/qr/pay/sb.html?l=ZnI=&a=MzIwMA==&d=QWN0aXZlciB0b24gY29tcHRlIE1VTEFGTE9XUiA=&m=Yg==&c=WEFG&k=Vnp3Zm12RWRKam5BQzM1dXVIQ2VJb3RqWXpqN3FHdk5LS09KNFBFejMyWQ==&s=TVVMQUZMT1dSIA==&q=SkJIQlJOQUY3QQ==';
     });
 
@@ -666,7 +625,6 @@
       const paymentMethod = document.getElementById('paymentMethod').value;
       const phoneNumber = document.getElementById('phoneNumber').value;
 
-      // Utiliser le code pays stocké (cm, sn, etc.) au lieu du nom affiché
       const country = userCountryCode || countryDisplay;
 
       if (!username || !email || !country || !paymentMethod || !phoneNumber) {
@@ -679,28 +637,26 @@
         return;
       }
 
-      // Afficher un message de chargement
       const activateBtn = document.getElementById('activateBtn');
       const originalText = activateBtn.innerHTML;
       activateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
       activateBtn.disabled = true;
 
       try {
-        // Obtenir le token Firebase pour l'authentification
         const idToken = await currentUser.getIdToken();
 
-        // Créer un FormData pour envoyer le fichier
         const formData = new FormData();
         formData.append('username', username);
         formData.append('email', email);
-        formData.append('country', country); // Envoie le code pays (cm, sn, etc.)
+        formData.append('country', country);
         formData.append('paymentMethod', paymentMethod);
         formData.append('phoneNumber', phoneNumber);
         formData.append('amount', '3200 FCFA');
         formData.append('paymentProof', selectedFile);
-        formData.append('idToken', idToken); // Ajouter le token pour l'authentification
+        formData.append('idToken', idToken);
 
-        // Envoyer les données au backend
+        console.log('📤 Envoi au serveur:', { username, email, country, paymentMethod, phoneNumber });
+
         const response = await fetch(`${SERVER_URL}/submit-payment`, {
           method: 'POST',
           body: formData
@@ -708,24 +664,20 @@
 
         if (response.ok) {
           alert('Votre demande d\'activation a été envoyée avec succès! Notre équipe va traiter votre demande sous peu.');
-          // Réinitialiser le formulaire
           document.getElementById('paymentMethod').value = '';
           paymentProof.value = '';
           fileName.textContent = 'Aucun fichier sélectionné';
           selectedFile = null;
         } else {
-          // Tenter de lire le message d'erreur du backend
           let errorMessage = 'Erreur lors de l\'envoi';
           try {
              const errorData = await response.json();
              errorMessage = errorData.error || errorData.message || errorMessage;
-          } catch {
-             // Si la réponse n'est pas du JSON, utiliser le message par défaut
-          }
+          } catch {}
           throw new Error(errorMessage);
         }
       } catch (error) {
-        console.error('Erreur:', error);
+        console.error('❌ Erreur:', error);
         alert('Une erreur est survenue lors de l\'envoi: ' + error.message + '. Veuillez réessayer ou contacter le support.');
       } finally {
         activateBtn.innerHTML = originalText;
