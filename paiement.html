@@ -557,15 +557,17 @@
             document.getElementById('phoneNumber').value = userData.phoneNumber;
           }
 
-          // Vérifier le statut - SEUL "paid" permet la redirection
-          if (userData.status === 'paid') {
+          // Vérifier le statut - "paid" OU "active" permet la redirection
+          const userStatus = (userData.status || '').toString().toLowerCase().trim();
+          const validStatuses = ['paid', 'active'];
+          if (validStatuses.includes(userStatus)) {
             accountStatusEl.textContent = 'Payé - Accès autorisé';
-            console.log('✅ Statut = paid, redirection vers dashboard');
+            console.log('✅ Statut =', userStatus, '- Redirection vers dashboard');
             window.location.href = 'dashboard.html';
             return;
           } else {
             accountStatusEl.textContent = 'En attente de paiement';
-            console.log('⏳ Statut actuel:', userData.status, '- Paiement requis');
+            console.log('⏳ Statut actuel:', userStatus, '- Paiement requis');
           }
 
           console.log('Données utilisateur chargées:', userData);
@@ -589,14 +591,16 @@
               document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
             }
 
-            // Vérifier le statut - SEUL "paid" permet la redirection
-            if (data.status === 'paid') {
+            // Vérifier le statut - "paid" OU "active" permet la redirection
+            const dataStatus = (data.status || '').toString().toLowerCase().trim();
+            const validStatuses = ['paid', 'active'];
+            if (validStatuses.includes(dataStatus)) {
               accountStatusEl.textContent = 'Payé - Accès autorisé';
-              console.log('✅ Statut = paid, redirection vers dashboard (Firestore direct)');
+              console.log('✅ Statut =', dataStatus, '- Redirection vers dashboard (Firestore direct)');
               window.location.href = 'dashboard.html';
               return;
             } else {
-              console.log('⏳ Statut actuel:', data.status, '- Paiement requis (Firestore direct)');
+              console.log('⏳ Statut actuel:', dataStatus, '- Paiement requis (Firestore direct)');
             }
           }
         }
