@@ -1997,7 +1997,7 @@
     </div>
   </footer>
 
-  <script>
+<script>
     /******** CONFIG FIREBASE CORRIGÉE ET INTÉGRÉE ********/
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
@@ -2014,7 +2014,6 @@
     const auth = firebase.auth();
 
     /******** DOM Elements ********/
-    // **MODIFIÉ** : on utilise le nouveau bouton
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -2048,12 +2047,18 @@
     const welcomeTitle = document.getElementById('welcomeTitle');
     const welcomeMessage = document.getElementById('welcomeMessage');
     const bannerUsername = document.getElementById('bannerUsername');
+    
+    // Nouveaux éléments pour les statistiques détaillées (si vous les ajoutez plus tard)
+    const parrainageCard = document.getElementById('parrainage-card');
+
 
     /******** Variables d'état ********/
     let currentDate = new Date();
     let userData = {};
     let currentUser = null;
-    const APP_DOMAIN = "mulaflowr.com"; // Assurez-vous que c'est le domaine où est hébergé le formulaire de paiement
+    // **MODIFIÉ** : Utiliser l'URL de votre backend Replit pour le lien de parrainage
+    const APP_DOMAIN = "https://mulaflowr-agencies.vercel.app"; 
+    const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app"; // Assurez-vous que cette URL est correcte
 
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
@@ -2075,7 +2080,7 @@
       }, duration);
     }
 
-    /* **MODIFIÉ** : Nouvel événement pour le nouveau bouton */
+    /* Événements UI (inchangés) */
     hamburgerBtn.addEventListener('click', () => {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
@@ -2086,8 +2091,6 @@
         overlay.classList.remove('active');
         hamburgerBtn.classList.remove('open');
     });
-
-    /* Menu déroulant pour le profil et le mode nuit */
     userProfile.addEventListener('click', (event) => {
         event.stopPropagation();
         profileDropdown.classList.toggle('active');
@@ -2098,7 +2101,7 @@
         }
     });
 
-    /******** Theme toggle (sauvegarde possible) ********/
+    /******** Theme toggle (inchangé) ********/
     themeToggle.addEventListener('click', (event) => {
         event.stopPropagation();
         document.body.classList.toggle('dark-mode');
@@ -2109,7 +2112,7 @@
         if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
     });
 
-    /******** Copy / share actions ********/
+    /******** Copy / share actions (inchangés) ********/
     if (copyLinkBtn) {
       copyLinkBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(referralLink.textContent)
@@ -2136,7 +2139,7 @@
     if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
     if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
 
-    /******** Calendrier ********/
+    /******** Calendrier (inchangé) ********/
     function updateCalendar() {
       if (!calendarGrid || !calendarMonth) return;
       const year = currentDate.getFullYear();
@@ -2161,7 +2164,7 @@
     if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
     if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
     
-    /******** Fonctions Utilitaires de Données ********/
+    /******** Fonctions Utilitaires de Données (inchangées) ********/
     function isPaidFlag(value) {
       if (typeof value === 'boolean') return value;
       if (typeof value === 'string') {
@@ -2185,7 +2188,7 @@
       return false;
     }
 
-    /******** Sauvegarde des données utilisateur ********/
+    /******** Sauvegarde des données utilisateur (inchangée) ********/
     async function saveUserData(key = null, value = null) {
       if (!currentUser) return;
       try {
@@ -2199,20 +2202,35 @@
       }
     }
 
-    /******** Chargement des données utilisateur depuis Firestore ********/
+    /******** Chargement des données utilisateur depuis Firestore (MISE À JOUR) ********/
     async function loadUserData() {
       if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
       const userRef = db.collection('users').doc(currentUser.uid);
       const doc = await userRef.get();
+      
+      const defaultReferralEarnings = { level1: 0, level2: 0, level3: 0 };
+      let parrainageTotal = 0;
+      let activeReferrals = 0;
+      let displayName = currentUser.displayName || currentUser.email.split('@')[0];
+      
       if (doc.exists) {
           const data = doc.data() || {};
+          const refEarnings = data.referralEarnings || defaultReferralEarnings;
+          
+          // Calcul du total des gains de parrainage
+          parrainageTotal = (refEarnings.level1 || 0) + (refEarnings.level2 || 0) + (refEarnings.level3 || 0);
+          
+          // Le champ 'totalReferrals' est mis à jour par le backend lors du paiement du filleul de niveau 1
+          activeReferrals = Number(data.totalReferrals || 0); 
+          displayName = data.displayName || displayName;
+          
           userData = {
               depense: Number(data.depense || data.debit || 0),
               profit: Number(data.profit || data.revenue || 0),
               solde: Number(data.solde || data.balance || 0),
               retire: Number(data.retire || data.withdrawn || 0),
-              // **MODIFICATION POUR LE PARRAINAGE**
-              parrainage: Number(data.parrainage || data.referralEarnings || 0), 
+              // **MISE À JOUR ESSENTIELLE** : Utilise le total des gains calculés
+              parrainage: parrainageTotal, 
               bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
               whatsappGains: Number(data.whatsappGains || 0),
               triviaGains: Number(data.triviaGains || 0),
@@ -2222,28 +2240,31 @@
               depotSolde: Number(data.depotSolde || data.depositBalance || 0),
               phoneNumber: data.phoneNumber || data.phone || "",
               country: data.country || data.pays || "",
-              referrer: data.referrer || data.parrain || "Aucun", // L'ID ou le nom du parrain
-              // **MODIFICATION POUR LE PARRAINAGE**
-              activeReferrals: Number(data.referralsCount || data.parrainageCount || 0), 
-              displayName: data.displayName || currentUser.displayName,
+              // **MODIFICATION** : Prend le username du parrain (Level 1 Sponsor)
+              referrer: data.level1Sponsor || data.sponsorUsername || "Aucun", 
+              activeReferrals: activeReferrals,
+              displayName: displayName,
               email: data.email || currentUser.email,
               paid: isUserPaidFromDoc(data),
-              theme: data.theme || 'light'
+              theme: data.theme || 'light',
+              // Ajout des champs pour référence future (si besoin d'afficher les niveaux séparément)
+              refEarnings: refEarnings 
           };
       } else {
-        // **MISE À JOUR** : Ajout des champs de parrainage aux valeurs par défaut
+        // Valeurs par défaut avec les champs de parrainage
         userData = { 
             depense: 0, profit: 0, solde: 0, retire: 0, 
             parrainage: 0, bonusAgent: 0, whatsappGains: 0, 
             triviaGains: 0, publiciteGains: 0, tiktokGains: 0, 
             youtubeGains: 0, depotSolde: 0, paid: false, theme: 'light',
-            referrer: "Aucun", activeReferrals: 0 
+            referrer: "Aucun", activeReferrals: 0, refEarnings: defaultReferralEarnings,
+            displayName: displayName, email: currentUser.email
         };
         await saveUserData();
       }
     }
 
-    /******** Mise à jour de l'interface utilisateur (UI) ********/
+    /******** Mise à jour de l'interface utilisateur (UI) (MISE À JOUR) ********/
     function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
 
     function updateDashboardUI() {
@@ -2251,7 +2272,7 @@
         document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.profit)}`;
         document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${formatNumberSafe(userData.solde)}`;
         document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.retire)}`;
-        // **MISE À JOUR** : Affichage des gains de parrainage
+        // **MISE À JOUR** : Utilisation du total de parrainage calculé dans loadUserData
         document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
         document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
         document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
@@ -2267,7 +2288,6 @@
         const email = dbData.email || user.email || 'Non spécifié';
         const phone = dbData.phoneNumber || 'Non spécifié';
         const country = dbData.country || 'Non spécifié';
-        // **MODIFICATION**: Récupérer le parrain et le nombre de parrainages actifs
         const referrer = dbData.referrer || 'Aucun'; 
         const activeReferrals = dbData.activeReferrals || 0;
 
@@ -2277,8 +2297,9 @@
         if (infoEmail) infoEmail.textContent = email;
         if (infoPhone) infoPhone.textContent = phone;
         if (infoCountry) infoCountry.textContent = country;
-        if (infoParrain) infoParrain.textContent = referrer;
-        // **MISE À JOUR** : Affichage du compte de parrainage actif
+        // **MISE À JOUR** : Affiche le username du parrain (Level 1 Sponsor)
+        if (infoParrain) infoParrain.textContent = referrer; 
+        // **MISE À JOUR** : Affiche le nombre de filleuls actifs (Level 1)
         if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
 
         if (bannerUsername) bannerUsername.textContent = displayName;
@@ -2292,10 +2313,9 @@
         
         // **MODIFICATION ESSENTIELLE** : Génération du lien de parrainage
         if (referralLink) {
-            // Utilise l'UID de l'utilisateur pour créer le lien de parrainage
-            // L'ID du parrain (ref) est l'UID complet de l'utilisateur connecté
-            const userReferralId = user.uid; 
-            referralLink.textContent = `${APP_DOMAIN}/paiement.html?ref=${userReferralId}`;
+            // Utilise le displayName/username de l'utilisateur pour le lien de parrainage (conforme au server.js)
+            const userReferralId = displayName; // Ou le champ 'username' si vous le définissez dans Firestore
+            referralLink.textContent = `${APP_DOMAIN}/paiement.html?ref=${encodeURIComponent(userReferralId)}`;
         }
     }
     
@@ -2307,23 +2327,19 @@
             : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
     }
 
-    /******** Point d'entrée principal de l'application ********/
+    /******** Point d'entrée principal de l'application (inchangé) ********/
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
             try {
-                // Tente de charger les données existantes de l'utilisateur
                 await loadUserData();
 
-                // Vérification du statut de paiement
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    // Rediriger vers la page de paiement
                     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500); 
                     return;
                 }
 
-                // Si l'utilisateur est payé, mettre à jour l'interface
                 updateDashboardUI();
                 updateUserInfoUI(user, userData);
                 applyTheme();
@@ -2336,20 +2352,19 @@
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
                 showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                // Déconnexion et redirection en cas d'erreur critique
                 auth.signOut();
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
-            // Rediriger vers la page de connexion si aucun utilisateur n'est connecté
             window.location.href = 'login.html';
         }
     });
 
-    /******** Initialisation au chargement de la page ********/
+    /******** Initialisation au chargement de la page (inchangé) ********/
     document.addEventListener('DOMContentLoaded', () => {
         updateCalendar();
     });
-  </script>
+</script>
+
 </body>
 </html>
