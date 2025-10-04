@@ -444,7 +444,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
@@ -459,6 +459,8 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app";
 
     const displayNameEl = document.getElementById('displayName');
     const accountStatusEl = document.getElementById('accountStatus');
@@ -475,6 +477,49 @@
     let selectedMethod = null;
     let currentUser = null;
     let selectedFile = null;
+    let userCountryCode = null; // Stocke le code pays (cm, sn, etc.)
+
+    // Mapping code pays → nom complet
+    const countryNames = {
+      'cm': 'Cameroun', 'ci': 'Côte d\'Ivoire', 'sn': 'Sénégal', 'ml': 'Mali',
+      'bf': 'Burkina Faso', 'ne': 'Niger', 'tg': 'Togo', 'bj': 'Bénin',
+      'ng': 'Nigeria', 'gh': 'Ghana', 'gn': 'Guinée', 'cd': 'RD Congo',
+      'td': 'Tchad', 'cf': 'République centrafricaine', 'cg': 'Congo-Brazzaville',
+      'gq': 'Guinée équatoriale', 'ga': 'Gabon', 'st': 'Sao Tomé-et-Principe',
+      'gw': 'Guinée-Bissau', 'lr': 'Liberia', 'sl': 'Sierra Leone', 'gm': 'Gambie',
+      'mr': 'Mauritanie', 'ke': 'Kenya', 'ug': 'Ouganda', 'tz': 'Tanzanie',
+      'rw': 'Rwanda', 'bi': 'Burundi', 'et': 'Éthiopie', 'ss': 'Soudan du Sud',
+      'sd': 'Soudan', 'so': 'Somalie', 'dj': 'Djibouti', 'er': 'Érythrée',
+      'dz': 'Algérie', 'eg': 'Égypte', 'ly': 'Libye', 'ma': 'Maroc', 'tn': 'Tunisie',
+      'ao': 'Angola', 'mz': 'Mozambique', 'zm': 'Zambie', 'zw': 'Zimbabwe',
+      'mw': 'Malawi', 'na': 'Namibie', 'bw': 'Botswana', 'sz': 'Eswatini',
+      'ls': 'Lesotho', 'mg': 'Madagascar', 'mu': 'Maurice', 'sc': 'Seychelles',
+      'cv': 'Cap-Vert'
+    };
+
+    // Fonction pour charger les données utilisateur depuis le serveur
+    async function loadUserDataFromServer(idToken) {
+      try {
+        const response = await fetch(`${SERVER_URL}/api/user-data`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement des données');
+        }
+
+        const data = await response.json();
+        return data.user;
+
+      } catch (error) {
+        console.error('Erreur loadUserDataFromServer:', error);
+        return null;
+      }
+    }
 
     // Vérifier si l'utilisateur est connecté ; sinon rediriger vers login
     onAuthStateChanged(auth, async (user) => {
@@ -488,30 +533,70 @@
       // Afficher le nom si disponible
       displayNameEl.textContent = user.displayName || user.email || user.uid;
 
-      // Remplir automatiquement le formulaire d'activation
-      document.getElementById('username').value = user.displayName || '';
-      document.getElementById('email').value = user.email || '';
-
-      // Récupérer le statut utilisateur depuis Firestore (si existant)
       try {
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          accountStatusEl.textContent = (data.status === 'active' || data.status === 'paid') ? 'Actif' : 'En attente de paiement';
-          if(data.status === 'active' || data.status === 'paid'){
-            // Rediriger directement si déjà payé
+        // Obtenir le token Firebase
+        const idToken = await user.getIdToken();
+
+        // Charger les données depuis le serveur
+        const userData = await loadUserDataFromServer(idToken);
+
+        if (userData) {
+          // Pré-remplir le formulaire avec les données du serveur
+          document.getElementById('username').value = userData.username || userData.displayName || '';
+          document.getElementById('email').value = userData.email || '';
+
+          // Stocker le code pays et afficher le nom complet
+          if (userData.country) {
+            userCountryCode = userData.country; // Stocke "cm", "sn", etc.
+            const countryName = countryNames[userData.country] || userData.country;
+            document.getElementById('country').value = countryName;
+          }
+
+          // Pré-remplir le numéro de téléphone
+          if (userData.phoneNumber) {
+            document.getElementById('phoneNumber').value = userData.phoneNumber;
+          }
+
+          // Vérifier le statut
+          if (userData.status === 'active' || userData.status === 'paid' || userData.status === 'preuves reçues') {
+            accountStatusEl.textContent = 'Actif';
+            // Rediriger vers le dashboard si déjà activé
             window.location.href = 'dashboard.html';
             return;
+          } else {
+            accountStatusEl.textContent = 'En attente de paiement';
           }
-          
-          // Remplir automatiquement le pays si disponible
-          if (data.country) {
-            document.getElementById('country').value = data.country;
+
+          console.log('Données utilisateur chargées:', userData);
+        } else {
+          // Fallback: charger depuis Firestore directement
+          const userRef = doc(db, 'users', user.uid);
+          const snap = await getDoc(userRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            
+            document.getElementById('username').value = data.username || data.displayName || '';
+            document.getElementById('email').value = data.email || user.email || '';
+            
+            if (data.country) {
+              userCountryCode = data.country;
+              const countryName = countryNames[data.country] || data.country;
+              document.getElementById('country').value = countryName;
+            }
+
+            if (data.phoneNumber || data.phone) {
+              document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
+            }
+
+            if (data.status === 'active' || data.status === 'paid' || data.status === 'preuves reçues') {
+              accountStatusEl.textContent = 'Actif';
+              window.location.href = 'dashboard.html';
+              return;
+            }
           }
         }
       } catch (err) {
-        console.error('Erreur lecture utilisateur:', err);
+        console.error('Erreur chargement données utilisateur:', err);
       }
     });
 
@@ -577,9 +662,12 @@
     document.getElementById('activateBtn').addEventListener('click', async () => {
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
-      const country = document.getElementById('country').value;
+      const countryDisplay = document.getElementById('country').value;
       const paymentMethod = document.getElementById('paymentMethod').value;
       const phoneNumber = document.getElementById('phoneNumber').value;
+
+      // Utiliser le code pays stocké (cm, sn, etc.) au lieu du nom affiché
+      const country = userCountryCode || countryDisplay;
 
       if (!username || !email || !country || !paymentMethod || !phoneNumber) {
         alert('Veuillez remplir tous les champs requis.');
@@ -598,20 +686,22 @@
       activateBtn.disabled = true;
 
       try {
+        // Obtenir le token Firebase pour l'authentification
+        const idToken = await currentUser.getIdToken();
+
         // Créer un FormData pour envoyer le fichier
         const formData = new FormData();
         formData.append('username', username);
         formData.append('email', email);
-        formData.append('country', country);
+        formData.append('country', country); // Envoie le code pays (cm, sn, etc.)
         formData.append('paymentMethod', paymentMethod);
         formData.append('phoneNumber', phoneNumber);
         formData.append('amount', '3200 FCFA');
         formData.append('paymentProof', selectedFile);
+        formData.append('idToken', idToken); // Ajouter le token pour l'authentification
 
-        // Envoyer les données au backend (URL Replit corrigée)
-        const BACKEND_URL = 'https://mulaflowr-exaucenapopolo2.replit.app/submit-payment';
-        
-        const response = await fetch(BACKEND_URL, {
+        // Envoyer les données au backend
+        const response = await fetch(`${SERVER_URL}/submit-payment`, {
           method: 'POST',
           body: formData
         });
@@ -620,7 +710,6 @@
           alert('Votre demande d\'activation a été envoyée avec succès! Notre équipe va traiter votre demande sous peu.');
           // Réinitialiser le formulaire
           document.getElementById('paymentMethod').value = '';
-          document.getElementById('phoneNumber').value = '';
           paymentProof.value = '';
           fileName.textContent = 'Aucun fichier sélectionné';
           selectedFile = null;
@@ -629,7 +718,7 @@
           let errorMessage = 'Erreur lors de l\'envoi';
           try {
              const errorData = await response.json();
-             errorMessage = errorData.message || errorMessage;
+             errorMessage = errorData.error || errorData.message || errorMessage;
           } catch {
              // Si la réponse n'est pas du JSON, utiliser le message par défaut
           }
