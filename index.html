@@ -3,741 +3,673 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MULAFLOWR — Paiement d'activation</title>
+  <title>MULAFLOWR - Inscription</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      --card: #fff;
-      --accent: #2a8c5a;
-      --muted: #5a6f7d;
-      --text: #2c3e50;
-    }
+    /* --- CSS modifié avec nouveau fond et nouvelles polices --- */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
     
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
+    /* Nouveau fond avec dégradé vert/bleu plus foncé */
     body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
+      color:#333;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+    
+    .container{width:100%;max-width:480px;margin:0 auto}
+    .logo-header{text-align:center;margin-bottom:20px}
+    
+    /* Nouveau style pour le logo avec police stylée */
+    .logo{
+      font-size:2.8rem;
+      font-weight:800;
+      color:#2c3e50;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:10px;
+      position: relative;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Conteneur pour les pièces superposées */
+    .coin-container {
+      position: relative;
+      margin-right: 12px;
+      height: 50px;
+      width: 50px;
+    }
+    
+    /* Style pour les pièces superposées avec couleur verte plus foncée */
+    .coin {
+      position: absolute;
+      color: #2a8c5a;
+      font-size: 2.2rem;
+      text-shadow: 0px 1px 2px rgba(0,0,0,0.2);
+    }
+    
+    /* Positionnement des 4 pièces superposées */
+    .coin-1 { top: 0; left: 0; z-index: 4; }
+    .coin-2 { top: 5px; left: 5px; z-index: 3; opacity: 0.8; }
+    .coin-3 { top: 10px; left: 10px; z-index: 2; opacity: 0.6; }
+    .coin-4 { top: 15px; left: 15px; z-index: 1; opacity: 0.4; }
+    
+    .tagline{color:#5a6f7d;font-size:1.1rem;margin-bottom:10px;font-weight:500}
+    
+    .card{
+      background-color:white;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      overflow:hidden;
+      padding:25px;
+    }
+    
+    .card-header{text-align:center;margin-bottom:25px}
+    .card-header h2{color:#2c3e50;font-size:1.8rem;font-weight:600;margin-bottom:8px}
+    .card-header p{color:#7f8c8d;font-size:1rem}
+    .form-group{margin-bottom:20px}
+    label{display:block;margin-bottom:8px;font-weight:500;color:#2c3e50;font-size:0.95rem}
+    .input-group{display:flex;align-items:center;background-color:#f8f9fa;border-radius:8px;overflow:hidden;border:1px solid #ddd;transition:all 0.3s ease}
+    .input-group:focus-within{border-color:#3498db;box-shadow:0 0 0 2px rgba(52,152,219,0.2)}
+    .input-icon{padding:0 15px;color:#7f8c8d}
+    input,select{width:100%;padding:14px;border:none;background:transparent;color:#2c3e50;font-size:1rem;outline:none}
+    input::placeholder{color:#95a5a6}
+    select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 15px center;background-size:15px}
+    .phone-group{display:flex}
+    .country-code{flex:0 0 30%;display:flex;align-items:center;background-color:#eef2f7;padding:0 15px;border-right:1px solid #ddd;font-weight:500;color:#2c3e50}
+    .flag{margin-right:8px;font-size:1.2rem}
+    .phone-input{flex:1}
+    .checkbox-group{display:flex;align-items:flex-start;gap:12px;margin:20px 0}
+    .checkbox-group input[type="checkbox"]{width:18px;height:18px;margin-top:3px;flex-shrink:0;accent-color:#4CD964;cursor:pointer}
+    .terms-text{font-size:0.85rem;line-height:1.35;color:#7f8c8d;max-width:calc(100% - 32px)}
+    .terms-text a{color:#3498db;text-decoration:none;font-weight:500}
+    .terms-text a:hover{text-decoration:underline}
+    .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:white;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
+    .btn:active{transform:translateY(0)}
+    .login-link{text-align:center;margin-top:25px;font-size:0.95rem;color:#7f8c8d}
+    .login-link a{color:#3498db;text-decoration:none;font-weight:500}
+    .login-link a:hover{text-decoration:underline}
+    .footer{margin-top:30px;text-align:center;color:#5a6f7d;font-size:0.85rem}
+    .footer-links{margin-top:10px;display:flex;justify-content:center;gap:15px}
+    .footer-links a{color:#5a6f7d;text-decoration:none}
+    .footer-links a:hover{text-decoration:underline;color:#3498db}
+    .error-message{color:#e74c3c;background-color:#fde8e6;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
+    .success-message{color:#2ecc71;background-color:#e8f6ef;padding:10px;border-radius:5px;margin-top:10px;font-size:0.9rem;display:none}
+    
+    /* --- Nouvelles règles CSS pour les notifications --- */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .notification {
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 32px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease forwards;
+      position: relative;
+      overflow: hidden;
     }
     
-    .wrap {
-      width: 100%;
-      max-width: 920px;
-      display: flex;
-      gap: 28px;
-      align-items: flex-start;
+    .notification.success {
+      background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
+      color: white;
     }
     
-    .left {
+    .notification.error {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    .notification-icon {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+    
+    .notification-content {
       flex: 1;
     }
     
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-    
-    .logo .name {
-      font-weight: 800;
-      color: var(--accent);
-      font-size: 24px;
-      font-family: 'Montserrat', sans-serif;
-      text-transform: uppercase;
-    }
-    
-    h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    
-    p.lead {
-      color: var(--muted);
-      margin-bottom: 18px;
-    }
-    
-    .amount {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text);
-      margin: 10px 0;
-    }
-    
-    .small {
-      color: var(--muted);
-      font-size: 14px;
-    }
-    
-    .methods {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 18px;
-    }
-    
-    .method {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #eef2f6;
-      background: #f8f9fa;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .method:hover {
-      background: #eef2f6;
-      border-color: #ddd;
-    }
-    
-    .method.selected {
-      background: #e8f6ef;
-      border-color: var(--accent);
-    }
-    
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 14px 20px;
-      border-radius: 8px;
-      border: none;
-      background: linear-gradient(135deg, #4CD964 0%, #2AB32A 100%);
-      color: #fff;
+    .notification-title {
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
+      margin-bottom: 4px;
     }
     
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(76, 217, 100, 0.4);
+    .notification-message {
+      font-size: 0.9rem;
+      opacity: 0.9;
     }
     
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .btn.secondary {
-      background: #eef2f6;
-      color: var(--text);
-    }
-    
-    .notice {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #fff8e6;
-      border: 1px solid #ffecb5;
-      color: #8a623a;
-    }
-    
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 18px;
-    }
-    
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
-    
-    .center {
-      text-align: center;
-    }
-    
-    .right {
-      width: 360px;
-    }
-    
-    .card .row {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .success {
-      background: #e8f6ef;
-      border: 1px solid #d1f2de;
-      padding: 10px;
-      border-radius: 6px;
-      color: #0b7a49;
-    }
-    
-    .error {
-      background: #fde8e6;
-      border: 1px solid #f5c2bd;
-      padding: 10px;
-      border-radius: 6px;
-      color: #a02b20;
-    }
-    
-    .activation-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px dashed #ddd;
-    }
-    
-    .activation-toggle {
-      background: #f8f9fa;
+    .notification-close {
+      background: none;
       border: none;
-      padding: 12px;
-      border-radius: 8px;
-      width: 100%;
-      text-align: center;
+      color: inherit;
       cursor: pointer;
-      color: var(--accent);
-      font-weight: 600;
+      margin-left: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
     }
     
-    .activation-form {
-      display: none;
-      margin-top: 15px;
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
+    .notification-close:hover {
+      opacity: 1;
     }
     
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-      color: var(--text);
-    }
-    
-    .form-group input, .form-group select {
+    .notification-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: #fff;
+      transform-origin: left;
+      animation: progressBar 5s linear forwards;
     }
     
-    .file-input {
-      border: 2px dashed #ddd;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
     
-    .file-input:hover {
-      border-color: var(--accent);
-      background: #f0f9f4;
+    @keyframes progressBar {
+      from {
+        transform: scaleX(1);
+      }
+      to {
+        transform: scaleX(0);
+      }
     }
     
-    .file-input i {
-      font-size: 24px;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-    
-    .file-name {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    .activate-btn {
-      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-      display: inline-flex;
+    /* Style pour les options de pays avec drapeaux */
+    .country-option {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      border: none;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 15px;
-      width: 100%;
     }
     
-    .capture-notice {
-      background: #fff8e6;
-      border: 1px solid #ffecb5;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      font-size: 13px;
-      color: #8a623a;
+    .country-flag {
+      margin-right: 8px;
+      font-size: 1.2rem;
     }
     
-    @media (max-width: 900px) {
-      .wrap {
-        flex-direction: column;
+    @media (max-width:576px){
+      .card{padding:20px}
+      .logo{font-size:2.2rem}
+      .tagline{font-size:1rem}
+      .card-header h2{font-size:1.5rem}
+      .notification-container {
+        left: 20px;
+        right: 20px;
+      }
+      .notification {
+        max-width: 100%;
       }
       
-      .right {
-        width: 100%;
+      .coin-container {
+        height: 40px;
+        width: 40px;
+      }
+      
+      .coin {
+        font-size: 1.8rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="left">
-      <div class="card" aria-live="polite">
-        <div class="logo">
-          <i class="fas fa-coins" style="font-size: 28px; color: #2a8c5a;"></i>
-          <div>
-            <div class="name">MULAFLOWR</div>
-            <div class="small">Activation de compte — paiement requis</div>
-          </div>
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <div class="container">
+    <div class="logo-header">
+      <div class="logo">
+        <div class="coin-container">
+          <i class="fas fa-coins coin coin-1"></i>
+          <i class="fas fa-coins coin coin-2"></i>
+          <i class="fas fa-coins coin coin-3"></i>
+          <i class="fas fa-coins coin coin-4"></i>
         </div>
-
-        <h1>Activez votre compte</h1>
-        <p class="lead">Pour commencer à accéder à votre tableau de bord complet et gagner de l'argent, vous devez activer votre compte avec un paiement unique.</p>
-
-        <div class="capture-notice">
-          <i class="fas fa-camera"></i> <strong>Important :</strong> Dès que votre paiement est validé, faites impérativement une capture d'écran de la confirmation.
-        </div>
-
-        <div class="row">
-          <div><span class="muted">Utilisateur connecté :</span> <strong id="displayName">—</strong></div>
-          <div class="amount">3 200 FCFA</div>
-          <div class="small">Montant unique d'activation. Une fois payé, vous aurez accès à votre tableau de bord.</div>
-
-          <div class="methods">
-            <div class="method" id="mobileMoneyMethod">
-              <div><i class="fas fa-mobile-screen-button" style="font-size:20px;color:#0b1220"></i></div>
-              <div>
-                <div style="font-weight:700">Mobile Money</div>
-                <div class="small">MTN Mobile Money / Orange Money</div>
-              </div>
-            </div>
-
-            <div class="method" id="cardMethod">
-              <div><i class="fas fa-credit-card" style="font-size:20px;color:#0b1220"></i></div>
-              <div>
-                <div style="font-weight:700">Carte bancaire (Visa/Mastercard)</div>
-                <div class="small">Paiement sécurisé par carte bancaire</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button id="payBtn" class="btn"><i class="fas fa-wallet"></i> PAYER MAINTENANT</button>
-          </div>
-
-          <div id="message" style="margin-top:14px"></div>
-        </div>
-        
-        <div class="activation-section">
-          <button class="activation-toggle" id="activationToggle">
-            <i class="fas fa-chevron-down"></i> Vous avez déjà effectué votre paiement ?
-          </button>
-          
-          <div class="activation-form" id="activationForm">
-            <h3>Activer mon compte</h3>
-            <p class="small">Remplissez ces informations et envoyez la preuve de votre paiement pour activer votre compte.</p>
-            
-            <div class="capture-notice">
-              <i class="fas fa-exclamation-triangle"></i> <strong>Attention :</strong> Vous devez impérativement faire une capture d'écran de votre paiement validé avant de remplir ce formulaire.
-            </div>
-            
-            <div class="form-group">
-              <label for="username">Nom d'utilisateur</label>
-              <input type="text" id="username" placeholder="Votre nom d'utilisateur" readonly>
-            </div>
-            
-            <div class="form-group">
-              <label for="email">Adresse e-mail</label>
-              <input type="email" id="email" placeholder="Votre adresse e-mail" readonly>
-            </div>
-            
-            <div class="form-group">
-              <label for="country">Pays</label>
-              <input type="text" id="country" placeholder="Votre pays" readonly>
-            </div>
-            
-            <div class="form-group">
-              <label for="amount">Montant payé</label>
-              <input type="text" id="amount" value="3 200 FCFA" readonly>
-            </div>
-            
-            <div class="form-group">
-              <label for="paymentMethod">Moyen de paiement utilisé</label>
-              <select id="paymentMethod">
-                <option value="">Sélectionnez votre moyen de paiement</option>
-                <option value="mobile_money">Mobile Money (MTN/Orange)</option>
-                <option value="card">Carte bancaire (Visa/Mastercard)</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="phoneNumber">Numéro de téléphone utilisé pour le paiement</label>
-              <input type="tel" id="phoneNumber" placeholder="Ex: +237 6XX XX XX XX">
-            </div>
-            
-            <div class="form-group">
-              <label>Preuve de paiement (capture d'écran)</label>
-              <div class="file-input" id="fileInput">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <div>Cliquez pour sélectionner votre capture d'écran</div>
-                <div class="small">Formats acceptés: JPG, PNG (max 5MB)</div>
-                <div class="file-name" id="fileName">Aucun fichier sélectionné</div>
-              </div>
-              <input type="file" id="paymentProof" accept="image/*" style="display: none">
-            </div>
-            
-            <button class="activate-btn" id="activateBtn">
-              <i class="fas fa-check-circle"></i> Activer mon compte
-            </button>
-          </div>
-        </div>
+        <span>MULAFLOWR</span>
       </div>
+      <div class="tagline">Chaque action génère du cash.</div>
     </div>
 
-    <div class="right">
-      <div class="card">
-        <h3 style="margin-bottom:8px">Résumé</h3>
-        <div class="row">
-          <div><span class="muted">Montant</span><div style="font-weight:800;font-size:18px">3 200 FCFA</div></div>
-          <div><span class="muted">Statut du compte</span><div id="accountStatus" style="font-weight:700;color:#b76b00">En attente de paiement</div></div>
-          <div id="paymentInfo" class="muted">Méthode : Non sélectionnée</div>
-          <div style="margin-top:8px"><button id="logoutBtn" class="btn secondary">Me déconnecter</button></div>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h2>Créer un compte</h2>
+        <p>Rejoignez notre communauté dès aujourd'hui</p>
       </div>
 
-      <div style="height:12px"></div>
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
 
-      <div class="card">
-        <h4>Besoin d'aide ?</h4>
-        <p class="small">Contactez le support si vous avez un problème de paiement : <a href="support.html">Support</a></p>
+      <form id="registrationForm">
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-user"></i></div>
+            <input type="text" id="username" name="username" required placeholder="Choisissez votre nom d'utilisateur">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="par">Par (Parrain)</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-user-friends"></i></div>
+            <input type="text" id="par" name="par" placeholder="Aucun parrain détecté" readonly>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-envelope"></i></div>
+            <input type="email" id="email" name="email" required placeholder="exemple@email.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Pays</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-globe"></i></div>
+            <select id="country" name="country" required onchange="updateCountryCode()">
+              <option value="">Sélectionnez votre pays</option>
+              
+              <optgroup label="Afrique Centrale">
+                <option value="cm" data-code="+237" selected>🇨🇲 Cameroun</option>
+                <option value="td" data-code="+235">🇹🇩 Tchad</option>
+                <option value="cf" data-code="+236">🇨🇫 République centrafricaine</option>
+                <option value="cg" data-code="+242">🇨🇬 Congo-Brazzaville</option>
+                <option value="cd" data-code="+243">🇨🇩 République démocratique du Congo</option>
+                <option value="gq" data-code="+240">🇬🇶 Guinée équatoriale</option>
+                <option value="ga" data-code="+241">🇬🇦 Gabon</option>
+                <option value="st" data-code="+239">🇸🇹 Sao Tomé-et-Principe</option>
+              </optgroup>
+              
+              <optgroup label="Afrique de l'Ouest">
+                <option value="ci" data-code="+225">🇨🇮 Côte d'Ivoire</option>
+                <option value="sn" data-code="+221">🇸🇳 Sénégal</option>
+                <option value="ml" data-code="+223">🇲🇱 Mali</option>
+                <option value="bf" data-code="+226">🇧🇫 Burkina Faso</option>
+                <option value="ne" data-code="+227">🇳🇪 Niger</option>
+                <option value="tg" data-code="+228">🇹🇬 Togo</option>
+                <option value="bj" data-code="+229">🇧🇯 Bénin</option>
+                <option value="ng" data-code="+234">🇳🇬 Nigeria</option>
+                <option value="gh" data-code="+233">🇬🇭 Ghana</option>
+                <option value="gn" data-code="+224">🇬🇳 Guinée</option>
+                <option value="gw" data-code="+245">🇬🇼 Guinée-Bissau</option>
+                <option value="lr" data-code="+231">🇱🇷 Liberia</option>
+                <option value="sl" data-code="+232">🇸🇱 Sierra Leone</option>
+                <option value="gm" data-code="+220">🇬🇲 Gambie</option>
+                <option value="mr" data-code="+222">🇲🇷 Mauritanie</option>
+              </optgroup>
+              
+              <optgroup label="Afrique de l'Est">
+                <option value="ke" data-code="+254">🇰🇪 Kenya</option>
+                <option value="ug" data-code="+256">🇺🇬 Ouganda</option>
+                <option value="tz" data-code="+255">🇹🇿 Tanzanie</option>
+                <option value="rw" data-code="+250">🇷🇼 Rwanda</option>
+                <option value="bi" data-code="+257">🇧🇮 Burundi</option>
+                <option value="et" data-code="+251">🇪🇹 Éthiopie</option>
+                <option value="ss" data-code="+211">🇸🇸 Soudan du Sud</option>
+                <option value="sd" data-code="+249">🇸🇩 Soudan</option>
+                <option value="so" data-code="+252">🇸🇴 Somalie</option>
+                <option value="dj" data-code="+253">🇩🇯 Djibouti</option>
+                <option value="er" data-code="+291">🇪🇷 Érythrée</option>
+              </optgroup>
+              
+              <optgroup label="Autres pays africains">
+                <option value="dz" data-code="+213">🇩🇿 Algérie</option>
+                <option value="eg" data-code="+20">🇪🇬 Égypte</option>
+                <option value="ly" data-code="+218">🇱🇾 Libye</option>
+                <option value="ma" data-code="+212">🇲🇦 Maroc</option>
+                <option value="tn" data-code="+216">🇹🇳 Tunisie</option>
+                <option value="ao" data-code="+244">🇦🇴 Angola</option>
+                <option value="mz" data-code="+258">🇲🇿 Mozambique</option>
+                <option value="zm" data-code="+260">🇿🇲 Zambie</option>
+                <option value="zw" data-code="+263">🇿🇼 Zimbabwe</option>
+                <option value="mw" data-code="+265">🇲🇼 Malawi</option>
+                <option value="na" data-code="+264">🇳🇦 Namibie</option>
+                <option value="bw" data-code="+267">🇧🇼 Botswana</option>
+                <option value="sz" data-code="+268">🇸🇿 Eswatini</option>
+                <option value="ls" data-code="+266">🇱🇸 Lesotho</option>
+                <option value="mg" data-code="+261">🇲🇬 Madagascar</option>
+                <option value="mu" data-code="+230">🇲🇺 Maurice</option>
+                <option value="sc" data-code="+248">🇸🇨 Seychelles</option>
+                <option value="cv" data-code="+238">🇨🇻 Cap-Vert</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Numéro de téléphone</label>
+          <div class="input-group phone-group">
+            <div class="country-code"><span id="selectedFlag" class="flag">🇨🇲</span><span id="countryCode">+237</span></div>
+            <div class="input-icon"><i class="fas fa-phone"></i></div>
+            <input type="tel" id="phone" name="phone" required class="phone-input" placeholder="XX XXX XXX">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-lock"></i></div>
+            <input type="password" id="password" name="password" required placeholder="Créez un mot de passe sécurisé">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+          <div class="input-group">
+            <div class="input-icon"><i class="fas fa-lock"></i></div>
+            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirmez votre mot de passe">
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="terms" name="terms" required>
+          <div class="terms-text">En cochant cette case, j'accepte les <a href="terms.html">Conditions d'utilisation</a> et la <a href="privacy.html">Politique de confidentialité</a> de MULAFLOWR.<br>Mon compte devra être activé <strong>après mon paiement</strong>.</div>
+        </div>
+
+        <button type="submit" class="btn"><i class="fas fa-user-plus"></i> S'inscrire maintenant</button>
+      </form>
+
+      <div class="login-link">Vous avez déjà un compte? <a href="login.html">Connectez-vous</a></div>
+    </div>
+
+    <div class="footer">
+      <div>© 2025 MULAFLOWR. Tous droits réservés.</div>
+      <div class="footer-links">
+        <a href="terms.html">Conditions d'utilisation</a>
+        <a href="privacy.html">Politique de confidentialité</a>
+        <a href="support.html">Support</a>
+        <a href="https://social-boost-horizon-new-sbh.vercel.app" target="_blank">Propulsé par SHB</a>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+<script type="module">
+/* ---------- Imports Firebase (modular) ---------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.firebasestorage.app",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
-    };
+/* ---------- Configuration Firebase ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.firebasestorage.app",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app";
+const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app";
 
-    const displayNameEl = document.getElementById('displayName');
-    const accountStatusEl = document.getElementById('accountStatus');
-    const messageEl = document.getElementById('message');
-    const paymentInfo = document.getElementById('paymentInfo');
-    const activationToggle = document.getElementById('activationToggle');
-    const activationForm = document.getElementById('activationForm');
-    const mobileMoneyMethod = document.getElementById('mobileMoneyMethod');
-    const cardMethod = document.getElementById('cardMethod');
-    const fileInput = document.getElementById('fileInput');
-    const paymentProof = document.getElementById('paymentProof');
-    const fileName = document.getElementById('fileName');
+/* ---------- Helpers notifications ---------- */
+function showNotification(type, title, message, duration = 5000) {
+  const notificationContainer = document.getElementById('notificationContainer');
+  if (!notificationContainer) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+  notification.innerHTML = `
+    <i class="fas ${icon} notification-icon"></i>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-message">${message}</div>
+    </div>
+    <button class="notification-close"><i class="fas fa-times"></i></button>
+    <div class="notification-progress"></div>
+  `;
+  notificationContainer.appendChild(notification);
+  const closeNotification = () => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(() => { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
+  };
+  notification.querySelector('.notification-close').addEventListener('click', closeNotification);
+  notification.querySelector('.notification-progress').style.animationDuration = `${duration}ms`;
+  setTimeout(closeNotification, duration);
+}
+function showError(msg){ showNotification('error','Erreur',msg); }
+function showSuccess(msg){ showNotification('success','Succès',msg); }
 
-    let selectedMethod = null;
-    let currentUser = null;
-    let selectedFile = null;
-    let userCountryCode = null; // Stocke le code pays (cm, sn, etc.)
+/* ---------- Utilitaires UI / Pays ---------- */
+function getFlag(countryCode){
+  const flags = {
+    'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪',
+    'tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩','td':'🇹🇩','cf':'🇨🇫','cg':'🇨🇬','gq':'🇬🇶',
+    'ga':'🇬🇦','st':'🇸🇹','ng':'🇳🇬','gh':'🇬🇭','gn':'🇬🇳','gw':'🇬🇼','lr':'🇱🇷',
+    'sl':'🇸🇱','gm':'🇬🇲','mr':'🇲🇷','ke':'🇰🇪','ug':'🇺🇬','tz':'🇹🇿','rw':'🇷🇼',
+    'bi':'🇧🇮','et':'🇪🇹','ss':'🇸🇸','sd':'🇸🇩','so':'🇸🇴','dj':'🇩🇯','er':'🇪🇷',
+    'dz':'🇩🇿','eg':'🇪🇬','ly':'🇱🇾','ma':'🇲🇦','tn':'🇹🇳','ao':'🇦🇴','mz':'🇲🇿',
+    'zm':'🇿🇲','zw':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
+    'mg':'🇲🇬','mu':'🇲🇺','sc':'🇸🇨','cv':'🇨🇻'
+  };
+  return flags[countryCode] || '🇨🇲';
+}
+function updateCountryCode(){
+  const countrySelect = document.getElementById('country');
+  const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+  const code = selectedOption?.getAttribute('data-code') || '+237';
+  const flag = getFlag(selectedOption?.value);
+  const countryCodeEl = document.getElementById('countryCode');
+  const selectedFlagEl = document.getElementById('selectedFlag');
+  if(countryCodeEl) countryCodeEl.textContent = code;
+  if(selectedFlagEl) selectedFlagEl.textContent = flag;
+}
 
-    // Mapping code pays → nom complet
-    const countryNames = {
-      'cm': 'Cameroun', 'ci': 'Côte d\'Ivoire', 'sn': 'Sénégal', 'ml': 'Mali',
-      'bf': 'Burkina Faso', 'ne': 'Niger', 'tg': 'Togo', 'bj': 'Bénin',
-      'ng': 'Nigeria', 'gh': 'Ghana', 'gn': 'Guinée', 'cd': 'RD Congo',
-      'td': 'Tchad', 'cf': 'République centrafricaine', 'cg': 'Congo-Brazzaville',
-      'gq': 'Guinée équatoriale', 'ga': 'Gabon', 'st': 'Sao Tomé-et-Principe',
-      'gw': 'Guinée-Bissau', 'lr': 'Liberia', 'sl': 'Sierra Leone', 'gm': 'Gambie',
-      'mr': 'Mauritanie', 'ke': 'Kenya', 'ug': 'Ouganda', 'tz': 'Tanzanie',
-      'rw': 'Rwanda', 'bi': 'Burundi', 'et': 'Éthiopie', 'ss': 'Soudan du Sud',
-      'sd': 'Soudan', 'so': 'Somalie', 'dj': 'Djibouti', 'er': 'Érythrée',
-      'dz': 'Algérie', 'eg': 'Égypte', 'ly': 'Libye', 'ma': 'Maroc', 'tn': 'Tunisie',
-      'ao': 'Angola', 'mz': 'Mozambique', 'zm': 'Zambie', 'zw': 'Zimbabwe',
-      'mw': 'Malawi', 'na': 'Namibie', 'bw': 'Botswana', 'sz': 'Eswatini',
-      'ls': 'Lesotho', 'mg': 'Madagascar', 'mu': 'Maurice', 'sc': 'Seychelles',
-      'cv': 'Cap-Vert'
-    };
+/* ---------- Recherche du parrain par username ---------- */
+async function findSponsorByUsername(username){
+  if(!username) return null;
+  username = username.trim();
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', username));
+    const qs = await getDocs(q);
+    if(!qs.empty){
+      const d = qs.docs[0];
+      const data = d.data() || {};
+      return { 
+        uid: d.id, 
+        username: data.username || null, 
+        displayName: data.displayName || data.username || null 
+      };
+    }
+    return null;
+  } catch(err){
+    console.error('findSponsorByUsername error', err);
+    return null;
+  }
+}
 
-    // Fonction pour charger les données utilisateur depuis le serveur
-    async function loadUserDataFromServer(idToken) {
-      try {
-        const response = await fetch(`${SERVER_URL}/api/user-data`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
+/* ---------- Vérification unicité username ---------- */
+async function checkUsernameExists(username){
+  if(!username) return false;
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', username));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch(err){
+    console.error('checkUsernameExists error', err);
+    return false;
+  }
+}
 
-        if (!response.ok) {
-          throw new Error('Erreur lors du chargement des données');
-        }
+/* ---------- Gestion du formulaire / enregistrement ---------- */
+let sponsorData = null;
 
-        const data = await response.json();
-        return data.user;
+const registrationForm = document.getElementById('registrationForm');
+if (!registrationForm) throw new Error('Formulaire non trouvé (#registrationForm).');
 
-      } catch (error) {
-        console.error('Erreur loadUserDataFromServer:', error);
-        return null;
-      }
+registrationForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const country = document.getElementById('country').value;
+  const phone = document.getElementById('phone').value.trim();
+  const countryCode = document.getElementById('countryCode')?.textContent || '+237';
+
+  // Validations basiques
+  if(!username){ showError("Choisissez un nom d'utilisateur."); return; }
+  if(password !== confirmPassword){ showError("Les mots de passe ne correspondent pas."); return; }
+  if(!document.getElementById('terms').checked){ showError("Veuillez accepter les conditions."); return; }
+  if(password.length < 6){ showError("Le mot de passe doit contenir au moins 6 caractères."); return; }
+
+  // Vérification unicité username
+  const exists = await checkUsernameExists(username);
+  if(exists){ showError("Ce nom d'utilisateur est déjà pris."); return; }
+
+  // Gestion UI
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+  submitBtn.disabled = true;
+
+  try {
+    console.log('📝 Création du compte Firebase Auth...');
+    // 1) Création du compte dans Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 2) Mise à jour profile displayName
+    await updateProfile(user, { displayName: username });
+
+    // 3) Obtenir le token d'authentification
+    const idToken = await user.getIdToken();
+
+    // 4) Préparer les données pour l'API du serveur
+    const sponsorUsername = sponsorData ? (sponsorData.username || '') : '';
+    const fullPhoneNumber = countryCode + phone;
+
+    console.log('📤 Envoi au serveur:', { email, username, sponsorUsername, country, fullPhoneNumber });
+
+    // 5) Appeler l'endpoint du serveur pour enregistrer avec le système de parrainage
+    const registerResponse = await fetch(`${SERVER_URL}/api/register-with-referral`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        email: email,
+        displayName: username,
+        sponsorUsername: sponsorUsername,
+        country: country,
+        phoneNumber: fullPhoneNumber,
+        uid: user.uid
+      })
+    });
+
+    const registerData = await registerResponse.json();
+
+    if (!registerResponse.ok) {
+      throw new Error(registerData.error || 'Erreur lors de l\'enregistrement sur le serveur');
     }
 
-    // Vérifier si l'utilisateur est connecté ; sinon rediriger vers login
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
+    console.log('✅ Inscription serveur réussie:', registerData);
 
-      currentUser = user;
-      
-      // Afficher le nom si disponible
-      displayNameEl.textContent = user.displayName || user.email || user.uid;
+    showSuccess("Votre compte a été créé ! Redirection vers la page de paiement...");
+    setTimeout(()=> window.location.assign('paiement.html'), 2000);
 
-      try {
-        // Obtenir le token Firebase
-        const idToken = await user.getIdToken();
+  } catch (err) {
+    console.error('❌ Registration error:', err);
+    let message = "Une erreur s'est produite lors de l'inscription.";
+    if(err.code === 'auth/email-already-in-use') message = "Cette adresse email est déjà utilisée par un autre compte.";
+    else if(err.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
+    else if(err.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
+    else message = err.message || message;
+    showError(message);
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+});
 
-        // Charger les données depuis le serveur
-        const userData = await loadUserDataFromServer(idToken);
+/* ---------- Initialisation au chargement : lecture du paramètre ref ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialise country select UI
+  try { document.getElementById('country').value = 'cm'; } catch(e){}
+  updateCountryCode();
 
-        if (userData) {
-          // Pré-remplir le formulaire avec les données du serveur
-          document.getElementById('username').value = userData.username || userData.displayName || '';
-          document.getElementById('email').value = userData.email || '';
+  // Param d'URL: on regarde 'ref' puis 'par'
+  const urlParams = new URLSearchParams(window.location.search);
+  const refParam = urlParams.get('ref') || urlParams.get('par') || '';
 
-          // Stocker le code pays et afficher le nom complet
-          if (userData.country) {
-            userCountryCode = userData.country; // Stocke "cm", "sn", etc.
-            const countryName = countryNames[userData.country] || userData.country;
-            document.getElementById('country').value = countryName;
-          }
+  const parInput = document.getElementById('par');
 
-          // Pré-remplir le numéro de téléphone
-          if (userData.phoneNumber) {
-            document.getElementById('phoneNumber').value = userData.phoneNumber;
-          }
-
-          // Vérifier le statut
-          if (userData.status === 'active' || userData.status === 'paid' || userData.status === 'preuves reçues') {
-            accountStatusEl.textContent = 'Actif';
-            // Rediriger vers le dashboard si déjà activé
-            window.location.href = 'dashboard.html';
-            return;
-          } else {
-            accountStatusEl.textContent = 'En attente de paiement';
-          }
-
-          console.log('Données utilisateur chargées:', userData);
-        } else {
-          // Fallback: charger depuis Firestore directement
-          const userRef = doc(db, 'users', user.uid);
-          const snap = await getDoc(userRef);
-          if (snap.exists()) {
-            const data = snap.data();
-            
-            document.getElementById('username').value = data.username || data.displayName || '';
-            document.getElementById('email').value = data.email || user.email || '';
-            
-            if (data.country) {
-              userCountryCode = data.country;
-              const countryName = countryNames[data.country] || data.country;
-              document.getElementById('country').value = countryName;
-            }
-
-            if (data.phoneNumber || data.phone) {
-              document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
-            }
-
-            if (data.status === 'active' || data.status === 'paid' || data.status === 'preuves reçues') {
-              accountStatusEl.textContent = 'Actif';
-              window.location.href = 'dashboard.html';
-              return;
-            }
-          }
+  if(refParam){
+    console.log('🔍 Recherche du parrain:', refParam);
+    // On cherche le parrain par username dans Firestore
+    try {
+      const found = await findSponsorByUsername(refParam);
+      if(found){
+        sponsorData = found;
+        const display = found.displayName || found.username;
+        if(parInput) {
+          parInput.value = display;
+          parInput.readOnly = true;
         }
-      } catch (err) {
-        console.error('Erreur chargement données utilisateur:', err);
-      }
-    });
-
-    // Gestion de la sélection de méthode de paiement
-    mobileMoneyMethod.addEventListener('click', () => {
-      mobileMoneyMethod.classList.add('selected');
-      cardMethod.classList.remove('selected');
-      selectedMethod = 'mobile_money';
-      paymentInfo.textContent = 'Méthode : Mobile Money';
-    });
-
-    cardMethod.addEventListener('click', () => {
-      cardMethod.classList.add('selected');
-      mobileMoneyMethod.classList.remove('selected');
-      selectedMethod = 'card';
-      paymentInfo.textContent = 'Méthode : Carte bancaire';
-    });
-
-    // Handler du bouton de paiement
-    document.getElementById('payBtn').addEventListener('click', async () => {
-      if (!selectedMethod) {
-        messageEl.innerHTML = '<div class="error">Veuillez sélectionner une méthode de paiement.</div>';
-        return;
-      }
-
-      const user = auth.currentUser;
-      if (!user) { 
-        window.location.href = 'login.html'; 
-        return; 
-      }
-
-      // Redirection vers le nouveau lien de paiement Soleaspay
-      window.location.href = 'https://soleaspay.com/qr/pay/sb.html?l=ZnI=&a=MzIwMA==&d=QWN0aXZlciB0b24gY29tcHRlIE1VTEFGTE9XUiA=&m=Yg==&c=WEFG&k=Vnp3Zm12RWRKam5BQzM1dXVIQ2VJb3RqWXpqN3FHdk5LS09KNFBFejMyWQ==&s=TVVMQUZMT1dSIA==&q=SkJIQlJOQUY3QQ==';
-    });
-
-    // Toggle du formulaire d'activation
-    activationToggle.addEventListener('click', () => {
-      if (activationForm.style.display === 'block') {
-        activationForm.style.display = 'none';
-        activationToggle.innerHTML = '<i class="fas fa-chevron-down"></i> Vous avez déjà effectué votre paiement ?';
+        console.log('✅ Parrain trouvé:', found);
       } else {
-        activationForm.style.display = 'block';
-        activationToggle.innerHTML = '<i class="fas fa-chevron-up"></i> Masquer le formulaire d\'activation';
-      }
-    });
-
-    // Gestion de l'upload de fichier
-    fileInput.addEventListener('click', () => {
-      paymentProof.click();
-    });
-
-    paymentProof.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        selectedFile = e.target.files[0];
-        fileName.textContent = selectedFile.name;
-      } else {
-        selectedFile = null;
-        fileName.textContent = 'Aucun fichier sélectionné';
-      }
-    });
-
-    // Handler du bouton d'activation
-    document.getElementById('activateBtn').addEventListener('click', async () => {
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const countryDisplay = document.getElementById('country').value;
-      const paymentMethod = document.getElementById('paymentMethod').value;
-      const phoneNumber = document.getElementById('phoneNumber').value;
-
-      // Utiliser le code pays stocké (cm, sn, etc.) au lieu du nom affiché
-      const country = userCountryCode || countryDisplay;
-
-      if (!username || !email || !country || !paymentMethod || !phoneNumber) {
-        alert('Veuillez remplir tous les champs requis.');
-        return;
-      }
-
-      if (!selectedFile) {
-        alert('Veuillez sélectionner une capture d\'écran de votre paiement.');
-        return;
-      }
-
-      // Afficher un message de chargement
-      const activateBtn = document.getElementById('activateBtn');
-      const originalText = activateBtn.innerHTML;
-      activateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
-      activateBtn.disabled = true;
-
-      try {
-        // Obtenir le token Firebase pour l'authentification
-        const idToken = await currentUser.getIdToken();
-
-        // Créer un FormData pour envoyer le fichier
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('email', email);
-        formData.append('country', country); // Envoie le code pays (cm, sn, etc.)
-        formData.append('paymentMethod', paymentMethod);
-        formData.append('phoneNumber', phoneNumber);
-        formData.append('amount', '3200 FCFA');
-        formData.append('paymentProof', selectedFile);
-        formData.append('idToken', idToken); // Ajouter le token pour l'authentification
-
-        // Envoyer les données au backend
-        const response = await fetch(`${SERVER_URL}/submit-payment`, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (response.ok) {
-          alert('Votre demande d\'activation a été envoyée avec succès! Notre équipe va traiter votre demande sous peu.');
-          // Réinitialiser le formulaire
-          document.getElementById('paymentMethod').value = '';
-          paymentProof.value = '';
-          fileName.textContent = 'Aucun fichier sélectionné';
-          selectedFile = null;
-        } else {
-          // Tenter de lire le message d'erreur du backend
-          let errorMessage = 'Erreur lors de l\'envoi';
-          try {
-             const errorData = await response.json();
-             errorMessage = errorData.error || errorData.message || errorMessage;
-          } catch {
-             // Si la réponse n'est pas du JSON, utiliser le message par défaut
-          }
-          throw new Error(errorMessage);
+        // Pas trouvé: on affiche le param brut
+        if(parInput){
+          parInput.value = refParam;
+          parInput.readOnly = false;
         }
-      } catch (error) {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de l\'envoi: ' + error.message + '. Veuillez réessayer ou contacter le support.');
-      } finally {
-        activateBtn.innerHTML = originalText;
-        activateBtn.disabled = false;
+        console.warn('⚠️ Parrain non trouvé avec username:', refParam);
       }
-    });
+    } catch(err){
+      console.error('❌ Erreur lors de la recherche du parrain:', err);
+      if(parInput) parInput.value = refParam;
+    }
+  } else {
+    // Aucun param: garde le champ par vide
+    if(parInput) { 
+      parInput.value = ''; 
+      parInput.placeholder = 'Aucun parrain détecté'; 
+      parInput.readOnly = false; 
+    }
+  }
 
-    // logout button
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await signOut(auth);
-      window.location.href = 'login.html';
-    });
-  </script>
+  // Écoute changement de pays
+  const countrySelect = document.getElementById('country');
+  if(countrySelect) countrySelect.addEventListener('change', updateCountryCode);
+});
+</script>
 </body>
 </html>
