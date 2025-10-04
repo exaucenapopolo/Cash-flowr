@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"> <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"> 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
@@ -1827,7 +1828,7 @@
         <div class="referral-content">
           <div class="referral-link-container">
             <div class="link-box">
-              <div class="link-text" id="referralLink">mulaflowr.com/?ref=USER000X0</div>
+              <div class="link-text" id="referralLink">Chargement du lien...</div> 
               <button class="copy-btn" id="copyLinkBtn">
                 <i class="fas fa-copy"></i>
                 <span>Copier</span>
@@ -1880,12 +1881,12 @@
           
           <div class="info-item">
             <div class="info-label">Parrain</div>
-            <div class="info-value" id="info-parrain">Chargement...</div>
+            <div class="info-value" id="info-parrain">Chargement...</div> 
           </div>
           
           <div class="info-item">
             <div class="info-label">Parrainage actif</div>
-            <div class="info-value" id="info-parrainage">0 personnes</div>
+            <div class="info-value" id="info-parrainage">Chargement...</div> 
           </div>
         </div>
       </div>
@@ -2052,6 +2053,7 @@
     let currentDate = new Date();
     let userData = {};
     let currentUser = null;
+    const APP_DOMAIN = "mulaflowr.com"; // Assurez-vous que c'est le domaine où est hébergé le formulaire de paiement
 
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
@@ -2164,7 +2166,7 @@
       if (typeof value === 'boolean') return value;
       if (typeof value === 'string') {
         const v = value.toLowerCase().trim();
-        return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1'].includes(v);
+        return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1', 'preuves reçues'].includes(v);
       }
       if (typeof value === 'number') return value === 1;
       return false;
@@ -2209,7 +2211,8 @@
               profit: Number(data.profit || data.revenue || 0),
               solde: Number(data.solde || data.balance || 0),
               retire: Number(data.retire || data.withdrawn || 0),
-              parrainage: Number(data.parrainage || data.referralEarnings || 0),
+              // **MODIFICATION POUR LE PARRAINAGE**
+              parrainage: Number(data.parrainage || data.referralEarnings || 0), 
               bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
               whatsappGains: Number(data.whatsappGains || 0),
               triviaGains: Number(data.triviaGains || 0),
@@ -2219,15 +2222,23 @@
               depotSolde: Number(data.depotSolde || data.depositBalance || 0),
               phoneNumber: data.phoneNumber || data.phone || "",
               country: data.country || data.pays || "",
-              referrer: data.referrer || data.parrain || "",
-              activeReferrals: Number(data.activeReferrals || data.parrainageCount || 0),
+              referrer: data.referrer || data.parrain || "Aucun", // L'ID ou le nom du parrain
+              // **MODIFICATION POUR LE PARRAINAGE**
+              activeReferrals: Number(data.referralsCount || data.parrainageCount || 0), 
               displayName: data.displayName || currentUser.displayName,
               email: data.email || currentUser.email,
               paid: isUserPaidFromDoc(data),
               theme: data.theme || 'light'
           };
       } else {
-        userData = { depense: 0, profit: 0, solde: 0, retire: 0, parrainage: 0, bonusAgent: 0, whatsappGains: 0, triviaGains: 0, publiciteGains: 0, tiktokGains: 0, youtubeGains: 0, depotSolde: 0, paid: false, theme: 'light' };
+        // **MISE À JOUR** : Ajout des champs de parrainage aux valeurs par défaut
+        userData = { 
+            depense: 0, profit: 0, solde: 0, retire: 0, 
+            parrainage: 0, bonusAgent: 0, whatsappGains: 0, 
+            triviaGains: 0, publiciteGains: 0, tiktokGains: 0, 
+            youtubeGains: 0, depotSolde: 0, paid: false, theme: 'light',
+            referrer: "Aucun", activeReferrals: 0 
+        };
         await saveUserData();
       }
     }
@@ -2240,6 +2251,7 @@
         document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.profit)}`;
         document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${formatNumberSafe(userData.solde)}`;
         document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.retire)}`;
+        // **MISE À JOUR** : Affichage des gains de parrainage
         document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
         document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
         document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
@@ -2255,7 +2267,8 @@
         const email = dbData.email || user.email || 'Non spécifié';
         const phone = dbData.phoneNumber || 'Non spécifié';
         const country = dbData.country || 'Non spécifié';
-        const referrer = dbData.referrer || 'Aucun';
+        // **MODIFICATION**: Récupérer le parrain et le nombre de parrainages actifs
+        const referrer = dbData.referrer || 'Aucun'; 
         const activeReferrals = dbData.activeReferrals || 0;
 
         if (sidebarUsername) sidebarUsername.textContent = displayName;
@@ -2265,6 +2278,7 @@
         if (infoPhone) infoPhone.textContent = phone;
         if (infoCountry) infoCountry.textContent = country;
         if (infoParrain) infoParrain.textContent = referrer;
+        // **MISE À JOUR** : Affichage du compte de parrainage actif
         if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
 
         if (bannerUsername) bannerUsername.textContent = displayName;
@@ -2275,8 +2289,13 @@
             const uidPart2 = user.uid.substring(4, 8).toUpperCase();
             fidelityKey.textContent = `MULA-USER-2024-${uidPart1}-${uidPart2}`;
         }
+        
+        // **MODIFICATION ESSENTIELLE** : Génération du lien de parrainage
         if (referralLink) {
-            referralLink.textContent = `mulaflowr.com/?ref=${user.uid.substring(0, 10)}`;
+            // Utilise l'UID de l'utilisateur pour créer le lien de parrainage
+            // L'ID du parrain (ref) est l'UID complet de l'utilisateur connecté
+            const userReferralId = user.uid; 
+            referralLink.textContent = `${APP_DOMAIN}/paiement.html?ref=${userReferralId}`;
         }
     }
     
@@ -2293,14 +2312,18 @@
         if (user) {
             currentUser = user;
             try {
+                // Tente de charger les données existantes de l'utilisateur
                 await loadUserData();
 
+                // Vérification du statut de paiement
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                    // Rediriger vers la page de paiement
+                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500); 
                     return;
                 }
 
+                // Si l'utilisateur est payé, mettre à jour l'interface
                 updateDashboardUI();
                 updateUserInfoUI(user, userData);
                 applyTheme();
@@ -2313,10 +2336,12 @@
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
                 showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                // Déconnexion et redirection en cas d'erreur critique
                 auth.signOut();
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
+            // Rediriger vers la page de connexion si aucun utilisateur n'est connecté
             window.location.href = 'login.html';
         }
     });
