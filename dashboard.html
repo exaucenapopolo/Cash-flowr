@@ -2300,7 +2300,7 @@ function updateUserInfoUI(user, dbData = {}) {
   if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
 }
 
-/******** CORRIGÉ: Communication serveur pour créer lien avec username ********/
+/******** Communication serveur pour créer lien avec username ********/
 async function requestReferralLinkFromServer(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/create-referral-link`, {
@@ -2318,7 +2318,7 @@ async function requestReferralLinkFromServer(username) {
   }
 }
 
-/******** NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur ********/
+/******** Récupérer les statistiques de parrainage depuis le serveur ********/
 async function fetchReferralStats(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/referral-stats/${username}`);
@@ -2331,7 +2331,7 @@ async function fetchReferralStats(username) {
   }
 }
 
-/******** NOUVEAU: Récupérer la liste des filleuls depuis le serveur ********/
+/******** Récupérer la liste des filleuls depuis le serveur ********/
 async function fetchMyReferrals(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/my-referrals/${username}`);
@@ -2344,7 +2344,7 @@ async function fetchMyReferrals(username) {
   }
 }
 
-/******** Start watcher: détecte passage status -> 'paid' et appelle le serveur ********/
+/******** CORRIGÉ: Watcher détecte 'paid' OU 'preuves reçues' et appelle le serveur ********/
 async function startStatusWatcherAndTriggerProcessing() {
   if (!currentUser) return;
   try {
@@ -2356,7 +2356,7 @@ async function startStatusWatcherAndTriggerProcessing() {
       const status = (d.status || d.statut || '').toString().toLowerCase();
       const alreadyProcessed = !!d.referralProcessed;
 
-      if (status === 'paid' && !alreadyProcessed) {
+      if ((status === 'paid' || status === 'preuves reçues') && !alreadyProcessed) {
         showNotification('info', 'Parrainage', 'Paiement détecté — distribution en cours...');
         try {
           const idToken = await currentUser.getIdToken();
@@ -2401,18 +2401,17 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
-      // CORRIGÉ: Générer/obtenir le lien de parrainage via serveur avec username
+      // Générer/obtenir le lien de parrainage via serveur avec username
       try {
         if (userData.username) {
           const serverResp = await requestReferralLinkFromServer(userData.username);
           if (serverResp && serverResp.referralLink) {
             referralLink.textContent = serverResp.referralLink;
             
-            // NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur
+            // Récupérer les statistiques de parrainage depuis le serveur
             const stats = await fetchReferralStats(userData.username);
             if (stats) {
               console.log('Stats de parrainage du serveur:', stats);
-              // Mettre à jour l'UI avec les stats du serveur si nécessaire
               userData.solde = stats.solde;
               userData.activeReferrals = stats.totalReferrals;
               userData.refEarnings = stats.earnings;
@@ -2421,11 +2420,9 @@ auth.onAuthStateChanged(async (user) => {
               updateUserInfoUI(user, userData);
             }
           } else {
-            // Fallback si le serveur ne répond pas
             referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userData.username)}`;
           }
         } else {
-          // Si pas de username, utiliser displayName/uid en fallback
           const userReferralId = userData.displayName || currentUser.uid;
           referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
         }
@@ -2435,7 +2432,7 @@ auth.onAuthStateChanged(async (user) => {
         referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
       }
 
-      // Démarrer le watcher qui déclenchera la répartition au moment où 'status' devient 'paid'
+      // Démarrer le watcher qui déclenchera la répartition au moment où 'status' devient 'paid' ou 'preuves reçues'
       startStatusWatcherAndTriggerProcessing();
 
       document.body.classList.add('loaded');
