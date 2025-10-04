@@ -2393,14 +2393,16 @@ auth.onAuthStateChanged(async (user) => {
     try {
       await loadUserData();
 
-      // 🔒 SÉCURITÉ: Vérifier que le statut est "paid" avant d'autoriser l'accès au dashboard
-      const userStatus = (userData.status || userData.statut || '').toString().toLowerCase();
-      if (userStatus !== 'paid') {
-        console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid")');
+      // 🔒 SÉCURITÉ: Vérifier que le statut est "paid" OU "active" avant d'autoriser l'accès au dashboard
+      const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
+      const validStatuses = ['paid', 'active'];
+      if (!validStatuses.includes(userStatus)) {
+        console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid" ou "active")');
         showNotification('warning', 'Paiement requis', 'Vous devez finaliser votre paiement pour accéder au dashboard.');
         setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
         return;
       }
+      console.log('✅ Accès autorisé au dashboard: statut =', userStatus);
 
       if (!userData.paid) {
         showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription. Nous surveillons le statut et appliquerons le parrainage dès que "paid" sera détecté.');
