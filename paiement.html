@@ -557,14 +557,15 @@
             document.getElementById('phoneNumber').value = userData.phoneNumber;
           }
 
-          // Vérifier le statut
-          if (userData.status === 'active' || userData.status === 'paid' || userData.status === 'preuves reçues') {
-            accountStatusEl.textContent = 'Actif';
-            // Rediriger vers le dashboard si déjà activé
+          // Vérifier le statut - SEUL "paid" permet la redirection
+          if (userData.status === 'paid') {
+            accountStatusEl.textContent = 'Payé - Accès autorisé';
+            console.log('✅ Statut = paid, redirection vers dashboard');
             window.location.href = 'dashboard.html';
             return;
           } else {
             accountStatusEl.textContent = 'En attente de paiement';
+            console.log('⏳ Statut actuel:', userData.status, '- Paiement requis');
           }
 
           console.log('Données utilisateur chargées:', userData);
@@ -588,10 +589,14 @@
               document.getElementById('phoneNumber').value = data.phoneNumber || data.phone || '';
             }
 
-            if (data.status === 'active' || data.status === 'paid' || data.status === 'preuves reçues') {
-              accountStatusEl.textContent = 'Actif';
+            // Vérifier le statut - SEUL "paid" permet la redirection
+            if (data.status === 'paid') {
+              accountStatusEl.textContent = 'Payé - Accès autorisé';
+              console.log('✅ Statut = paid, redirection vers dashboard (Firestore direct)');
               window.location.href = 'dashboard.html';
               return;
+            } else {
+              console.log('⏳ Statut actuel:', data.status, '- Paiement requis (Firestore direct)');
             }
           }
         }
