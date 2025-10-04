@@ -410,202 +410,303 @@
   </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    // Changement 1 : Import de `collection` et `query`
-    import { getFirestore, doc, setDoc, getDocs, collection, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+/* ---------- Imports Firebase (modular) ---------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  collection,
+  query,
+  where,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // --- CONFIG ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.firebasestorage.app",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
+/* ---------- Configuration Firebase ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.firebasestorage.app",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ---------- Helpers notifications ---------- */
+function showNotification(type, title, message, duration = 5000) {
+  const notificationContainer = document.getElementById('notificationContainer');
+  if (!notificationContainer) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+  notification.innerHTML = `
+    <i class="fas ${icon} notification-icon"></i>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-message">${message}</div>
+    </div>
+    <button class="notification-close"><i class="fas fa-times"></i></button>
+    <div class="notification-progress"></div>
+  `;
+  notificationContainer.appendChild(notification);
+  const closeNotification = () => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(() => { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
+  };
+  notification.querySelector('.notification-close').addEventListener('click', closeNotification);
+  notification.querySelector('.notification-progress').style.animationDuration = `${duration}ms`;
+  setTimeout(closeNotification, duration);
+}
+function showError(msg){ showNotification('error','Erreur',msg); }
+function showSuccess(msg){ showNotification('success','Succès',msg); }
+
+/* ---------- Utilitaires UI / Pays ---------- */
+function getFlag(countryCode){
+  const flags = {
+    'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪',
+    'tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩','td':'🇹🇩','cf':'🇨🇫','cg':'🇨🇬','gq':'🇬🇶',
+    'ga':'🇬🇦','st':'🇸🇹','ng':'🇳🇬','gh':'🇬🇭','gn':'🇬🇳','gw':'🇬🇼','lr':'🇱🇷',
+    'sl':'🇸🇱','gm':'🇬🇲','mr':'🇲🇷','ke':'🇰🇪','ug':'🇺🇬','tz':'🇹🇿','rw':'🇷🇼',
+    'bi':'🇧🇮','et':'🇪🇹','ss':'🇸🇸','sd':'🇸🇩','so':'🇸🇴','dj':'🇩🇯','er':'🇪🇷',
+    'dz':'🇩🇿','eg':'🇪🇬','ly':'🇱🇾','ma':'🇲🇦','tn':'🇹🇳','ao':'🇦🇴','mz':'🇲🇿',
+    'zm':'🇿🇲','zw':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
+    'mg':'🇲🇬','mu':'🇲🇺','sc':'🇸🇨','cv':'🇨🇻'
+  };
+  return flags[countryCode] || '🇨🇲';
+}
+function updateCountryCode(){
+  const countrySelect = document.getElementById('country');
+  const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+  const code = selectedOption?.getAttribute('data-code') || '+237';
+  const flag = getFlag(selectedOption?.value);
+  const countryCodeEl = document.getElementById('countryCode');
+  const selectedFlagEl = document.getElementById('selectedFlag');
+  if(countryCodeEl) countryCodeEl.textContent = code;
+  if(selectedFlagEl) selectedFlagEl.textContent = flag;
+}
+
+/* ---------- Recherche du parrain (Firestore) ---------- */
+/*
+  - On prend le paramètre d'URL "ref" (ou "par") si présent.
+  - On essaye d'abord getDoc par UID (doc id).
+  - Si non trouvé, on cherche par champ 'username'.
+  - Si non trouvé, on cherche par 'displayName'.
+  - Renvoie un objet { uid, username, displayName } ou null.
+*/
+async function findSponsor(refParam){
+  if(!refParam) return null;
+  refParam = refParam.trim();
+  try {
+    // 1) tentative en tant qu'UID (doc id)
+    try {
+      const maybeDocRef = doc(db, 'users', refParam);
+      const snapshot = await getDoc(maybeDocRef);
+      if(snapshot.exists()){
+        const data = snapshot.data() || {};
+        return { uid: snapshot.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
+      }
+    } catch(e){
+      // ignore
+    }
+
+    // 2) tentative par username
+    try {
+      const usersRef = collection(db, 'users');
+      let q = query(usersRef, where('username', '==', refParam));
+      let qs = await getDocs(q);
+      if(!qs.empty){
+        const d = qs.docs[0];
+        const data = d.data() || {};
+        return { uid: d.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
+      }
+    } catch(e){ /* ignore */ }
+
+    // 3) tentative par displayName (approche stricte : case-sensitive)
+    try {
+      const usersRef = collection(db, 'users');
+      let q2 = query(usersRef, where('displayName', '==', refParam));
+      let qs2 = await getDocs(q2);
+      if(!qs2.empty){
+        const d = qs2.docs[0];
+        const data = d.data() || {};
+        return { uid: d.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
+      }
+    } catch(e){ /* ignore */ }
+
+    // 4) pas trouvé
+    return null;
+  } catch(err){
+    console.error('findSponsor error', err);
+    return null;
+  }
+}
+
+/* ---------- Vérification unicité username (comme précédemment) ---------- */
+async function checkUsernameExists(username){
+  if(!username) return false;
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', username));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch(err){
+    console.error('checkUsernameExists error', err);
+    return false;
+  }
+}
+
+/* ---------- Gestion du formulaire / enregistrement ---------- */
+let sponsorData = null; // contiendra l'objet sponsor si trouvé
+
+const registrationForm = document.getElementById('registrationForm');
+if (!registrationForm) throw new Error('Formulaire non trouvé (#registrationForm).');
+
+// Création d'un champ caché pour stocker UID du parrain (ajout dynamique pour ne pas toucher HTML)
+(function createHiddenParrainUid(){
+  if (!document.getElementById('parrainUid')) {
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.id = 'parrainUid';
+    hidden.name = 'parrainUid';
+    hidden.value = '';
+    registrationForm.appendChild(hidden);
+  }
+})();
+
+registrationForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const country = document.getElementById('country').value;
+  const phone = document.getElementById('phone').value.trim();
+  // On prend l'UID du parrain s'il existe, sinon la valeur du champ par (texte)
+  const parrainUidField = document.getElementById('parrainUid');
+  const parrainUid = parrainUidField ? (parrainUidField.value || '') : '';
+  const parrainText = document.getElementById('par') ? document.getElementById('par').value || '' : '';
+
+  // validations basiques
+  if(!username){ showError("Choisissez un nom d'utilisateur."); return; }
+  if(password !== confirmPassword){ showError("Les mots de passe ne correspondent pas."); return; }
+  if(!document.getElementById('terms').checked){ showError("Veuillez accepter les conditions."); return; }
+
+  // vérification unicité username
+  const exists = await checkUsernameExists(username);
+  if(exists){ showError("Ce nom d'utilisateur est déjà pris."); return; }
+
+  // gestion UI
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+  submitBtn.disabled = true;
+
+  try {
+    // 1) création du compte dans Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 2) mise à jour profile displayName
+    await updateProfile(user, { displayName: username });
+
+    // 3) préparation données utilisateur
+    const finalParrainUid = sponsorData ? (sponsorData.uid || '') : (parrainUid || '');
+    const finalParrainText = sponsorData ? (sponsorData.username || sponsorData.displayName || sponsorData.uid) : (parrainText || '');
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDocData = {
+      uid: user.uid,
+      username: username,
+      displayName: username,
+      email: email,
+      country: country,
+      phone: (document.getElementById('countryCode')?.textContent || '') + (phone || ''),
+      parrain: finalParrainText,      // affichage/parrain (string lisible)
+      parrainUid: finalParrainUid || null, // uid réel du parrain si trouvé
+      status: 'pending_payment',
+      fidelityKey: false,
+      createdAt: serverTimestamp(),
+      depense: 0, profit: 0, solde: 0, retire: 0,
+      parrainage: 0, bonusAgent: 0, whatsappGains: 0, triviaGains: 0,
+      publiciteGains: 0, tiktokGains: 0, youtubeGains: 0,
+      depotSolde: 0, activeReferrals: 0
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // 4) écriture dans Firestore
+    await setDoc(userDocRef, userDocData);
 
-    // Système de notification (toast)
-    function showNotification(type, title, message, duration = 5000) {
-      const notificationContainer = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      notification.innerHTML = `
-        <i class="fas ${icon} notification-icon"></i>
-        <div class="notification-content">
-          <div class="notification-title">${title}</div>
-          <div class="notification-message">${message}</div>
-        </div>
-        <button class="notification-close"><i class="fas fa-times"></i></button>
-        <div class="notification-progress"></div>
-      `;
-      notificationContainer.appendChild(notification);
-      const closeNotification = () => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
-      };
-      const closeButton = notification.querySelector('.notification-close');
-      closeButton.addEventListener('click', closeNotification);
-      const progressBar = notification.querySelector('.notification-progress');
-      progressBar.style.animationDuration = `${duration}ms`;
-      setTimeout(closeNotification, duration);
-    }
+    showSuccess("Votre compte a été créé ! Redirection vers la page de paiement...");
+    setTimeout(()=> window.location.assign('paiement.html'), 2000);
+  } catch (err) {
+    console.error('Registration error:', err);
+    let message = "Une erreur s'est produite lors de l'inscription.";
+    if(err.code === 'auth/email-already-in-use') message = "Cette adresse email est déjà utilisée par un autre compte.";
+    else if(err.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
+    else if(err.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
+    else message = err.message || message;
+    showError(message);
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+});
 
-    function showError(message) { showNotification('error', 'Erreur', message); }
-    function showSuccess(message) { showNotification('success', 'Succès', message); }
-    // utils
-    function getFlag(countryCode){
-      const flags = {
-        'ci':'🇨🇮','fr':'🇫🇷','sn':'🇸🇳','cm':'🇨🇲','ml':'🇲🇱','bf':'🇧🇫','ne':'🇳🇪',
-        'tg':'🇹🇬','bj':'🇧🇯','cd':'🇨🇩','td':'🇹🇩','cf':'🇨🇫','cg':'🇨🇬','gq':'🇬🇶',
-        'ga':'🇬🇦','st':'🇸🇹','ng':'🇳🇬','gh':'🇬🇭','gn':'🇬🇳','gw':'🇬🇼','lr':'🇱🇷',
-        'sl':'🇸🇱','gm':'🇬🇲','mr':'🇲🇷','ke':'🇰🇪','ug':'🇺🇬','tz':'🇹🇿','rw':'🇷🇼',
-        'bi':'🇧🇮','et':'🇪🇹','ss':'🇸🇸','sd':'🇸🇩','so':'🇸🇴','dj':'🇩🇯','er':'🇪🇷',
-        'dz':'🇩🇿','eg':'🇪🇬','ly':'🇱🇾','ma':'🇲🇦','tn':'🇹🇳','ao':'🇦🇴','mz':'🇲🇿',
-        'zm':'🇿🇲','🇿🇼':'🇿🇼','mw':'🇲🇼','na':'🇳🇦','bw':'🇧🇼','sz':'🇸🇿','ls':'🇱🇸',
-        'mg':'🇲🇬','mu':'🇲🇺','sc':'🇸🇨','cv':'🇨🇻'
-      };
-      return flags[countryCode] || '🇨🇲';
-    }
-    
-    function updateCountryCode() {
-      const countrySelect = document.getElementById('country');
-      const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-      const code = selectedOption?.getAttribute('data-code') || '+237';
-      const flag = getFlag(selectedOption?.value);
-      document.getElementById('countryCode').textContent = code;
-      document.getElementById('selectedFlag').textContent = flag;
-    }
+/* ---------- Initialisation au chargement : lecture du paramètre ref et recherche du parrain ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  // initialise country select UI
+  try { document.getElementById('country').value = 'cm'; } catch(e){}
+  updateCountryCode();
 
-    // Changement 2 : Vérifie si le nom d'utilisateur existe directement dans la collection 'users'
-    async function checkUsernameExists(username) {
-        if (!username) return false;
-        try {
-            const usersRef = collection(db, 'users');
-            // Crée une requête pour trouver un utilisateur avec ce nom d'utilisateur
-            const q = query(usersRef, where('username', '==', username));
-            const querySnapshot = await getDocs(q);
-            // Si le snapshot n'est pas vide, le nom d'utilisateur existe
-            return !querySnapshot.empty;
-        } catch (err) {
-            console.error('checkUsernameExists error', err);
-            return false;
+  // param d'URL: on regarde 'ref' puis 'par'
+  const urlParams = new URLSearchParams(window.location.search);
+  const refParam = urlParams.get('ref') || urlParams.get('par') || '';
+
+  const parInput = document.getElementById('par');
+  const parrainUidField = document.getElementById('parrainUid');
+
+  if(refParam){
+    // on cherche le parrain dans Firestore
+    try {
+      const found = await findSponsor(refParam);
+      if(found){
+        sponsorData = found;
+        // affiche le nom lisible (displayName si possible, sinon username, sinon uid)
+        const display = found.displayName || found.username || found.uid;
+        if(parInput) {
+          parInput.value = display;
+          parInput.readOnly = true;
         }
-    }
-
-    document.getElementById('registrationForm').addEventListener('submit', async function(e){
-      e.preventDefault();
-
-      const username = document.getElementById('username').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const country = document.getElementById('country').value;
-      const phone = document.getElementById('phone').value.trim();
-      // Changement 3 : Assure que 'parrain' est une chaîne vide si non défini
-      const parrain = document.getElementById('par').value || '';
-
-      // basic validation
-      if (!username) { showError('Choisissez un nom d\'utilisateur.'); return; }
-      if (password !== confirmPassword) { showError('Les mots de passe ne correspondent pas.'); return; }
-      if (!document.getElementById('terms').checked) { showError('Veuillez accepter les conditions.'); return; }
-
-      // Changement 4 : Utilise la nouvelle fonction de vérification d'unicité
-      const usernameExists = await checkUsernameExists(username);
-      if (usernameExists) {
-        showError('Ce nom d\'utilisateur est déjà pris.');
-        return;
-      }
-
-      // UI state
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-      submitBtn.disabled = true;
-
-      try {
-        // 1) create auth user
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // 2) update profile displayName (facultatif mais utile)
-        await updateProfile(user, { displayName: username });
-
-        // 3) Création du document utilisateur dans la collection 'users'
-        // Nous n'avons plus besoin d'une transaction car il n'y a qu'un seul setDoc
-        const userRef = doc(db, 'users', user.uid);
-        
-        // Données utilisateur complètes
-        const userData = {
-          uid: user.uid,
-          username: username, // On stocke le nom d'utilisateur ici
-          email: email,
-          country: country,
-          phone: document.getElementById('countryCode').textContent + (phone || ''),
-          parrain: parrain,
-          status: 'pending_payment',
-          fidelityKey: false,
-          createdAt: serverTimestamp(),
-          // Champs financiers
-          depense: 0,
-          profit: 0,
-          solde: 0,
-          retire: 0,
-          parrainage: 0,
-          bonusAgent: 0,
-          whatsappGains: 0,
-          triviaGains: 0,
-          publiciteGains: 0,
-          tiktokGains: 0,
-          youtubeGains: 0,
-          depotSolde: 0,
-          activeReferrals: 0,
-        };
-
-        // Ajout du document dans Firestore
-        await setDoc(userRef, userData);
-
-        // 4) success -> redirection vers paiement
-        showSuccess('Votre compte a été créé avec succès ! Redirection vers la page de paiement...');
-        setTimeout(() => {
-          window.location.assign('paiement.html');
-        }, 2500);
-
-      } catch (error) {
-        console.error('Registration error:', error);
-
-        let message = "Une erreur s'est produite lors de l'inscription.";
-        if (error.code === 'auth/email-already-in-use') message = "Cette adresse email est déjà utilisée par un autre compte.";
-        else if (error.code === 'auth/invalid-email') message = "L'adresse email n'est pas valide.";
-        else if (error.code === 'auth/operation-not-allowed') message = "L'inscription par email/mot de passe n'est pas activée dans Firebase Auth.";
-        else if (error.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
-        // On supprime la vérification de l'erreur de transaction, car il n'y a plus de transaction
-        // else if (error.message === 'USERNAME_TAKEN_IN_TRANSACTION') message = "Le nom d'utilisateur a été pris pendant l'inscription. Choisissez-en un autre.";
-        else if (error.code === 'permission-denied' || /permission-denied/i.test(error.message)) {
-          message = "Permission refusée lors de l'écriture en base. Vérifie tes règles Firestore.";
-        } else {
-          message = error.message || message;
+        if(parrainUidField) parrainUidField.value = found.uid;
+      } else {
+        // pas trouvé: on affiche simplement le param brut (car il peut s'agir d'un username non enregistré)
+        if(parInput){
+          parInput.value = refParam;
+          parInput.readOnly = false; // laisse utilisateur modifier si besoin
         }
-
-        showError(message);
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        if(parrainUidField) parrainUidField.value = '';
       }
-    });
+    } catch(err){
+      console.error('Erreur lors de la recherche du parrain:', err);
+      if(parInput) parInput.value = refParam;
+      if(parrainUidField) parrainUidField.value = '';
+    }
+  } else {
+    // aucun param: garde le champ par vide ou le placeholder
+    if(parInput) { parInput.value = ''; parInput.placeholder = 'Aucun parrain détecté'; parInput.readOnly = false; }
+    if(parrainUidField) parrainUidField.value = '';
+  }
 
-    // init UI and prefill par param
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('country').value = 'cm';
-      updateCountryCode();
-      const parValue = (new URLSearchParams(location.search)).get('par') || '';
-      if (parValue) document.getElementById('par').value = parValue;
-    });
-  </script>
+  // écoute changement de pays
+  const countrySelect = document.getElementById('country');
+  if(countrySelect) countrySelect.addEventListener('change', updateCountryCode);
+});
+</script>
 </body>
 </html>
