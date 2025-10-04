@@ -50,7 +50,6 @@
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
-      /* NOUVEAU: Couleurs pour les badges */
       --badge-active: #4CD964;
       --badge-pending: #FF9500;
       --badge-inactive: #FF3B30;
@@ -75,7 +74,6 @@
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      /* NOUVEAU: Couleurs pour les badges en mode sombre */
       --badge-active: #2ecc71;
       --badge-pending: #f1c40f;
       --badge-inactive: #e74c3c;
@@ -301,7 +299,7 @@
     /* NOUVEAU: Styles de la Sidebar (Menu) */
     .sidebar {
       width: 280px;
-      background: rgba(255, 255, 255, 0.75); /* Effet de verre (Glassmorphism) */
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-right: 1px solid rgba(255, 255, 255, 0.2);
@@ -314,7 +312,6 @@
       transition: transform 0.4s ease-in-out; 
     }
     
-    /* NOUVEAU: Animation pour l'ouverture du menu en mobile */
     .sidebar.open {
         transform: translateX(0);
     }
@@ -346,7 +343,6 @@
       font-weight: 600;
     }
 
-    /* NOUVEAU: Styles pour les options du menu */
     .menu-item {
       padding: 12px 25px 12px 35px;
       display: flex;
@@ -357,17 +353,15 @@
       font-weight: 500;
       border-left: 4px solid transparent;
       position: relative;
-      overflow: hidden; /* Pour l'effet de surbrillance */
-      animation: fadeIn 0.5s ease-out; /* Animation d'apparition */
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
     }
 
-    /* Animation d'apparition */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateX(-20px); }
       to { opacity: 1; transform: translateX(0); }
     }
     
-    /* NOUVEAU: Effet de surbrillance au survol */
     .menu-item::before {
       content: '';
       position: absolute;
@@ -395,12 +389,10 @@
       transition: transform 0.3s ease;
     }
 
-    /* NOUVEAU: Animation des icônes au survol */
     .menu-item:hover i {
       transform: scale(1.1) rotate(5deg);
     }
 
-    /* NOUVEAU: Styles des badges */
     .menu-badge {
       position: absolute;
       right: 25px;
@@ -530,7 +522,7 @@
 
     .small-stat-card {
       background: linear-gradient(135deg, #ff6b6b 0%, #c62828 100%);
-      border-radius: 10px;
+      border-radius: 5px;
       padding: 15px;
       box-shadow: var(--shadow);
       display: flex;
@@ -541,30 +533,21 @@
       position: relative;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      
-      /* **MODIFICATIONS ICI** */
-      /* Nouvelle forme: Parallelogramme */
-      border-radius: 5px;
       transform: skewX(-15deg);
-      
-      /* Animation */
       animation: up-down 4s infinite ease-in-out;
     }
     
-    /* Animation alternative pour la deuxième carte */
     .small-stat-card:nth-child(2) {
       background: linear-gradient(135deg, #4cd964 0%, #2e7d32 100%);
-      animation-delay: 1s; /* Décalage pour un effet de vague */
+      animation-delay: 1s;
     }
 
-    /* Animation au survol */
     .small-stat-card:hover {
       transform: translateY(-5px) scale(1.02) skewX(-15deg);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      animation-play-state: paused; /* Arrête l'animation au survol */
+      animation-play-state: paused;
     }
 
-    /* Animation de montée et de descente */
     @keyframes up-down {
         0%, 100% { transform: translateY(0) skewX(-15deg); }
         50% { transform: translateY(-10px) skewX(-15deg); }
@@ -587,12 +570,9 @@
 
     .small-stat-title,
     .small-stat-value {
-      /* Pour que le texte ne soit pas déformé, on applique l'inverse du skew */
       transform: skewX(15deg);
-      z-index: 2; /* S'assure que le texte est au-dessus du pseudo-élément */
+      z-index: 2;
     }
-
-    /* Fin des modifications */
 
     /* Large stats cards */
     .large-stats {
@@ -811,334 +791,180 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       z-index: 2;
     }
 
     .gain-stat-title {
-      color: var(--text-light);
-      font-size: 0.75rem;
-      font-weight: 500;
-      z-index: 2;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-color);
+      opacity: 0.8;
     }
 
     .gain-stat-icon {
-      width: 25px;
-      height: 25px;
-      border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.3);
-      color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      z-index: 2;
-      transition: transform 0.3s ease;
-    }
-
-    .gain-stat-card:hover .gain-stat-icon {
-      transform: scale(1.2);
+      font-size: 1.2rem;
+      color: var(--text-color);
+      opacity: 0.6;
     }
 
     .gain-stat-value {
-      font-size: 1rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: var(--text-color);
       z-index: 2;
     }
 
-    /* Fidelity key section */
-    .fidelity-section {
-      background: linear-gradient(135deg, #e6fffd 0%, #b2fff8 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .fidelity-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    .fidelity-key {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.3s ease;
-    }
-
-    .fidelity-key:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .key-icon {
-      font-size: 1.5rem;
-      color: var(--primary-color);
-      animation: bounceKey 2s infinite;
-    }
-
-    @keyframes bounceKey {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-
-    .key-text {
-      flex: 1;
-      font-family: 'Roboto Mono', monospace; /* NOUVEAU: police monospace pour le code */
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-    }
-
-    .key-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .copy-key-btn, .send-key-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .copy-key-btn:hover, .send-key-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .send-key-btn {
-      background-color: #25D366;
-    }
-
     /* Referral section */
     .referral-section {
-      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .referral-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
     }
 
     .section-title {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
       color: var(--secondary-color);
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .referral-content {
       display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .referral-link-container {
-      flex: 1;
-      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
     .link-box {
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      padding: 15px;
       display: flex;
+      gap: 10px;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      position: relative;
-      z-index: 1;
-      transition: transform 0.3s ease;
-    }
-
-    .link-box:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     .link-text {
+      flex: 1;
+      background-color: var(--background-light);
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-family: 'Roboto Mono', monospace;
       font-size: 0.9rem;
-      color: var(--text-light);
+      color: var(--text-color);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      flex: 1;
-      margin-right: 15px;
     }
 
     .copy-btn {
       background-color: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 5px;
-      padding: 8px 12px;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 0.85rem;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      gap: 8px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
     .copy-btn:hover {
+      background-color: var(--primary-dark);
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .social-share {
       display: flex;
       gap: 10px;
-      margin-top: 15px;
+      flex-wrap: wrap;
     }
 
     .social-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       cursor: pointer;
-      transition: transform 0.2s;
-      position: relative;
-      z-index: 1;
-      animation: pulseSocial 2s infinite;
-    }
-
-    @keyframes pulseSocial {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .social-btn:hover {
-      animation: none;
-      transform: scale(1.15);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 
-    .whatsapp { background-color: #25D366; }
-    .facebook { background-color: #3b5998; }
-    .twitter { background-color: #1DA1F2; }
-    .telegram { background-color: #0088cc; }
+    .social-btn.whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+    }
+
+    .social-btn.facebook {
+      background: linear-gradient(135deg, #1877f2, #0b5ed7);
+    }
+
+    .social-btn.twitter {
+      background: linear-gradient(135deg, #1da1f2, #0d8bd6);
+    }
+
+    .social-btn.telegram {
+      background: linear-gradient(135deg, #0088cc, #006ba1);
+    }
 
     /* User info section */
     .user-info-section {
-      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-info-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
     }
 
     .user-info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
     }
 
     .info-item {
       display: flex;
       flex-direction: column;
-      position: relative;
-      z-index: 1;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-    }
-
-    .info-item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      gap: 8px;
     }
 
     .info-label {
       font-size: 0.85rem;
       color: var(--text-light);
-      margin-bottom: 5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     .info-value {
       font-size: 1rem;
-      font-weight: 500;
       color: var(--text-color);
+      font-weight: 500;
     }
 
-    /* Task calendar */
+    /* Calendar */
     .task-calendar {
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
       margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .task-calendar::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
     }
 
     .calendar-header {
@@ -1146,13 +972,12 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
     }
 
     .calendar-month {
-      font-weight: 600;
-      color: var(--text-color);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--secondary-color);
     }
 
     .calendar-nav {
@@ -1163,68 +988,69 @@
     .nav-btn {
       width: 35px;
       height: 35px;
-      border-radius: 50%;
-      background-color: var(--primary-light);
+      background-color: var(--primary-color);
       color: white;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
     .nav-btn:hover {
+      background-color: var(--primary-dark);
       transform: scale(1.1);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .calendar-days {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .day-header {
       text-align: center;
-      padding: 10px;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-light);
-      font-size: 0.9rem;
     }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     .calendar-date {
-      height: 40px;
+      aspect-ratio: 1;
+      background-color: var(--background-light);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--text-color);
       cursor: pointer;
-      position: relative;
-      background-color: rgba(255, 255, 255, 0.5);
-      transition: all 0.2s ease;
+      transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
     .calendar-date:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.05);
+      background-color: var(--primary-light);
+      color: white;
+      transform: scale(1.1);
     }
 
     .calendar-date.active {
       background-color: var(--primary-color);
       color: white;
-      transform: scale(1.05);
-      animation: pulse 2s infinite;
+      font-weight: 700;
     }
 
     .calendar-date.has-task::after {
-      content: "";
+      content: '';
       position: absolute;
       bottom: 5px;
       width: 6px;
@@ -1233,74 +1059,84 @@
       border-radius: 50%;
     }
 
+    /* Task table */
     .task-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
     }
 
-    .task-table th, .task-table td {
-      padding: 12px 15px;
+    .task-table th,
+    .task-table td {
+      padding: 12px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .task-table th {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: var(--primary-color);
+      color: white;
       font-weight: 600;
-      color: var(--text-light);
+      text-transform: uppercase;
+      font-size: 0.85rem;
     }
 
-    .task-table tr {
-      transition: background-color 0.2s ease;
-    }
-
-    .task-table tr:hover {
-      background-color: rgba(0, 0, 0, 0.03);
-      transform: scale(1.01);
+    .task-table tr:last-child td {
+      border-bottom: none;
     }
 
     .task-status {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      background-color: var(--success-color);
-      color: white;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .task-status:contains('Active') {
+      background-color: #d4ffd4;
+      color: #2e7d32;
+    }
+
+    .task-status:contains('Completed') {
+      background-color: #d4e6ff;
+      color: #0b5ed7;
+    }
+
+    .task-status:contains('Pending') {
+      background-color: #fff0d4;
+      color: #e67700;
     }
 
     /* Footer */
     .footer {
       background-color: var(--card-bg);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       padding: 20px 30px;
-      text-align: center;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
       margin-top: auto;
     }
 
     .footer-content {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
     .footer-links {
       display: flex;
-      justify-content: center;
       gap: 20px;
       flex-wrap: wrap;
     }
 
     .footer-link {
-      color: var(--primary-color);
+      color: var(--text-light);
       text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
     }
 
     .footer-link:hover {
-      text-decoration: underline;
-      color: var(--primary-dark);
+      color: var(--primary-color);
     }
 
     .footer-text {
@@ -1308,175 +1144,150 @@
       font-size: 0.9rem;
     }
 
-    /* Pulse animation for important elements */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 992px) {
-      .sidebar {
-        width: 230px;
-      }
-      
-      .medium-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-        .main-container {
-            flex-direction: column;
-        }
-        
-        /* **MODIFIÉ** : Masque le menu hamburger de base */
-        .hamburger-menu {
-            display: none;
-        }
-
-        /* **NOUVEAU** : Affiche le nouveau bouton hamburger animé */
-        .hamburger-btn {
-            display: flex;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 101;
-        }
-
-        .sidebar {
-            width: 75%; /* On agrandit un peu le menu en mobile */
-            max-width: 300px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: -100%; /* Le menu est hors de l'écran par défaut */
-            z-index: 99;
-            transition: left 0.4s ease-in-out;
-        }
-        
-        /* **MODIFIÉ** : Nouvelle classe pour l'activation */
-        .sidebar.open {
-            left: 0;
-        }
-        
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 98;
-        }
-        
-        .overlay.active {
-            display: block;
-        }
-        
-        .header {
-            padding: 15px;
-        }
-        
-        .logo {
-            font-size: 1.5rem;
-            margin-left: 50px; /* Pour laisser de la place au bouton */
-        }
-        
-        .content {
-            padding: 20px;
-        }
-        
-        .medium-stats {
-            grid-template-columns: 1fr;
-        }
-        
-        .gain-stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .key-buttons {
-            flex-direction: column;
-        }
-
-        .footer-links {
-            flex-direction: column;
-            gap: 10px;
-        }
-    }
-
-    @media (max-width: 576px) {
-      .gain-stats {
-        grid-template-columns: 1fr;
-      }
-      
-      .user-info-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .task-table {
-        display: block;
-        overflow-x: auto;
-      }
-      
-      .user-name {
-        display: none;
-      }
-    }
-
-    /* Animation for notifications */
+    /* Notification system */
     .notification-container {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 9999;
+      z-index: 10000;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      pointer-events: none;
     }
 
     .notification {
+      background-color: var(--card-bg);
+      border-radius: 12px;
       padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
-      gap: 10px;
-      max-width: 350px;
-      animation: slideIn 0.3s ease forwards;
-      position: relative;
-      overflow: hidden;
-      color: white;
-      pointer-events: auto;
-    }
-
-    .notification.success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
-    }
-
-    .notification.error {
-      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
-    }
-
-    .notification.info { 
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+      gap: 15px;
+      min-width: 300px;
+      max-width: 400px;
+      animation: slideIn 0.3s ease-out forwards;
     }
 
     @keyframes slideIn {
       from {
-        transform: translateX(110%);
+        transform: translateX(400px);
         opacity: 0;
       }
       to {
         transform: translateX(0);
         opacity: 1;
+      }
+    }
+
+    .notification.success {
+      border-left: 4px solid var(--success-color);
+    }
+
+    .notification.error {
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .notification.info {
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .notification i {
+      color: var(--text-color);
+    }
+
+    .notification.success i {
+      color: var(--success-color);
+    }
+
+    .notification.error i {
+      color: var(--danger-color);
+    }
+
+    .notification.info i {
+      color: var(--primary-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 80px;
+        transform: translateX(-100%);
+        z-index: 150;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .hamburger-btn {
+        display: flex;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 140;
+      }
+
+      .overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .small-stats {
+        flex-direction: column;
+      }
+
+      .stats-group-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .header {
+        padding: 15px 20px;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .content {
+        padding: 20px 15px;
+      }
+
+      .page-title {
+        font-size: 1.3rem;
+      }
+
+      .banner {
+        padding: 15px;
+      }
+
+      .banner-title {
+        font-size: 1rem;
+      }
+
+      .username-highlight {
+        font-size: 1.5rem;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .notification {
+        min-width: 250px;
       }
     }
   </style>
@@ -1488,278 +1299,151 @@
 
   <div class="notification-container" id="notificationContainer"></div>
 
+  <div class="overlay" id="overlay"></div>
+
   <header class="header">
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-    </button>
-    
     <div class="logo">
-      <span>MULAFLOWR</span>
+      <i class="fas fa-coins" style="margin-right: 10px;"></i>
+      MULAFLOWR
     </div>
-    
     <div class="header-controls">
-      <button class="language-selector" id="languageSelector">
-        <i class="fas fa-globe"></i>
-        <span>French</span>
-        <i class="fas fa-chevron-down"></i>
+      <button class="hamburger-btn" id="hamburgerBtn">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
       </button>
-      
+      <select class="language-selector" id="languageSelector">
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+      </select>
       <div class="user-profile" id="userProfile">
-          <div class="avatar" id="userAvatar">U</div>
-          <div class="profile-dropdown" id="profileDropdown">
-              <button class="theme-toggle" id="themeToggle">
-                  <i class="fas fa-moon"></i>
-                  <span>Mode nuit</span>
-              </button>
-          </div>
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="profile-dropdown" id="profileDropdown">
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+            <span>Mode nuit</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <div class="overlay" id="overlay"></div>
-
   <div class="main-container">
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">Dashboard >> MULAFLOWR</div>
+        <div class="welcome-text">Bienvenue</div>
         <div class="username" id="sidebarUsername">Utilisateur</div>
       </div>
-      
-      <div class="menu-category">PRINCIPAL</div>
-      <a href="dashboard.html" class="menu-item active">
+
+      <div class="menu-category">Menu Principal</div>
+      <a href="#" class="menu-item active">
         <i class="fas fa-home"></i>
-        <span>Tableau de bord</span>
-        <span class="menu-badge badge-active">☑</span>
+        <span>Accueil</span>
       </a>
-      
-      <a href="depot.html" class="menu-item">
-        <i class="fas fa-wallet"></i>
-        <span>Dépôt 💵</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <a href="#" class="menu-item">
+        <i class="fas fa-tasks"></i>
+        <span>Mes tâches</span>
+        <span class="menu-badge active">3</span>
       </a>
-      
-      <a href="bonus_bienvenue.html" class="menu-item">
-        <i class="fas fa-gift"></i>
-        <span>Bonus de bienvenue</span>
-        <span class="menu-badge badge-inactive">☒</span>
-      </a>
-      
-      <div class="menu-category">COMPTES</div>
-      <a href="retrait.html" class="menu-item">
-        <i class="fas fa-money-bill-wave"></i>
-        <span>Retrait</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="equipe.html" class="menu-item">
+      <a href="#" class="menu-item">
         <i class="fas fa-users"></i>
-        <span>Équipe</span>
-        <span class="menu-badge badge-inactive">☒</span>
+        <span>Parrainage</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Mon portefeuille</span>
       </a>
 
-      <div class="menu-category">SPÉCIAL</div>
-      <a href="love_earn.html" class="menu-item">
-        <i class="fas fa-heart"></i>
-        <span>LoveEarn</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="social_boost.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>SBH</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="challenge_reward.html" class="menu-item">
-        <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <div class="menu-category">PRODUIT / TACHE</div>
-      <a href="whatsapp_earn.html" class="menu-item">
-        <i class="fab fa-whatsapp"></i>
-        <span>Gagner via Whatsapp</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="movies.html" class="menu-item">
-        <i class="fas fa-film"></i>
-        <span>Movies</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="paris_fixes.html" class="menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Paris fixes</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="gains_publicitaires.html" class="menu-item">
-        <i class="fas fa-ad"></i>
-        <span>Gains publicitaires</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="spin_wheel.html" class="menu-item">
-        <i class="fas fa-trophy"></i>
-        <span>Spin wheel 🏆</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="tiktok_earn.html" class="menu-item">
-        <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="youtube_earn.html" class="menu-item">
+      <div class="menu-category">Outils</div>
+      <a href="#" class="menu-item">
         <i class="fab fa-youtube"></i>
-        <span>YouTube Earn</span>
-        <span class="menu-badge badge-inactive">☐</span>
+        <span>YouTube</span>
       </a>
-      
-      <a href="instagram_earn.html" class="menu-item">
-        <i class="fab fa-instagram"></i>
-        <span>Instagram Earn</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <a href="#" class="menu-item">
+        <i class="fab fa-tiktok"></i>
+        <span>TikTok</span>
       </a>
-      
-      <a href="trivia_challenge.html" class="menu-item">
-        <i class="fas fa-brain"></i>
-        <span>TRIVIA challenge</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <a href="#" class="menu-item">
+        <i class="fab fa-whatsapp"></i>
+        <span>WhatsApp</span>
       </a>
-      
-      <div class="menu-category">BONUS</div>
-      <a href="liste_contacts.html" class="menu-item">
-        <i class="fas fa-address-book"></i>
-        <span>Liste de contacts gratuit 🆓</span>
-        <span class="menu-badge badge-inactive">☐</span>
-      </a>
-      
-      <a href="booster_visibilite.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>Booster ma visibilité</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <a href="#" class="menu-item">
+        <i class="fas fa-question-circle"></i>
+        <span>Trivia</span>
       </a>
 
-      <a href="canva_pro.html" class="menu-item">
-        <i class="fas fa-palette"></i>
-        <span>Canva Pro</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <div class="menu-category">Paramètres</div>
+      <a href="#" class="menu-item">
+        <i class="fas fa-cog"></i>
+        <span>Paramètres</span>
       </a>
-      
-      <a href="connexion_gratuite.html" class="menu-item">
-        <i class="fas fa-shield-alt"></i>
-        <span>Connexion gratuite</span>
-        <span class="menu-badge badge-inactive">☐</span>
+      <a href="#" class="menu-item">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Déconnexion</span>
       </a>
     </aside>
 
     <main class="content">
       <h1 class="page-title">
-        <i class="fas fa-home"></i>
-        <span>Dashboard >> MULAFLOWR</span>
+        <i class="fas fa-chart-line"></i>
+        TABLEAU DE BORD
       </h1>
-      
+
       <div class="banner" id="welcomeBanner">
         <div class="banner-title" id="welcomeTitle">
-            Bienvenue,
-            <span class="username-highlight" id="bannerUsername">Utilisateur</span>
+          Bienvenue <span class="username-highlight" id="bannerUsername">Utilisateur</span>!
         </div>
         <div class="banner-text" id="welcomeMessage">
-          Débloquez plus de 10 outils numériques avec MULAFLOWR, des annonces aux promotions YouTube et trivia, spécialement conçus pour VOUS ! Améliorez votre présence en ligne dès maintenant ! 💬 💬 💬 💬
+          Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀
         </div>
-        <a href="https://web2apkpro.com/public_download.php?project_id=501&token=9553436f25" class="banner-link">CLIQUEZ ICI pour obtenir l'application Android</a>
+        <a href="#" class="banner-link">Commencer maintenant</a>
       </div>
-      
+
       <div class="small-stats">
         <div class="small-stat-card" id="depense-card">
-          <div class="small-stat-title">
-            <i class="fas fa-arrow-down arrow-icon"></i>
-            Dépense:
-          </div>
+          <div class="small-stat-title">Total Dépensé</div>
           <div class="small-stat-value">XAF 0</div>
         </div>
-        
         <div class="small-stat-card" id="profit-card">
-          <div class="small-stat-title">
-            <i class="fas fa-arrow-up arrow-icon"></i>
-            Profit:
-          </div>
+          <div class="small-stat-title">Total Profit</div>
           <div class="small-stat-value">XAF 0</div>
         </div>
       </div>
-      
-      <div class="stats-group-2">
+
+      <div class="large-stats">
         <div class="large-stat-card" id="solde-card">
           <div class="large-stat-title">
-            <i class="fas fa-piggy-bank large-stat-icon"></i>
-            SOLDE
+            <i class="fas fa-money-bill-wave large-stat-icon"></i>
+            <span>Solde disponible</span>
           </div>
           <div class="large-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
-          </div>
         </div>
-      
+      </div>
+
+      <div class="stats-group-2">
         <div class="medium-stat-card" id="retire-card">
           <div class="medium-stat-title">
-            <i class="fas fa-download medium-stat-icon"></i>
-            Retiré
+            <i class="fas fa-hand-holding-usd medium-stat-icon"></i>
+            <span>Retraits</span>
           </div>
           <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
-          </div>
         </div>
-        
         <div class="medium-stat-card" id="parrainage-card">
           <div class="medium-stat-title">
-            <i class="fas fa-users medium-stat-icon"></i>
-            Gains de parrainage
+            <i class="fas fa-user-friends medium-stat-icon"></i>
+            <span>Parrainage</span>
           </div>
           <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
-          </div>
         </div>
-        
         <div class="medium-stat-card" id="bonus-agent-card">
           <div class="medium-stat-title">
             <i class="fas fa-gift medium-stat-icon"></i>
-            Bonus d'agent
+            <span>Bonus Agent</span>
           </div>
           <div class="medium-stat-value">XAF 0</div>
-          <div class="stat-change">
-            <span>Vol:(0%)</span>
-          </div>
         </div>
       </div>
-      
-      <div class="fidelity-section">
-        <h2 class="section-title">CLÉ DE FIDÉLITÉ</h2>
-        <p>Utilisez votre clé de fidélité pour accéder à des avantages exclusifs et des bonus supplémentaires.</p>
-        
-        <div class="fidelity-key">
-          <i class="fas fa-key key-icon"></i>
-          <div class="key-text" id="fidelityKey">MULA-USER-2024-0000-0000</div>
-          <div class="key-buttons">
-            <button class="copy-key-btn" id="copyKeyBtn">
-              <i class="fas fa-copy"></i>
-              <span>Copier</span>
-            </button>
-            <button class="send-key-btn" id="sendKeyBtn">
-              <i class="fab fa-whatsapp"></i>
-              <span>Envoyer</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      
+
       <div class="gain-stats">
         <div class="gain-stat-card" id="whatsapp-gains">
           <div class="gain-stat-header">
@@ -2031,9 +1715,6 @@ const prevMonth = document.getElementById('prevMonth');
 const nextMonth = document.getElementById('nextMonth');
 const calendarGrid = document.querySelector('.calendar-grid');
 const calendarMonth = document.querySelector('.calendar-month');
-const copyKeyBtn = document.getElementById('copyKeyBtn');
-const fidelityKey = document.getElementById('fidelityKey');
-const sendKeyBtn = document.getElementById('sendKeyBtn');
 const sidebarUsername = document.getElementById('sidebarUsername');
 const userAvatar = document.getElementById('userAvatar');
 const infoUsername = document.getElementById('info-username');
@@ -2053,9 +1734,8 @@ let currentDate = new Date();
 let userData = {};
 let currentUser = null;
 
-// Lien d'inscription (CE QUE TU AS DEMANDÉ: index.html)
 const APP_DOMAIN = "https://mulaflowr-agencies.vercel.app";
-const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app"; // ajuste si nécessaire
+const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app";
 
 /******** UI helpers ********/
 function showNotification(type, title, message, duration = 4000) {
@@ -2124,26 +1804,14 @@ if (copyLinkBtn) {
       .catch(() => showNotification('error', 'Erreur', 'Impossible de copier le lien.'));
   });
 }
-if (copyKeyBtn) {
-  copyKeyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(fidelityKey.textContent)
-      .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
-      .catch(() => showNotification('error', 'Erreur', 'Impossible de copier la clé.'));
-  });
-}
-if (sendKeyBtn) {
-  sendKeyBtn.addEventListener('click', () => {
-    const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
-    window.open(`https://wa.me/?text=${message}`, '_blank');
-  });
-}
+
 const promoMessage = "Tu veux gagner de l'argent en ligne? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
 if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + ' ' + referralLink.textContent)}`, '_blank'); });
 if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
 if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
 if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
 
-/******** Calendrier (simple) ********/
+/******** Calendrier ********/
 function updateCalendar() {
   if (!calendarGrid || !calendarMonth) return;
   const year = currentDate.getFullYear();
@@ -2178,6 +1846,7 @@ function isPaidFlag(value) {
   if (typeof value === 'number') return value === 1;
   return false;
 }
+
 function isUserPaidFromDoc(docData) {
   if (!docData) return false;
   const candidates = [
@@ -2312,21 +1981,15 @@ function updateUserInfoUI(user, dbData = {}) {
 
   if (bannerUsername) bannerUsername.textContent = displayName;
   if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
-
-  if (fidelityKey) {
-    const uidPart1 = user.uid.substring(0, 4).toUpperCase();
-    const uidPart2 = user.uid.substring(4, 8).toUpperCase();
-    fidelityKey.textContent = `MULA-USER-2024-${uidPart1}-${uidPart2}`;
-  }
 }
 
-/******** Communication serveur pour créer lien / stats ********/
-async function requestReferralLinkFromServer(uid) {
+/******** CORRIGÉ: Communication serveur pour créer lien avec username ********/
+async function requestReferralLinkFromServer(username) {
   try {
     const resp = await fetch(`${SERVER_URL}/api/create-referral-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: uid })
+      body: JSON.stringify({ username: username })
     });
     if (!resp.ok) return null;
     const json = await resp.json();
@@ -2334,6 +1997,32 @@ async function requestReferralLinkFromServer(uid) {
     return null;
   } catch (err) {
     console.error('requestReferralLinkFromServer error', err);
+    return null;
+  }
+}
+
+/******** NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur ********/
+async function fetchReferralStats(username) {
+  try {
+    const resp = await fetch(`${SERVER_URL}/api/referral-stats/${username}`);
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    return json.stats || null;
+  } catch (err) {
+    console.error('fetchReferralStats error', err);
+    return null;
+  }
+}
+
+/******** NOUVEAU: Récupérer la liste des filleuls depuis le serveur ********/
+async function fetchMyReferrals(username) {
+  try {
+    const resp = await fetch(`${SERVER_URL}/api/my-referrals/${username}`);
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    return json.referrals || null;
+  } catch (err) {
+    console.error('fetchMyReferrals error', err);
     return null;
   }
 }
@@ -2380,40 +2069,6 @@ async function startStatusWatcherAndTriggerProcessing() {
   }
 }
 
-/******** Exemple: soumission paiement (utilitaire) ********/
-async function submitPaymentToServer({ username, email, country, paymentMethod, phoneNumber, amount, idToken }, paymentProofFile) {
-  try {
-    const form = new FormData();
-    form.append('username', username);
-    form.append('email', email);
-    form.append('country', country || '');
-    form.append('paymentMethod', paymentMethod || 'unknown');
-    form.append('phoneNumber', phoneNumber || '');
-    form.append('amount', String(amount));
-    if (idToken) form.append('idToken', idToken);
-    if (paymentProofFile) form.append('paymentProof', paymentProofFile, paymentProofFile.name);
-
-    const resp = await fetch(`${SERVER_URL}/submit-payment`, {
-      method: 'POST',
-      body: form
-    });
-
-    if (!resp.ok) {
-      const text = await resp.text();
-      showNotification('error', 'Erreur', `Serveur paiement: ${resp.status}`);
-      console.error('submitPaymentToServer non OK', resp.status, text);
-      return null;
-    }
-    const json = await resp.json();
-    showNotification('success', 'Paiement envoyé', json.message || 'Reçu');
-    return json;
-  } catch (err) {
-    console.error('Erreur submitPaymentToServer:', err);
-    showNotification('error', 'Erreur', 'Impossible d\'envoyer la preuve au serveur.');
-    return null;
-  }
-}
-
 /******** Auth state change (point d'entrée) ********/
 auth.onAuthStateChanged(async (user) => {
   if (user) {
@@ -2429,17 +2084,32 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
-      // Générer/obtenir le lien de parrainage via serveur (si possible), sinon fallback
+      // CORRIGÉ: Générer/obtenir le lien de parrainage via serveur avec username
       try {
-        const serverResp = await requestReferralLinkFromServer(currentUser.uid);
-        if (serverResp && serverResp.referralLink) {
-          referralLink.textContent = serverResp.referralLink;
-          if (serverResp.username) {
-            userData.username = serverResp.username;
-            try { await db.collection('users').doc(currentUser.uid).set({ username: serverResp.username }, { merge: true }); } catch(e) { console.warn('save username fail', e); }
+        if (userData.username) {
+          const serverResp = await requestReferralLinkFromServer(userData.username);
+          if (serverResp && serverResp.referralLink) {
+            referralLink.textContent = serverResp.referralLink;
+            
+            // NOUVEAU: Récupérer les statistiques de parrainage depuis le serveur
+            const stats = await fetchReferralStats(userData.username);
+            if (stats) {
+              console.log('Stats de parrainage du serveur:', stats);
+              // Mettre à jour l'UI avec les stats du serveur si nécessaire
+              userData.solde = stats.solde;
+              userData.activeReferrals = stats.totalReferrals;
+              userData.refEarnings = stats.earnings;
+              userData.parrainage = (stats.earnings.level1 || 0) + (stats.earnings.level2 || 0) + (stats.earnings.level3 || 0);
+              updateDashboardUI();
+              updateUserInfoUI(user, userData);
+            }
+          } else {
+            // Fallback si le serveur ne répond pas
+            referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userData.username)}`;
           }
         } else {
-          const userReferralId = userData.username || userData.displayName || currentUser.uid;
+          // Si pas de username, utiliser displayName/uid en fallback
+          const userReferralId = userData.displayName || currentUser.uid;
           referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
         }
       } catch (err) {
@@ -2462,7 +2132,6 @@ auth.onAuthStateChanged(async (user) => {
       setTimeout(() => { window.location.href = 'login.html'; }, 3000);
     }
   } else {
-    // Si non connecté -> renvoyer vers login
     window.location.href = 'login.html';
   }
 });
@@ -2483,8 +2152,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /******** Expose quelques utilitaires pour debug dans console ********/
 window._mulaflowr = {
-  submitPaymentToServer,
-  requestReferralLinkFromServer
+  requestReferralLinkFromServer,
+  fetchReferralStats,
+  fetchMyReferrals
 };
 </script>
 </body>
