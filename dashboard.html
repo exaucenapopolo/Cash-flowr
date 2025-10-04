@@ -1998,373 +1998,494 @@
   </footer>
 
 <script>
-    /******** CONFIG FIREBASE CORRIGÉE ET INTÉGRÉE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
+/******** CONFIG FIREBASE ********/
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.appspot.com",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/******** DOM Elements ********/
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const themeToggle = document.getElementById('themeToggle');
+const userProfile = document.getElementById('userProfile');
+const profileDropdown = document.getElementById('profileDropdown');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+const referralLink = document.getElementById('referralLink');
+const languageSelector = document.getElementById('languageSelector');
+const shareWhatsApp = document.getElementById('shareWhatsApp');
+const shareFacebook = document.getElementById('shareFacebook');
+const shareTwitter = document.getElementById('shareTwitter');
+const shareTelegram = document.getElementById('shareTelegram');
+const prevMonth = document.getElementById('prevMonth');
+const nextMonth = document.getElementById('nextMonth');
+const calendarGrid = document.querySelector('.calendar-grid');
+const calendarMonth = document.querySelector('.calendar-month');
+const copyKeyBtn = document.getElementById('copyKeyBtn');
+const fidelityKey = document.getElementById('fidelityKey');
+const sendKeyBtn = document.getElementById('sendKeyBtn');
+const sidebarUsername = document.getElementById('sidebarUsername');
+const userAvatar = document.getElementById('userAvatar');
+const infoUsername = document.getElementById('info-username');
+const infoEmail = document.getElementById('info-email');
+const infoPhone = document.getElementById('info-phone');
+const infoCountry = document.getElementById('info-country');
+const infoParrain = document.getElementById('info-parrain');
+const infoParrainage = document.getElementById('info-parrainage');
+const loader = document.getElementById('loader');
+const welcomeBanner = document.getElementById('welcomeBanner');
+const welcomeTitle = document.getElementById('welcomeTitle');
+const welcomeMessage = document.getElementById('welcomeMessage');
+const bannerUsername = document.getElementById('bannerUsername');
+
+/******** Variables d'état ********/
+let currentDate = new Date();
+let userData = {};
+let currentUser = null;
+
+// Lien d'inscription (CE QUE TU AS DEMANDÉ: index.html)
+const APP_DOMAIN = "https://mulaflowr-agencies.vercel.app";
+const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app"; // ajuste si nécessaire
+
+/******** UI helpers ********/
+function showNotification(type, title, message, duration = 4000) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+  notification.innerHTML = `
+    <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+    <div>
+      <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+      <span>${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+  }, duration);
+}
+
+/******** UI events ********/
+if (hamburgerBtn) {
+  hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+      hamburgerBtn.classList.toggle('open');
+  });
+}
+if (overlay) {
+  overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      hamburgerBtn.classList.remove('open');
+  });
+}
+if (userProfile) {
+  userProfile.addEventListener('click', (event) => {
+      event.stopPropagation();
+      profileDropdown.classList.toggle('active');
+  });
+}
+document.addEventListener('click', (event) => {
+  if (!userProfile || !userProfile.contains(event.target)) {
+    if (profileDropdown) profileDropdown.classList.remove('active');
+  }
+});
+if (themeToggle) {
+  themeToggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      themeToggle.innerHTML = isDarkMode 
+          ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+          : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+      if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+  });
+}
+
+/******** Copy / share actions ********/
+if (copyLinkBtn) {
+  copyLinkBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(referralLink.textContent)
+      .then(() => showNotification('success', 'Succès', 'Lien copié dans le presse-papier!'))
+      .catch(() => showNotification('error', 'Erreur', 'Impossible de copier le lien.'));
+  });
+}
+if (copyKeyBtn) {
+  copyKeyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(fidelityKey.textContent)
+      .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
+      .catch(() => showNotification('error', 'Erreur', 'Impossible de copier la clé.'));
+  });
+}
+if (sendKeyBtn) {
+  sendKeyBtn.addEventListener('click', () => {
+    const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+  });
+}
+const promoMessage = "Tu veux gagner de l'argent en ligne? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
+if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + ' ' + referralLink.textContent)}`, '_blank'); });
+if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
+if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
+if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
+
+/******** Calendrier (simple) ********/
+function updateCalendar() {
+  if (!calendarGrid || !calendarMonth) return;
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  calendarMonth.textContent = `${monthNames[month]} ${year}`;
+  calendarGrid.innerHTML = '';
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let startDay = firstDay === 0 ? 6 : firstDay - 1;
+  for (let i=0; i < startDay; i++) { calendarGrid.insertAdjacentHTML('beforeend', '<div class="calendar-date"></div>'); }
+  for (let day=1; day <= daysInMonth; day++) {
+    const dateCell = document.createElement('div');
+    dateCell.className = 'calendar-date';
+    dateCell.textContent = day;
+    const today = new Date();
+    if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
+    if (Math.random() > 0.7) dateCell.classList.add('has-task');
+    calendarGrid.appendChild(dateCell);
+  }
+}
+if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
+if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
+
+/******** Fonctions utilitaires ********/
+function isPaidFlag(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const v = value.toLowerCase().trim();
+    return ['true','yes','paid','payé','complete','completed','1','preuves reçues'].includes(v);
+  }
+  if (typeof value === 'number') return value === 1;
+  return false;
+}
+function isUserPaidFromDoc(docData) {
+  if (!docData) return false;
+  const candidates = [
+    docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
+    docData.status, docData.statut, docData.payment, docData.paidStatus
+  ];
+  for (const candidate of candidates) {
+    if (candidate !== undefined && candidate !== null) {
+      if (isPaidFlag(candidate)) return true;
+    }
+  }
+  return false;
+}
+
+/******** Sauvegarde des données utilisateur ********/
+async function saveUserData(key = null, value = null) {
+  if (!currentUser) return;
+  try {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    const dataToSave = key ? { [key]: value } : userData;
+    await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
+    console.log('Données utilisateur enregistrées.');
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde :", error);
+    showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
+  }
+}
+
+/******** Chargement des données utilisateur depuis Firestore ********/
+async function loadUserData() {
+  if (!currentUser) throw new Error("Aucun utilisateur connecté.");
+  const userRef = db.collection('users').doc(currentUser.uid);
+  const doc = await userRef.get();
+
+  const defaultReferralEarnings = { level1: 0, level2: 0, level3: 0 };
+  let parrainageTotal = 0;
+  let activeReferrals = 0;
+  let displayName = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Utilisateur');
+
+  if (doc.exists) {
+    const data = doc.data() || {};
+    const refEarnings = data.referralEarnings || defaultReferralEarnings;
+
+    parrainageTotal = (refEarnings.level1 || 0) + (refEarnings.level2 || 0) + (refEarnings.level3 || 0);
+    activeReferrals = Number(data.totalReferrals || 0);
+    displayName = data.displayName || displayName;
+
+    userData = {
+      depense: Number(data.depense || data.debit || 0),
+      profit: Number(data.profit || data.revenue || 0),
+      solde: Number(data.solde || data.balance || 0),
+      retire: Number(data.retire || data.withdrawn || 0),
+      parrainage: parrainageTotal,
+      bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
+      whatsappGains: Number(data.whatsappGains || 0),
+      triviaGains: Number(data.triviaGains || 0),
+      publiciteGains: Number(data.publiciteGains || 0),
+      tiktokGains: Number(data.tiktokGains || 0),
+      youtubeGains: Number(data.youtubeGains || 0),
+      depotSolde: Number(data.depotSolde || data.depositBalance || 0),
+      phoneNumber: data.phoneNumber || data.phone || "",
+      country: data.country || data.pays || "",
+      referrer: data.level1Sponsor || data.sponsorUsername || "Aucun",
+      activeReferrals: activeReferrals,
+      displayName: displayName,
+      email: data.email || currentUser.email,
+      paid: isUserPaidFromDoc(data),
+      theme: data.theme || 'light',
+      refEarnings: refEarnings,
+      username: data.username || data.userName || null
     };
+  } else {
+    userData = {
+      depense:0, profit:0, solde:0, retire:0,
+      parrainage:0, bonusAgent:0, whatsappGains:0,
+      triviaGains:0, publiciteGains:0, tiktokGains:0,
+      youtubeGains:0, depotSolde:0, paid:false, theme:'light',
+      referrer:"Aucun", activeReferrals:0, refEarnings:defaultReferralEarnings,
+      displayName:displayName, email:currentUser.email, username:null
+    };
+    await saveUserData();
+  }
+}
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+/******** Mise à jour UI ********/
+function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
 
-    /******** DOM Elements ********/
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const referralLink = document.getElementById('referralLink');
-    const languageSelector = document.getElementById('languageSelector');
-    const shareWhatsApp = document.getElementById('shareWhatsApp');
-    const shareFacebook = document.getElementById('shareFacebook');
-    const shareTwitter = document.getElementById('shareTwitter');
-    const shareTelegram = document.getElementById('shareTelegram');
-    const prevMonth = document.getElementById('prevMonth');
-    const nextMonth = document.getElementById('nextMonth');
-    const calendarGrid = document.querySelector('.calendar-grid');
-    const calendarMonth = document.querySelector('.calendar-month');
-    const copyKeyBtn = document.getElementById('copyKeyBtn');
-    const fidelityKey = document.getElementById('fidelityKey');
-    const sendKeyBtn = document.getElementById('sendKeyBtn');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    const infoUsername = document.getElementById('info-username');
-    const infoEmail = document.getElementById('info-email');
-    const infoPhone = document.getElementById('info-phone');
-    const infoCountry = document.getElementById('info-country');
-    const infoParrain = document.getElementById('info-parrain');
-    const infoParrainage = document.getElementById('info-parrainage');
-    const loader = document.getElementById('loader');
-    const welcomeBanner = document.getElementById('welcomeBanner');
-    const welcomeTitle = document.getElementById('welcomeTitle');
-    const welcomeMessage = document.getElementById('welcomeMessage');
-    const bannerUsername = document.getElementById('bannerUsername');
-    
-    // Nouveaux éléments pour les statistiques détaillées (si vous les ajoutez plus tard)
-    const parrainageCard = document.getElementById('parrainage-card');
+function updateDashboardUI() {
+  try {
+    const dep = document.querySelector('#depense-card .small-stat-value');
+    const profit = document.querySelector('#profit-card .small-stat-value');
+    const solde = document.querySelector('#solde-card .large-stat-value');
+    const retire = document.querySelector('#retire-card .medium-stat-value');
+    if(dep) dep.textContent = `XAF ${formatNumberSafe(userData.depense)}`;
+    if(profit) profit.textContent = `XAF ${formatNumberSafe(userData.profit)}`;
+    if(solde) solde.textContent = `XAF ${formatNumberSafe(userData.solde)}`;
+    if(retire) retire.textContent = `XAF ${formatNumberSafe(userData.retire)}`;
 
+    const parrainageCard = document.querySelector('#parrainage-card .medium-stat-value');
+    if(parrainageCard) parrainageCard.textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
 
-    /******** Variables d'état ********/
-    let currentDate = new Date();
-    let userData = {};
-    let currentUser = null;
-    // **MODIFIÉ** : Utiliser l'URL de votre backend Replit pour le lien de parrainage
-    const APP_DOMAIN = "https://mulaflowr-agencies.vercel.app"; 
-    const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app"; // Assurez-vous que cette URL est correcte
+    const bonusCard = document.querySelector('#bonus-agent-card .medium-stat-value');
+    if(bonusCard) bonusCard.textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
 
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
-    }
+    if(document.querySelector('#whatsapp-gains .gain-stat-value')) document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
+    if(document.querySelector('#trivia-gains .gain-stat-value')) document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
+    if(document.querySelector('#publicite-gains .gain-stat-value')) document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
+    if(document.querySelector('#tiktok-gains .gain-stat-value')) document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
+    if(document.querySelector('#youtube-gains .gain-stat-value')) document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
+    if(document.querySelector('#depot-solde .gain-stat-value')) document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
+  } catch (err) {
+    console.error('Erreur updateDashboardUI', err);
+  }
+}
 
-    /* Événements UI (inchangés) */
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
+function updateUserInfoUI(user, dbData = {}) {
+  const displayName = dbData.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Utilisateur');
+  const email = dbData.email || user.email || 'Non spécifié';
+  const phone = dbData.phoneNumber || 'Non spécifié';
+  const country = dbData.country || 'Non spécifié';
+  const referrer = dbData.referrer || 'Aucun';
+  const activeReferrals = dbData.activeReferrals || 0;
+
+  if (sidebarUsername) sidebarUsername.textContent = displayName;
+  if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+  if (infoUsername) infoUsername.textContent = displayName;
+  if (infoEmail) infoEmail.textContent = email;
+  if (infoPhone) infoPhone.textContent = phone;
+  if (infoCountry) infoCountry.textContent = country;
+  if (infoParrain) infoParrain.textContent = referrer;
+  if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
+
+  if (bannerUsername) bannerUsername.textContent = displayName;
+  if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
+
+  if (fidelityKey) {
+    const uidPart1 = user.uid.substring(0, 4).toUpperCase();
+    const uidPart2 = user.uid.substring(4, 8).toUpperCase();
+    fidelityKey.textContent = `MULA-USER-2024-${uidPart1}-${uidPart2}`;
+  }
+}
+
+/******** Communication serveur pour créer lien / stats ********/
+async function requestReferralLinkFromServer(uid) {
+  try {
+    const resp = await fetch(`${SERVER_URL}/api/create-referral-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: uid })
     });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    if (json && json.referralLink) return json;
+    return null;
+  } catch (err) {
+    console.error('requestReferralLinkFromServer error', err);
+    return null;
+  }
+}
 
-    /******** Theme toggle (inchangé) ********/
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
-    });
+/******** Start watcher: détecte passage status -> 'paid' et appelle le serveur ********/
+async function startStatusWatcherAndTriggerProcessing() {
+  if (!currentUser) return;
+  try {
+    const userDocRef = db.collection('users').doc(currentUser.uid);
 
-    /******** Copy / share actions (inchangés) ********/
-    if (copyLinkBtn) {
-      copyLinkBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(referralLink.textContent)
-          .then(() => showNotification('success', 'Succès', 'Lien copié dans le presse-papier!'))
-          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier le lien.'));
-      });
-    }
-    if (copyKeyBtn) {
-      copyKeyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(fidelityKey.textContent)
-          .then(() => showNotification('success', 'Succès', 'Clé de fidélité copiée!'))
-          .catch(err => showNotification('error', 'Erreur', 'Impossible de copier la clé.'));
-      });
-    }
-    if (sendKeyBtn) {
-      sendKeyBtn.addEventListener('click', () => {
-        const message = encodeURIComponent("Voici ma clé de fidélité MULAFLOWR: " + fidelityKey.textContent);
-        window.open(`https://wa.me/?text=${message}`, '_blank');
-      });
-    }
-    const promoMessage = "Tu veux gagner de l'argent en ligne? Regarde les vidéos et gagne de l'argent. Sur ce lien, avec 3000 francs CFA seulement, tu peux gagner 5000 francs par jour. Si tu es intéressé, je t'explique: ";
-    if (shareWhatsApp) shareWhatsApp.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent(promoMessage + referralLink.textContent)}`, '_blank'); });
-    if (shareFacebook) shareFacebook.addEventListener('click', () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink.textContent)}&quote=${encodeURIComponent(promoMessage)}`, '_blank'); });
-    if (shareTwitter) shareTwitter.addEventListener('click', () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(promoMessage)}&url=${encodeURIComponent(referralLink.textContent)}`, '_blank'); });
-    if (shareTelegram) shareTelegram.addEventListener('click', () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink.textContent)}&text=${encodeURIComponent(promoMessage)}`, '_blank'); });
+    userDocRef.onSnapshot(async (snap) => {
+      if (!snap.exists) return;
+      const d = snap.data();
+      const status = (d.status || d.statut || '').toString().toLowerCase();
+      const alreadyProcessed = !!d.referralProcessed;
 
-    /******** Calendrier (inchangé) ********/
-    function updateCalendar() {
-      if (!calendarGrid || !calendarMonth) return;
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-      calendarMonth.textContent = `${monthNames[month]} ${year}`;
-      calendarGrid.innerHTML = '';
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      let startDay = firstDay === 0 ? 6 : firstDay - 1;
-      for (let i=0; i < startDay; i++) { calendarGrid.insertAdjacentHTML('beforeend', '<div class="calendar-date"></div>'); }
-      for (let day=1; day <= daysInMonth; day++) {
-        const dateCell = document.createElement('div');
-        dateCell.className = 'calendar-date';
-        dateCell.textContent = day;
-        const today = new Date();
-        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
-        if (Math.random() > 0.7) dateCell.classList.add('has-task');
-        calendarGrid.appendChild(dateCell);
-      }
-    }
-    if (prevMonth) prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); updateCalendar(); });
-    if (nextMonth) nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); updateCalendar(); });
-    
-    /******** Fonctions Utilitaires de Données (inchangées) ********/
-    function isPaidFlag(value) {
-      if (typeof value === 'boolean') return value;
-      if (typeof value === 'string') {
-        const v = value.toLowerCase().trim();
-        return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1', 'preuves reçues'].includes(v);
-      }
-      if (typeof value === 'number') return value === 1;
-      return false;
-    }
-    function isUserPaidFromDoc(docData) {
-      if (!docData) return false;
-      const candidates = [
-        docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
-        docData.status, docData.statut, docData.payment, docData.paidStatus
-      ];
-      for (const candidate of candidates) {
-        if (candidate !== undefined && candidate !== null) {
-          if (isPaidFlag(candidate)) return true;
+      if (status === 'paid' && !alreadyProcessed) {
+        showNotification('info', 'Parrainage', 'Paiement détecté — distribution en cours...');
+        try {
+          const idToken = await currentUser.getIdToken();
+          const resp = await fetch(`${SERVER_URL}/api/process-referral-on-paid`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({ userDocId: currentUser.uid })
+          });
+          const json = await resp.json().catch(()=>({}));
+          if (resp.ok && json && json.ok) {
+            showNotification('success', 'Parrainage', 'Gains partagés aux parrains.');
+            await loadUserData();
+            updateDashboardUI();
+            updateUserInfoUI(currentUser, userData);
+          } else {
+            console.error('Erreur process-referral-on-paid:', json);
+            showNotification('error', 'Parrainage', (json && json.error) ? json.error : 'Erreur lors du partage des gains.');
+          }
+        } catch (err) {
+          console.error('Erreur appel process-referral-on-paid:', err);
+          showNotification('error', 'Parrainage', 'Impossible d\'appeler le serveur de parrainage.');
         }
       }
-      return false;
-    }
+    });
+  } catch (err) {
+    console.error('startStatusWatcherAndTriggerProcessing erreur:', err);
+  }
+}
 
-    /******** Sauvegarde des données utilisateur (inchangée) ********/
-    async function saveUserData(key = null, value = null) {
-      if (!currentUser) return;
+/******** Exemple: soumission paiement (utilitaire) ********/
+async function submitPaymentToServer({ username, email, country, paymentMethod, phoneNumber, amount, idToken }, paymentProofFile) {
+  try {
+    const form = new FormData();
+    form.append('username', username);
+    form.append('email', email);
+    form.append('country', country || '');
+    form.append('paymentMethod', paymentMethod || 'unknown');
+    form.append('phoneNumber', phoneNumber || '');
+    form.append('amount', String(amount));
+    if (idToken) form.append('idToken', idToken);
+    if (paymentProofFile) form.append('paymentProof', paymentProofFile, paymentProofFile.name);
+
+    const resp = await fetch(`${SERVER_URL}/submit-payment`, {
+      method: 'POST',
+      body: form
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      showNotification('error', 'Erreur', `Serveur paiement: ${resp.status}`);
+      console.error('submitPaymentToServer non OK', resp.status, text);
+      return null;
+    }
+    const json = await resp.json();
+    showNotification('success', 'Paiement envoyé', json.message || 'Reçu');
+    return json;
+  } catch (err) {
+    console.error('Erreur submitPaymentToServer:', err);
+    showNotification('error', 'Erreur', 'Impossible d\'envoyer la preuve au serveur.');
+    return null;
+  }
+}
+
+/******** Auth state change (point d'entrée) ********/
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try {
+      await loadUserData();
+
+      if (!userData.paid) {
+        showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription. Nous surveillons le statut et appliquerons le parrainage dès que "paid" sera détecté.');
+      }
+
+      updateDashboardUI();
+      updateUserInfoUI(user, userData);
+      applyTheme();
+
+      // Générer/obtenir le lien de parrainage via serveur (si possible), sinon fallback
       try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : userData;
-        await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
-        console.log('Données utilisateur enregistrées avec succès.');
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
-    }
-
-    /******** Chargement des données utilisateur depuis Firestore (MISE À JOUR) ********/
-    async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      
-      const defaultReferralEarnings = { level1: 0, level2: 0, level3: 0 };
-      let parrainageTotal = 0;
-      let activeReferrals = 0;
-      let displayName = currentUser.displayName || currentUser.email.split('@')[0];
-      
-      if (doc.exists) {
-          const data = doc.data() || {};
-          const refEarnings = data.referralEarnings || defaultReferralEarnings;
-          
-          // Calcul du total des gains de parrainage
-          parrainageTotal = (refEarnings.level1 || 0) + (refEarnings.level2 || 0) + (refEarnings.level3 || 0);
-          
-          // Le champ 'totalReferrals' est mis à jour par le backend lors du paiement du filleul de niveau 1
-          activeReferrals = Number(data.totalReferrals || 0); 
-          displayName = data.displayName || displayName;
-          
-          userData = {
-              depense: Number(data.depense || data.debit || 0),
-              profit: Number(data.profit || data.revenue || 0),
-              solde: Number(data.solde || data.balance || 0),
-              retire: Number(data.retire || data.withdrawn || 0),
-              // **MISE À JOUR ESSENTIELLE** : Utilise le total des gains calculés
-              parrainage: parrainageTotal, 
-              bonusAgent: Number(data.bonusAgent || data.agentBonus || 0),
-              whatsappGains: Number(data.whatsappGains || 0),
-              triviaGains: Number(data.triviaGains || 0),
-              publiciteGains: Number(data.publiciteGains || 0),
-              tiktokGains: Number(data.tiktokGains || 0),
-              youtubeGains: Number(data.youtubeGains || 0),
-              depotSolde: Number(data.depotSolde || data.depositBalance || 0),
-              phoneNumber: data.phoneNumber || data.phone || "",
-              country: data.country || data.pays || "",
-              // **MODIFICATION** : Prend le username du parrain (Level 1 Sponsor)
-              referrer: data.level1Sponsor || data.sponsorUsername || "Aucun", 
-              activeReferrals: activeReferrals,
-              displayName: displayName,
-              email: data.email || currentUser.email,
-              paid: isUserPaidFromDoc(data),
-              theme: data.theme || 'light',
-              // Ajout des champs pour référence future (si besoin d'afficher les niveaux séparément)
-              refEarnings: refEarnings 
-          };
-      } else {
-        // Valeurs par défaut avec les champs de parrainage
-        userData = { 
-            depense: 0, profit: 0, solde: 0, retire: 0, 
-            parrainage: 0, bonusAgent: 0, whatsappGains: 0, 
-            triviaGains: 0, publiciteGains: 0, tiktokGains: 0, 
-            youtubeGains: 0, depotSolde: 0, paid: false, theme: 'light',
-            referrer: "Aucun", activeReferrals: 0, refEarnings: defaultReferralEarnings,
-            displayName: displayName, email: currentUser.email
-        };
-        await saveUserData();
-      }
-    }
-
-    /******** Mise à jour de l'interface utilisateur (UI) (MISE À JOUR) ********/
-    function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
-
-    function updateDashboardUI() {
-        document.querySelector('#depense-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.depense)}`;
-        document.querySelector('#profit-card .small-stat-value').textContent = `XAF ${formatNumberSafe(userData.profit)}`;
-        document.querySelector('#solde-card .large-stat-value').textContent = `XAF ${formatNumberSafe(userData.solde)}`;
-        document.querySelector('#retire-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.retire)}`;
-        // **MISE À JOUR** : Utilisation du total de parrainage calculé dans loadUserData
-        document.querySelector('#parrainage-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.parrainage)}`;
-        document.querySelector('#bonus-agent-card .medium-stat-value').textContent = `XAF ${formatNumberSafe(userData.bonusAgent)}`;
-        document.querySelector('#whatsapp-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.whatsappGains)}`;
-        document.querySelector('#trivia-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.triviaGains)}`;
-        document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
-        document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
-        document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
-        document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
-    }
-
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
-        const email = dbData.email || user.email || 'Non spécifié';
-        const phone = dbData.phoneNumber || 'Non spécifié';
-        const country = dbData.country || 'Non spécifié';
-        const referrer = dbData.referrer || 'Aucun'; 
-        const activeReferrals = dbData.activeReferrals || 0;
-
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-        if (infoUsername) infoUsername.textContent = displayName;
-        if (infoEmail) infoEmail.textContent = email;
-        if (infoPhone) infoPhone.textContent = phone;
-        if (infoCountry) infoCountry.textContent = country;
-        // **MISE À JOUR** : Affiche le username du parrain (Level 1 Sponsor)
-        if (infoParrain) infoParrain.textContent = referrer; 
-        // **MISE À JOUR** : Affiche le nombre de filleuls actifs (Level 1)
-        if (infoParrainage) infoParrainage.textContent = `${activeReferrals} personnes`;
-
-        if (bannerUsername) bannerUsername.textContent = displayName;
-        if (welcomeMessage) welcomeMessage.innerHTML = `Nous sommes ravis de vous revoir sur <strong>MULAFLOWR</strong>. Profitez de nos 10+ outils numériques pour booster vos revenus en ligne ! 💰 🚀`;
-
-        if (fidelityKey) {
-            const uidPart1 = user.uid.substring(0, 4).toUpperCase();
-            const uidPart2 = user.uid.substring(4, 8).toUpperCase();
-            fidelityKey.textContent = `MULA-USER-2024-${uidPart1}-${uidPart2}`;
-        }
-        
-        // **MODIFICATION ESSENTIELLE** : Génération du lien de parrainage
-        if (referralLink) {
-            // Utilise le displayName/username de l'utilisateur pour le lien de parrainage (conforme au server.js)
-            const userReferralId = displayName; // Ou le champ 'username' si vous le définissez dans Firestore
-            referralLink.textContent = `${APP_DOMAIN}/paiement.html?ref=${encodeURIComponent(userReferralId)}`;
-        }
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
-
-    /******** Point d'entrée principal de l'application (inchangé) ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                await loadUserData();
-
-                if (!userData.paid) {
-                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500); 
-                    return;
-                }
-
-                updateDashboardUI();
-                updateUserInfoUI(user, userData);
-                applyTheme();
-                
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue !', `Content de vous revoir, ${userData.displayName || user.email.split('@')[0]} !`);
-
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
-            }
+        const serverResp = await requestReferralLinkFromServer(currentUser.uid);
+        if (serverResp && serverResp.referralLink) {
+          referralLink.textContent = serverResp.referralLink;
+          if (serverResp.username) {
+            userData.username = serverResp.username;
+            try { await db.collection('users').doc(currentUser.uid).set({ username: serverResp.username }, { merge: true }); } catch(e) { console.warn('save username fail', e); }
+          }
         } else {
-            window.location.href = 'login.html';
+          const userReferralId = userData.username || userData.displayName || currentUser.uid;
+          referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
         }
-    });
+      } catch (err) {
+        console.warn('Erreur génération lien parrainage', err);
+        const userReferralId = userData.username || userData.displayName || currentUser.uid;
+        referralLink.textContent = `${APP_DOMAIN}/index.html?ref=${encodeURIComponent(userReferralId)}`;
+      }
 
-    /******** Initialisation au chargement de la page (inchangé) ********/
-    document.addEventListener('DOMContentLoaded', () => {
-        updateCalendar();
-    });
+      // Démarrer le watcher qui déclenchera la répartition au moment où 'status' devient 'paid'
+      startStatusWatcherAndTriggerProcessing();
+
+      document.body.classList.add('loaded');
+      if (loader) loader.classList.add('hidden');
+
+      showNotification('success', 'Bienvenue !', `Content de vous revoir, ${userData.displayName || (user.email && user.email.split('@')[0])}!`);
+    } catch (error) {
+      console.error("Erreur critique lors de l'initialisation :", error);
+      showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+      auth.signOut();
+      setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+    }
+  } else {
+    // Si non connecté -> renvoyer vers login
+    window.location.href = 'login.html';
+  }
+});
+
+/******** Theme helper ********/
+function applyTheme() {
+  const isDarkMode = userData.theme === 'dark';
+  document.body.classList.toggle('dark-mode', isDarkMode);
+  if (themeToggle) themeToggle.innerHTML = isDarkMode 
+      ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+      : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+}
+
+/******** Initialisation ********/
+document.addEventListener('DOMContentLoaded', () => {
+  updateCalendar();
+});
+
+/******** Expose quelques utilitaires pour debug dans console ********/
+window._mulaflowr = {
+  submitPaymentToServer,
+  requestReferralLinkFromServer
+};
 </script>
-
 </body>
 </html>
