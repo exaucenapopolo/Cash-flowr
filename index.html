@@ -416,13 +416,11 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://
 import {
   getFirestore,
   doc,
-  setDoc,
-  getDocs,
   getDoc,
+  getDocs,
   collection,
   query,
-  where,
-  serverTimestamp
+  where
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 /* ---------- Configuration Firebase ---------- */
@@ -439,6 +437,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+const SERVER_URL = "https://mulaflowr-exaucenapopolo2.replit.app";
 
 /* ---------- Helpers notifications ---------- */
 function showNotification(type, title, message, duration = 5000) {
@@ -493,63 +493,31 @@ function updateCountryCode(){
   if(selectedFlagEl) selectedFlagEl.textContent = flag;
 }
 
-/* ---------- Recherche du parrain (Firestore) ---------- */
-/*
-  - On prend le paramètre d'URL "ref" (ou "par") si présent.
-  - On essaye d'abord getDoc par UID (doc id).
-  - Si non trouvé, on cherche par champ 'username'.
-  - Si non trouvé, on cherche par 'displayName'.
-  - Renvoie un objet { uid, username, displayName } ou null.
-*/
-async function findSponsor(refParam){
-  if(!refParam) return null;
-  refParam = refParam.trim();
+/* ---------- Recherche du parrain par username ---------- */
+async function findSponsorByUsername(username){
+  if(!username) return null;
+  username = username.trim();
   try {
-    // 1) tentative en tant qu'UID (doc id)
-    try {
-      const maybeDocRef = doc(db, 'users', refParam);
-      const snapshot = await getDoc(maybeDocRef);
-      if(snapshot.exists()){
-        const data = snapshot.data() || {};
-        return { uid: snapshot.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
-      }
-    } catch(e){
-      // ignore
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', username));
+    const qs = await getDocs(q);
+    if(!qs.empty){
+      const d = qs.docs[0];
+      const data = d.data() || {};
+      return { 
+        uid: d.id, 
+        username: data.username || null, 
+        displayName: data.displayName || data.username || null 
+      };
     }
-
-    // 2) tentative par username
-    try {
-      const usersRef = collection(db, 'users');
-      let q = query(usersRef, where('username', '==', refParam));
-      let qs = await getDocs(q);
-      if(!qs.empty){
-        const d = qs.docs[0];
-        const data = d.data() || {};
-        return { uid: d.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
-      }
-    } catch(e){ /* ignore */ }
-
-    // 3) tentative par displayName (approche stricte : case-sensitive)
-    try {
-      const usersRef = collection(db, 'users');
-      let q2 = query(usersRef, where('displayName', '==', refParam));
-      let qs2 = await getDocs(q2);
-      if(!qs2.empty){
-        const d = qs2.docs[0];
-        const data = d.data() || {};
-        return { uid: d.id, username: data.username || null, displayName: data.displayName || data.username || null, raw: data };
-      }
-    } catch(e){ /* ignore */ }
-
-    // 4) pas trouvé
     return null;
   } catch(err){
-    console.error('findSponsor error', err);
+    console.error('findSponsorByUsername error', err);
     return null;
   }
 }
 
-/* ---------- Vérification unicité username (comme précédemment) ---------- */
+/* ---------- Vérification unicité username ---------- */
 async function checkUsernameExists(username){
   if(!username) return false;
   try {
@@ -564,22 +532,10 @@ async function checkUsernameExists(username){
 }
 
 /* ---------- Gestion du formulaire / enregistrement ---------- */
-let sponsorData = null; // contiendra l'objet sponsor si trouvé
+let sponsorData = null;
 
 const registrationForm = document.getElementById('registrationForm');
 if (!registrationForm) throw new Error('Formulaire non trouvé (#registrationForm).');
-
-// Création d'un champ caché pour stocker UID du parrain (ajout dynamique pour ne pas toucher HTML)
-(function createHiddenParrainUid(){
-  if (!document.getElementById('parrainUid')) {
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.id = 'parrainUid';
-    hidden.name = 'parrainUid';
-    hidden.value = '';
-    registrationForm.appendChild(hidden);
-  }
-})();
 
 registrationForm.addEventListener('submit', async function(e){
   e.preventDefault();
@@ -589,62 +545,67 @@ registrationForm.addEventListener('submit', async function(e){
   const confirmPassword = document.getElementById('confirmPassword').value;
   const country = document.getElementById('country').value;
   const phone = document.getElementById('phone').value.trim();
-  // On prend l'UID du parrain s'il existe, sinon la valeur du champ par (texte)
-  const parrainUidField = document.getElementById('parrainUid');
-  const parrainUid = parrainUidField ? (parrainUidField.value || '') : '';
-  const parrainText = document.getElementById('par') ? document.getElementById('par').value || '' : '';
+  const countryCode = document.getElementById('countryCode')?.textContent || '+237';
 
-  // validations basiques
+  // Validations basiques
   if(!username){ showError("Choisissez un nom d'utilisateur."); return; }
   if(password !== confirmPassword){ showError("Les mots de passe ne correspondent pas."); return; }
   if(!document.getElementById('terms').checked){ showError("Veuillez accepter les conditions."); return; }
+  if(password.length < 6){ showError("Le mot de passe doit contenir au moins 6 caractères."); return; }
 
-  // vérification unicité username
+  // Vérification unicité username
   const exists = await checkUsernameExists(username);
   if(exists){ showError("Ce nom d'utilisateur est déjà pris."); return; }
 
-  // gestion UI
+  // Gestion UI
   const submitBtn = this.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
   submitBtn.disabled = true;
 
   try {
-    // 1) création du compte dans Firebase Auth
+    // 1) Création du compte dans Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2) mise à jour profile displayName
+    // 2) Mise à jour profile displayName
     await updateProfile(user, { displayName: username });
 
-    // 3) préparation données utilisateur
-    const finalParrainUid = sponsorData ? (sponsorData.uid || '') : (parrainUid || '');
-    const finalParrainText = sponsorData ? (sponsorData.username || sponsorData.displayName || sponsorData.uid) : (parrainText || '');
+    // 3) Obtenir le token d'authentification
+    const idToken = await user.getIdToken();
 
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDocData = {
-      uid: user.uid,
-      username: username,
-      displayName: username,
-      email: email,
-      country: country,
-      phone: (document.getElementById('countryCode')?.textContent || '') + (phone || ''),
-      parrain: finalParrainText,      // affichage/parrain (string lisible)
-      parrainUid: finalParrainUid || null, // uid réel du parrain si trouvé
-      status: 'pending_payment',
-      fidelityKey: false,
-      createdAt: serverTimestamp(),
-      depense: 0, profit: 0, solde: 0, retire: 0,
-      parrainage: 0, bonusAgent: 0, whatsappGains: 0, triviaGains: 0,
-      publiciteGains: 0, tiktokGains: 0, youtubeGains: 0,
-      depotSolde: 0, activeReferrals: 0
-    };
+    // 4) Préparer les données pour l'API du serveur
+    const sponsorUsername = sponsorData ? (sponsorData.username || '') : '';
+    const fullPhoneNumber = countryCode + phone;
 
-    // 4) écriture dans Firestore
-    await setDoc(userDocRef, userDocData);
+    // 5) Appeler l'endpoint du serveur pour enregistrer avec le système de parrainage
+    const registerResponse = await fetch(`${SERVER_URL}/api/register-with-referral`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        email: email,
+        displayName: username,
+        sponsorUsername: sponsorUsername,
+        country: country,
+        phoneNumber: fullPhoneNumber,
+        uid: user.uid
+      })
+    });
+
+    const registerData = await registerResponse.json();
+
+    if (!registerResponse.ok) {
+      throw new Error(registerData.error || 'Erreur lors de l\'enregistrement sur le serveur');
+    }
+
+    console.log('Inscription serveur réussie:', registerData);
 
     showSuccess("Votre compte a été créé ! Redirection vers la page de paiement...");
     setTimeout(()=> window.location.assign('paiement.html'), 2000);
+
   } catch (err) {
     console.error('Registration error:', err);
     let message = "Une erreur s'est produite lors de l'inscription.";
@@ -658,52 +619,52 @@ registrationForm.addEventListener('submit', async function(e){
   }
 });
 
-/* ---------- Initialisation au chargement : lecture du paramètre ref et recherche du parrain ---------- */
+/* ---------- Initialisation au chargement : lecture du paramètre ref ---------- */
 document.addEventListener('DOMContentLoaded', async () => {
-  // initialise country select UI
+  // Initialise country select UI
   try { document.getElementById('country').value = 'cm'; } catch(e){}
   updateCountryCode();
 
-  // param d'URL: on regarde 'ref' puis 'par'
+  // Param d'URL: on regarde 'ref' puis 'par'
   const urlParams = new URLSearchParams(window.location.search);
   const refParam = urlParams.get('ref') || urlParams.get('par') || '';
 
   const parInput = document.getElementById('par');
-  const parrainUidField = document.getElementById('parrainUid');
 
   if(refParam){
-    // on cherche le parrain dans Firestore
+    // On cherche le parrain par username dans Firestore
     try {
-      const found = await findSponsor(refParam);
+      const found = await findSponsorByUsername(refParam);
       if(found){
         sponsorData = found;
-        // affiche le nom lisible (displayName si possible, sinon username, sinon uid)
-        const display = found.displayName || found.username || found.uid;
+        const display = found.displayName || found.username;
         if(parInput) {
           parInput.value = display;
           parInput.readOnly = true;
         }
-        if(parrainUidField) parrainUidField.value = found.uid;
+        console.log('Parrain trouvé:', found);
       } else {
-        // pas trouvé: on affiche simplement le param brut (car il peut s'agir d'un username non enregistré)
+        // Pas trouvé: on affiche le param brut
         if(parInput){
           parInput.value = refParam;
-          parInput.readOnly = false; // laisse utilisateur modifier si besoin
+          parInput.readOnly = false;
         }
-        if(parrainUidField) parrainUidField.value = '';
+        console.warn('Parrain non trouvé avec username:', refParam);
       }
     } catch(err){
       console.error('Erreur lors de la recherche du parrain:', err);
       if(parInput) parInput.value = refParam;
-      if(parrainUidField) parrainUidField.value = '';
     }
   } else {
-    // aucun param: garde le champ par vide ou le placeholder
-    if(parInput) { parInput.value = ''; parInput.placeholder = 'Aucun parrain détecté'; parInput.readOnly = false; }
-    if(parrainUidField) parrainUidField.value = '';
+    // Aucun param: garde le champ par vide
+    if(parInput) { 
+      parInput.value = ''; 
+      parInput.placeholder = 'Aucun parrain détecté'; 
+      parInput.readOnly = false; 
+    }
   }
 
-  // écoute changement de pays
+  // Écoute changement de pays
   const countrySelect = document.getElementById('country');
   if(countrySelect) countrySelect.addEventListener('change', updateCountryCode);
 });
