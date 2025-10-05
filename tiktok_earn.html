@@ -608,6 +608,7 @@
       gap: 15px;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -789,6 +790,82 @@
         }
     }
 
+    /* Monday Alert Banner */
+    .monday-alert {
+      background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .monday-alert h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .monday-alert p {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .monday-alert .countdown {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 10px;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 149, 0, 0.5); }
+      50% { box-shadow: 0 0 40px rgba(255, 149, 0, 0.8); }
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      border-radius: 12px;
+      flex-direction: column;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .video-overlay.active {
+      display: flex;
+    }
+
+    .video-overlay i {
+      font-size: 3rem;
+      color: #FF9500;
+      margin-bottom: 15px;
+    }
+
+    .video-overlay h4 {
+      color: white;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .video-overlay p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+    }
+
     /* Animation for notifications */
     .notification-container {
       position: fixed;
@@ -961,6 +1038,16 @@
         <span>TikTok Earn</span>
       </h1>
       
+      <!-- Bannière d'alerte Monday-only (masquée le lundi) -->
+      <div class="monday-alert" id="mondayAlert" style="display: none;">
+        <h3>
+          <i class="fas fa-calendar-alt"></i>
+          <span>Disponible uniquement le lundi</span>
+        </h3>
+        <p>Les vidéos TikTok sont accessibles chaque lundi pour gagner 250 FCFA par vidéo</p>
+        <div class="countdown" id="mondayCountdown">Calcul en cours...</div>
+      </div>
+      
       <div class="earn-section">
         <h2 class="section-title">Gagnez de l'argent en regardant des vidéos TikTok</h2>
         
@@ -973,6 +1060,12 @@
             <div class="play-button" id="playButton">
               <i class="fas fa-play"></i>
             </div>
+            <!-- Overlay pour les jours non-lundi -->
+            <div class="video-overlay" id="videoOverlay">
+              <i class="fas fa-lock"></i>
+              <h4>Vidéo verrouillée</h4>
+              <p>Revenez lundi pour gagner 250 FCFA</p>
+            </div>
           </div>
         </div>
         
@@ -980,7 +1073,7 @@
           <div class="timer-circle">
             <div class="timer-bg"></div>
             <div class="timer-progress" id="timerProgress"></div>
-            <div class="timer-text" id="timerText">20s</div>
+            <div class="timer-text" id="timerText">10s</div>
           </div>
           <div class="timer-label">Temps restant</div>
         </div>
@@ -1075,16 +1168,16 @@ function cloudinaryUrl(publicId) {
 }
 
 /******** Paramètres modifiables ********/
-const REQUIRED_SECONDS = 10;    // <--- maintenant 10 secondes
+const REQUIRED_SECONDS = 10;
 const REWARD_AMOUNT = 250;
 const MAX_VIDEOS_PER_DAY = 2;
-const ENFORCE_MONDAY = false;    // true = lecture possible uniquement le Lundi; false = désactive cette restriction (pratique pour tester)
+const ENFORCE_MONDAY = true;  // 🔒 RESTRICTION ACTIVÉE: Vidéos disponibles uniquement le lundi
 
 /******** Variables d'état ********/
 let currentUser = null;
 let userData = {};
 let currentIndex = 0;
-let seenSeconds = {};                 // pour la vidéo courante
+let seenSeconds = {};
 let seenCount = 0;
 let isPlaying = false;
 let isVisible = true;
@@ -1092,12 +1185,11 @@ let videosWatchedToday = 0;
 let earningsToday = 0;
 let canWatchMore = true;
 
-// flags par vidéo (permets watch/claim indépendants)
-const validatedFlags = new Array(publicIdList.length).fill(false); // true si vu >= REQUIRED_SECONDS
-const claimedFlags = new Array(publicIdList.length).fill(false);   // true si déjà réclamé
+const validatedFlags = new Array(publicIdList.length).fill(false);
+const claimedFlags = new Array(publicIdList.length).fill(false);
 
-// bouton "Regarder la suivante" (sera injecté dans la page)
 let nextButton = null;
+let countdownInterval = null;
 
 /******** UI helpers ********/
 function showNotification(type, title, message, duration = 3500) {
@@ -1120,7 +1212,7 @@ function showNotification(type, title, message, duration = 3500) {
   }, duration);
 }
 
-/******** Menu & UI de base (inchangé) ********/
+/******** Menu & UI de base ********/
 hamburgerBtn.addEventListener('click', () => {
   sidebar.classList.toggle('open');
   overlay.classList.toggle('active');
@@ -1146,14 +1238,83 @@ themeToggle.addEventListener('click', (event) => {
   if (currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
 });
 
-/******** Helpers pour jour (Monday) ********/
+/******** Helpers pour jour (Monday) - Timezone Africa/Douala ********/
 function isTodayMonday() {
-  const d = new Date();
-  // getDay(): 0 = Sunday, 1 = Monday
-  return d.getDay() === 1;
+  try {
+    // Utiliser le timezone Africa/Douala (CEMAC) pour cohérence avec le serveur
+    const formatter = new Intl.DateTimeFormat('en-US', { 
+      timeZone: 'Africa/Douala',
+      weekday: 'long' 
+    });
+    const dayName = formatter.format(new Date());
+    return dayName === 'Monday';
+  } catch (error) {
+    // Fallback en cas d'erreur de timezone
+    console.warn('Timezone Africa/Douala non supporté, utilisation locale');
+    const d = new Date();
+    return d.getDay() === 1;
+  }
 }
 
-/******** Gestion du bouton "Regarder la suivante" (injection) ********/
+function getNextMondayCountdown() {
+  try {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
+    
+    // Calculer combien de jours jusqu'au prochain lundi
+    let daysUntilMonday = (8 - currentDay) % 7;
+    if (daysUntilMonday === 0) daysUntilMonday = 7; // Si on est lundi, prochain lundi = dans 7 jours
+    
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + daysUntilMonday);
+    nextMonday.setHours(0, 0, 0, 0);
+    
+    const diff = nextMonday - now;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { days, hours, minutes, seconds };
+  } catch (error) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+}
+
+function updateMondayUI() {
+  const mondayAlert = document.getElementById('mondayAlert');
+  const videoOverlay = document.getElementById('videoOverlay');
+  const mondayCountdown = document.getElementById('mondayCountdown');
+  
+  const isMonday = isTodayMonday();
+  
+  if (ENFORCE_MONDAY && !isMonday) {
+    // Afficher la bannière et l'overlay
+    if (mondayAlert) mondayAlert.style.display = 'block';
+    if (videoOverlay) videoOverlay.classList.add('active');
+    
+    // Démarrer le compte à rebours
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      const countdown = getNextMondayCountdown();
+      if (mondayCountdown) {
+        mondayCountdown.textContent = `Prochain lundi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
+      }
+      
+      // Recharger la page si on arrive à lundi
+      if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
+        window.location.reload();
+      }
+    }, 1000);
+  } else {
+    // Masquer la bannière et l'overlay
+    if (mondayAlert) mondayAlert.style.display = 'none';
+    if (videoOverlay) videoOverlay.classList.remove('active');
+    if (countdownInterval) clearInterval(countdownInterval);
+  }
+}
+
+/******** Gestion du bouton "Regarder la suivante" ********/
 function ensureNextButtonExists() {
   if (nextButton) return;
   const actionRow = document.querySelector('.action-buttons');
@@ -1181,22 +1342,19 @@ function loadByIndex(i) {
   if (i < 0 || i >= publicIdList.length) return;
   currentIndex = i;
 
-  // reset état local pour la nouvelle vidéo
   seenSeconds = {};
   seenCount = 0;
   isPlaying = false;
-  validatedFlags[currentIndex] = validatedFlags[currentIndex] || false; // garde valeur si déjà validée
-  // update UI
+  validatedFlags[currentIndex] = validatedFlags[currentIndex] || false;
+  
   updateTimerUI();
   claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
   startButton.disabled = !canWatchMore;
   playButton.style.display = 'flex';
 
-  // charger src
   tiktokVideo.src = cloudinaryUrl(publicIdList[currentIndex]);
   tiktokVideo.load();
 
-  // gérer l'affichage du bouton "suivante"
   ensureNextButtonExists();
   updateNextButtonVisibility();
 }
@@ -1216,7 +1374,6 @@ function updateDailyStatsUI() {
 function updateNextButtonVisibility() {
   if (!nextButton) return;
   const haveNext = currentIndex + 1 < publicIdList.length;
-  // show next button only if current video validated OR already claimed, and next exists
   if (haveNext && validatedFlags[currentIndex]) {
     nextButton.style.display = 'inline-flex';
   } else {
@@ -1228,7 +1385,7 @@ function markVideoValidated(index) {
   if (validatedFlags[index]) return;
   validatedFlags[index] = true;
   if (index === currentIndex) {
-    claimButton.disabled = claimedFlags[index]; // enabled if not claimed
+    claimButton.disabled = claimedFlags[index];
     updateNextButtonVisibility();
     showNotification('success','Vidéo validée','Vous pouvez réclamer la récompense ou regarder la suivante.');
   }
@@ -1237,7 +1394,7 @@ function markVideoValidated(index) {
 /******** timeupdate: compter secondes uniques ********/
 tiktokVideo.addEventListener('timeupdate', () => {
   if (!isPlaying || !isVisible) return;
-  if (validatedFlags[currentIndex]) return; // déjà validée
+  if (validatedFlags[currentIndex]) return;
   const sec = Math.floor(tiktokVideo.currentTime);
   if (sec < 0) return;
   if (!seenSeconds[sec]) {
@@ -1254,7 +1411,6 @@ tiktokVideo.addEventListener('timeupdate', () => {
 tiktokVideo.addEventListener('play', () => { isPlaying = true; });
 tiktokVideo.addEventListener('pause', () => { isPlaying = false; });
 tiktokVideo.addEventListener('ended', () => {
-  // si la vidéo se termine mais a atteint REQUIRED_SECONDS, valider
   if (seenCount >= REQUIRED_SECONDS) markVideoValidated(currentIndex);
 });
 
@@ -1280,7 +1436,6 @@ document.addEventListener('visibilitychange', () => {
 
 /******** Buttons events ********/
 playButton.addEventListener('click', () => {
-  // user gesture -> allow sound; also check Monday rule before play
   if (ENFORCE_MONDAY && !isTodayMonday()) {
     showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le lundi.');
     return;
@@ -1295,7 +1450,6 @@ startButton.addEventListener('click', () => {
     showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le lundi.');
     return;
   }
-  // start playing current video (user gesture)
   tiktokVideo.currentTime = 0;
   tiktokVideo.muted = false;
   tiktokVideo.play().catch(err => console.warn('play blocked', err));
@@ -1303,37 +1457,64 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
+/******** 🚀 NOUVELLE FONCTION: Appel API serveur pour réclamation ********/
 claimButton.addEventListener('click', async () => {
-  if (!currentUser) { showNotification('error','Non connecté','Veuillez vous connecter.'); return; }
-  if (!validatedFlags[currentIndex]) { showNotification('error','Non validé','Vous n\'avez pas encore regardé la vidéo suffisamment.'); return; }
-  if (claimedFlags[currentIndex]) { showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo.'); return; }
-  if (videosWatchedToday >= MAX_VIDEOS_PER_DAY) { showNotification('info','Limite atteinte','Vous avez atteint la limite quotidienne de réclamations.'); return; }
+  if (!currentUser) { 
+    showNotification('error','Non connecté','Veuillez vous connecter.'); 
+    return; 
+  }
+  if (!validatedFlags[currentIndex]) { 
+    showNotification('error','Non validé','Vous n\'avez pas encore regardé la vidéo suffisamment.'); 
+    return; 
+  }
+  if (claimedFlags[currentIndex]) { 
+    showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo.'); 
+    return; 
+  }
+  if (videosWatchedToday >= MAX_VIDEOS_PER_DAY) { 
+    showNotification('info','Limite atteinte','Vous avez atteint la limite quotidienne de réclamations.'); 
+    return; 
+  }
 
   try {
-    const userRef = db.collection('users').doc(currentUser.uid);
-    await userRef.update({
-      tiktokGains: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-      solde: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-      tikTokWatchesToday: firebase.firestore.FieldValue.increment(1),
-      tikTokEarningsToday: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-      lastTikTokWatchDate: new Date().toDateString()
+    // Récupérer le token Firebase
+    const idToken = await currentUser.getIdToken();
+    
+    // Appel à l'API backend
+    const response = await fetch('/api/tiktok-claim-reward', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        idToken: idToken,
+        rewardAmount: REWARD_AMOUNT,
+        videoIndex: currentIndex
+      })
     });
 
-    // update local state
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Erreur serveur');
+    }
+
+    // Mise à jour de l'état local
     claimedFlags[currentIndex] = true;
-    videosWatchedToday++;
-    earningsToday += REWARD_AMOUNT;
+    videosWatchedToday = data.videosWatchedToday || (videosWatchedToday + 1);
+    earningsToday = data.earningsToday || (earningsToday + REWARD_AMOUNT);
+    
     updateDailyStatsUI();
     updateNextButtonVisibility();
 
-    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde.`);
+    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance} FCFA`);
 
-    // if there is next and user still allowed to watch, don't auto-start; user decides
     claimButton.disabled = true;
     startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
+    
   } catch (err) {
-    console.error('Erreur lors de la réclamation :', err);
-    showNotification('error','Erreur serveur','Impossible d\'enregistrer la récompense. Réessayez.');
+    console.error('Erreur lors de la réclamation:', err);
+    showNotification('error','Erreur', err.message || 'Impossible d\'enregistrer la récompense. Réessayez.');
   }
 });
 
@@ -1382,7 +1563,7 @@ auth.onAuthStateChanged(async (user) => {
     try {
       await loadUserData();
 
-      // Vérification statut (conserve ta logique existante)
+      // Vérification statut
       const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
       const validStatuses = ['paid', 'active'];
       if (!validStatuses.includes(userStatus)) {
@@ -1394,7 +1575,7 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
-      // Check daily limit values (depuis Firestore) - these values increment on claim
+      // Charger statistiques quotidiennes depuis Firestore
       const today = new Date().toDateString();
       if ((userData.lastTikTokWatchDate || '') !== today) {
         videosWatchedToday = 0;
@@ -1406,25 +1587,26 @@ auth.onAuthStateChanged(async (user) => {
       canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
       updateDailyStatsUI();
 
-      // Ensure next button is available in DOM
       ensureNextButtonExists();
 
-      // If ENFORCE_MONDAY true and today is not Monday, disable start+play
+      // 🔒 Gérer l'UI en fonction du jour (lundi uniquement)
+      updateMondayUI();
+
       if (ENFORCE_MONDAY && !isTodayMonday()) {
         startButton.disabled = true;
         playButton.style.display = 'none';
-        showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le lundi.');
+        claimButton.disabled = true;
+        showNotification('info','Non disponible', 'Les vidéos TikTok sont disponibles uniquement le lundi.');
       } else {
         startButton.disabled = !canWatchMore;
         playButton.style.display = 'flex';
+        showNotification('success','Bienvenue','Prêt à gagner avec TikTok!');
       }
 
-      // charge première vidéo
       loadByIndex(0);
 
       document.body.classList.add('loaded');
       if (loader) loader.classList.add('hidden');
-      showNotification('success','Bienvenue','Prêt à gagner avec TikTok!');
 
     } catch (error) {
       console.error('Erreur initialisation:', error);
@@ -1439,7 +1621,6 @@ auth.onAuthStateChanged(async (user) => {
 
 /******** Petit preload ********/
 document.addEventListener('DOMContentLoaded', () => {
-  // préload de la première url si possible
   if (publicIdList.length) {
     const link = document.createElement('link');
     link.rel = 'preload';
@@ -1447,7 +1628,6 @@ document.addEventListener('DOMContentLoaded', () => {
     link.href = cloudinaryUrl(publicIdList[0]);
     document.head.appendChild(link);
   }
-  // hide loader after a short safety delay
   setTimeout(()=> { if (loader) loader.classList.add('hidden'); }, 700);
 });
 </script>
