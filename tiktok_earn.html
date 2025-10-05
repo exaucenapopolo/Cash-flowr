@@ -1028,300 +1028,356 @@
     </div>
   </footer>
 
-  <script>
-    /******** CONFIG FIREBASE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
-    };
+<script>
+/******** CONFIG FIREBASE ********/
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.appspot.com",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+/******** DOM Elements ********/
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const themeToggle = document.getElementById('themeToggle');
+const userProfile = document.getElementById('userProfile');
+const profileDropdown = document.getElementById('profileDropdown');
+const languageSelector = document.getElementById('languageSelector');
+const loader = document.getElementById('loader');
+const sidebarUsername = document.getElementById('sidebarUsername');
+const userAvatar = document.getElementById('userAvatar');
 
-    /******** DOM Elements ********/
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    // TikTok Earn specific elements
-    const tiktokVideo = document.getElementById('tiktokVideo');
-    const playButton = document.getElementById('playButton');
-    const timerProgress = document.getElementById('timerProgress');
-    const timerText = document.getElementById('timerText');
-    const startButton = document.getElementById('startButton');
-    const claimButton = document.getElementById('claimButton');
-    const videosWatched = document.getElementById('videosWatched');
-    const earnedToday = document.getElementById('earnedToday');
+const tiktokVideo = document.getElementById('tiktokVideo');
+const playButton = document.getElementById('playButton');
+const timerProgress = document.getElementById('timerProgress');
+const timerText = document.getElementById('timerText');
+const startButton = document.getElementById('startButton');
+const claimButton = document.getElementById('claimButton');
+const videosWatched = document.getElementById('videosWatched');
+const earnedToday = document.getElementById('earnedToday');
 
-    /******** Variables d'état ********/
-    let currentUser = null;
-    let userData = {};
-    let timerInterval = null;
-    let remainingTime = 20;
-    let videosWatchedToday = 0;
-    let earningsToday = 0;
-    let canWatchMore = true;
+/******** Config des vidéos Cloudinary ********/
+const CLOUD_NAME = 'do83voiqy';
+const publicIdList = [
+  'snaptik_7555599346184572178_v2_fojn5l',
+  'snaptik_7443138137112579360_v2_gwx7vh'
+];
+function cloudinaryUrl(publicId) {
+  return `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/q_auto,f_auto/${publicId}.mp4`;
+}
 
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
+/******** Variables d'état ********/
+let currentUser = null;
+let userData = {};
+let currentIndex = 0;
+const REQUIRED_SECONDS = 20; // secondes requises pour valider la vidéo
+const REWARD_AMOUNT = 250;
+const MAX_VIDEOS_PER_DAY = 2;
+
+let seenSeconds = {}; // seenSeconds[sec] = true
+let seenCount = 0;
+let isPlaying = false;
+let isVisible = true;
+let videosWatchedToday = 0;
+let earningsToday = 0;
+let canWatchMore = true;
+let validatedThisVideo = false;
+
+/******** UI helpers ********/
+function showNotification(type, title, message, duration = 3500) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+  notification.innerHTML = `
+    <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+    <div>
+      <strong style="display:block;margin-bottom:5px;">${title}</strong>
+      <span>${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+  }, duration);
+}
+
+/******** Menu & UI de base (inchangé) ********/
+hamburgerBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+  hamburgerBtn.classList.toggle('open');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  hamburgerBtn.classList.remove('open');
+});
+userProfile.addEventListener('click', (event) => {
+  event.stopPropagation();
+  profileDropdown.classList.toggle('active');
+});
+document.addEventListener('click', (event) => {
+  if (!userProfile.contains(event.target)) profileDropdown.classList.remove('active');
+});
+themeToggle.addEventListener('click', (event) => {
+  event.stopPropagation();
+  document.body.classList.toggle('dark-mode');
+  const isDarkMode = document.body.classList.contains('dark-mode');
+  themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i><span>Mode jour</span>' : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+  if (currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+});
+
+/******** Fonctions vidéo & logique ********/
+function loadByIndex(i) {
+  if (i < 0 || i >= publicIdList.length) return;
+  currentIndex = i;
+  validatedThisVideo = false;
+  seenSeconds = {};
+  seenCount = 0;
+  updateTimerUI();
+  claimButton.disabled = true;
+  startButton.disabled = !canWatchMore || (videosWatchedToday >= MAX_VIDEOS_PER_DAY);
+  playButton.style.display = 'flex';
+  tiktokVideo.src = cloudinaryUrl(publicIdList[i]);
+  tiktokVideo.load();
+}
+
+function updateTimerUI() {
+  const remaining = Math.max(0, REQUIRED_SECONDS - seenCount);
+  timerText.textContent = `${remaining}s`;
+  const progress = ((REQUIRED_SECONDS - remaining) / REQUIRED_SECONDS) * 360;
+  timerProgress.style.transform = `rotate(${progress}deg)`;
+}
+
+function markVideoValidated() {
+  if (validatedThisVideo) return;
+  validatedThisVideo = true;
+  claimButton.disabled = false;
+  startButton.disabled = true;
+  showNotification('success', 'Vidéo validée', 'Vous pouvez réclamer la récompense.');
+}
+
+/******** timeupdate: compter secondes uniques ********/
+tiktokVideo.addEventListener('timeupdate', () => {
+  if (!isPlaying || !isVisible || validatedThisVideo) return;
+  const sec = Math.floor(tiktokVideo.currentTime);
+  if (sec < 0) return;
+  // Basic anti-seek: on n'accorde pas plus de 2 secondes en une frame (sécurise un peu)
+  // NOTE: ne garantit pas contre contournement avancé
+  if (!seenSeconds[sec]) {
+    seenSeconds[sec] = true;
+    seenCount++;
+    updateTimerUI();
+    if (seenCount >= REQUIRED_SECONDS) {
+      markVideoValidated();
     }
+  }
+});
 
-    /******** Gestion du menu ********/
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
-    });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
+/******** play/pause/ended handlers ********/
+tiktokVideo.addEventListener('play', () => { isPlaying = true; });
+tiktokVideo.addEventListener('pause', () => { isPlaying = false; });
+tiktokVideo.addEventListener('ended', () => {
+  // si la vidéo se termine mais a atteint REQUIRED_SECONDS, valider
+  if (seenCount >= REQUIRED_SECONDS) markVideoValidated();
+});
 
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
-
-    /******** Theme toggle ********/
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
-    });
-
-    /******** Fonctions pour TikTok Earn ********/
-    function startTimer() {
-      clearInterval(timerInterval);
-      remainingTime = 20;
-      updateTimerUI();
-      
-      timerInterval = setInterval(() => {
-        remainingTime--;
-        updateTimerUI();
-        
-        if (remainingTime <= 0) {
-          clearInterval(timerInterval);
-          videoCompleted();
-        }
-      }, 1000);
+/******** IntersectionObserver: pause si hors viewport ********/
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    isVisible = e.isIntersecting;
+    if (!isVisible && isPlaying) {
+      tiktokVideo.pause();
+      showNotification('info','Lecture en pause','La vidéo est hors de l\'écran, la lecture a été mise en pause.');
     }
-    
-    function updateTimerUI() {
-      const progress = ((20 - remainingTime) / 20) * 360;
-      timerProgress.style.transform = `rotate(${progress}deg)`;
-      timerText.textContent = `${remainingTime}s`;
-    }
-    
-    function videoCompleted() {
-      claimButton.disabled = false;
+  });
+}, { threshold: 0.6 });
+io.observe(tiktokVideo);
+
+/******** Visibility API: pause si onglet caché ********/
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isPlaying) {
+    tiktokVideo.pause();
+    showNotification('info','Lecture en pause','Vous avez quitté l\'onglet: la lecture est en pause.');
+  }
+});
+
+/******** Buttons events ********/
+playButton.addEventListener('click', () => {
+  // user gesture -> allow sound
+  tiktokVideo.muted = false;
+  tiktokVideo.play().catch(err => console.warn('play blocked', err));
+  playButton.style.display = 'none';
+});
+
+startButton.addEventListener('click', () => {
+  if (!canWatchMore || videosWatchedToday >= MAX_VIDEOS_PER_DAY) {
+    showNotification('info','Limite atteinte', 'Vous avez atteint la limite quotidienne.');
+    return;
+  }
+  tiktokVideo.currentTime = 0;
+  tiktokVideo.muted = false; // after gesture
+  tiktokVideo.play().catch(err => console.warn('play blocked', err));
+  playButton.style.display = 'none';
+  startButton.disabled = true;
+});
+
+claimButton.addEventListener('click', async () => {
+  if (!currentUser) { showNotification('error','Non connecté','Veuillez vous connecter.'); return; }
+  if (!validatedThisVideo) { showNotification('error','Non validé','Vous n\'avez pas encore regardé la vidéo suffisamment.'); return; }
+
+  try {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    // Incrément atomique (sécurise les races conditions)
+    await userRef.update({
+      tiktokGains: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+      solde: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+      tikTokWatchesToday: firebase.firestore.FieldValue.increment(1),
+      tikTokEarningsToday: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+      lastTikTokWatchDate: new Date().toDateString()
+    });
+
+    // Mise à jour locale
+    videosWatchedToday++;
+    earningsToday += REWARD_AMOUNT;
+    updateDailyStatsUI();
+
+    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde.`);
+
+    // Préparer la prochaine vidéo si disponible
+    claimButton.disabled = true;
+    if (videosWatchedToday < MAX_VIDEOS_PER_DAY && currentIndex + 1 < publicIdList.length) {
+      loadByIndex(currentIndex + 1);
+    } else {
+      canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
       startButton.disabled = true;
-      showNotification('success', 'Félicitations!', 'Vous avez regardé la vidéo avec succès. Cliquez pour réclamer votre récompense!');
+      showNotification('info', 'Limite quotidienne', 'Plus de vidéos disponibles pour aujourd\'hui.');
     }
-    
-    async function claimReward() {
-      if (!currentUser) return;
-      
-      // Mettre à jour les données utilisateur
-      userData.tiktokGains = (userData.tiktokGains || 0) + 250;
-      userData.solde = (userData.solde || 0) + 250;
-      
-      // Mettre à jour les statistiques du jour
-      videosWatchedToday++;
-      earningsToday += 250;
-      userData.tikTokWatchesToday = videosWatchedToday;
-      userData.tikTokEarningsToday = earningsToday;
-      
-      updateDailyStats();
-      
-      // Sauvegarder les données
-      await saveUserData();
-      
-      // Mettre à jour l'UI
-      claimButton.disabled = true;
-      startButton.disabled = !(canWatchMore && videosWatchedToday < 2);
-      
-      showNotification('success', 'Récompense ajoutée!', '250 FCFA ont été ajoutés à votre solde!');
-    }
-    
-    function updateDailyStats() {
-      videosWatched.textContent = `${videosWatchedToday}/2`;
-      earnedToday.textContent = `${earningsToday} FCFA`;
-    }
-    
-    function checkDailyLimit() {
+
+  } catch (err) {
+    console.error('Erreur lors de la réclamation :', err);
+    showNotification('error','Erreur serveur','Impossible d\'enregistrer la récompense. Réessayez.');
+  }
+});
+
+/******** UI daily stats helper ********/
+function updateDailyStatsUI() {
+  videosWatched.textContent = `${videosWatchedToday}/${MAX_VIDEOS_PER_DAY}`;
+  earnedToday.textContent = `${earningsToday} FCFA`;
+}
+
+/******** Sauvegarde / chargement utilisateur (Firestore) ********/
+async function saveUserData(key = null, value = null) {
+  if (!currentUser) return;
+  try {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    const dataToSave = key ? { [key]: value } : userData;
+    await userRef.set(dataToSave, { merge: true });
+    console.log('Données utilisateur enregistrées.');
+  } catch (error) {
+    console.error('Erreur sauvegarde:', error);
+    showNotification('error','Erreur sauvegarde','Impossible de sauvegarder vos données.');
+  }
+}
+
+async function loadUserData() {
+  if (!currentUser) throw new Error('Aucun utilisateur connecté.');
+  const userRef = db.collection('users').doc(currentUser.uid);
+  const doc = await userRef.get();
+  if (doc.exists) {
+    userData = doc.data() || {};
+  } else {
+    userData = {};
+    await saveUserData();
+  }
+}
+
+/******** Mise à jour UI user ********/
+function updateUserInfoUI(user, dbData = {}) {
+  const displayName = dbData.username || user.displayName || (user.email ? user.email.split('@')[0] : 'Utilisateur');
+  if (sidebarUsername) sidebarUsername.textContent = displayName;
+  if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+}
+
+function applyTheme() {
+  const isDarkMode = userData.theme === 'dark';
+  document.body.classList.toggle('dark-mode', isDarkMode);
+  themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i><span>Mode jour</span>' : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+}
+
+/******** Auth & init principal ********/
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try {
+      await loadUserData();
+
+      // Vérification statut (conserve ta logique existante)
+      const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
+      const validStatuses = ['paid', 'active'];
+      if (!validStatuses.includes(userStatus)) {
+        showNotification('info','Action requise','Veuillez finaliser votre inscription pour continuer.');
+        setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
+        return;
+      }
+
+      updateUserInfoUI(user, userData);
+      applyTheme();
+
+      // Check daily limit
       const today = new Date().toDateString();
-      const lastWatchDate = userData.lastTikTokWatchDate || '';
-      
-      if (lastWatchDate !== today) {
-        // Nouveau jour, réinitialiser le compteur
+      if ((userData.lastTikTokWatchDate || '') !== today) {
         videosWatchedToday = 0;
         earningsToday = 0;
-        userData.tikTokWatchesToday = 0;
-        userData.tikTokEarningsToday = 0;
-        userData.lastTikTokWatchDate = today;
       } else {
-        // Même jour, récupérer les valeurs sauvegardées
         videosWatchedToday = userData.tikTokWatchesToday || 0;
         earningsToday = userData.tikTokEarningsToday || 0;
       }
-      
-      canWatchMore = videosWatchedToday < 2;
-      startButton.disabled = !canWatchMore;
-      
-      updateDailyStats();
+      canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
+      updateDailyStatsUI();
+
+      // charge première vidéo
+      loadByIndex(0);
+
+      document.body.classList.add('loaded');
+      if (loader) loader.classList.add('hidden');
+      showNotification('success','Bienvenue','Prêt à gagner avec TikTok!');
+
+    } catch (error) {
+      console.error('Erreur initialisation:', error);
+      showNotification('error','Erreur critique','Impossible de charger vos données. Veuillez vous reconnecter.');
+      auth.signOut();
+      setTimeout(()=> { window.location.href = 'login.html'; }, 2000);
     }
+  } else {
+    window.location.href = 'login.html';
+  }
+});
 
-    /******** Gestion des événements TikTok ********/
-    playButton.addEventListener('click', () => {
-      tiktokVideo.play();
-      playButton.style.display = 'none';
-    });
-    
-    startButton.addEventListener('click', () => {
-      if (canWatchMore && videosWatchedToday < 2) {
-        tiktokVideo.currentTime = 0;
-        tiktokVideo.play();
-        playButton.style.display = 'none';
-        startTimer();
-        startButton.disabled = true;
-      }
-    });
-    
-    claimButton.addEventListener('click', claimReward);
-    
-    tiktokVideo.addEventListener('ended', () => {
-      clearInterval(timerInterval);
-      videoCompleted();
-    });
-
-    /******** Sauvegarde des données utilisateur ********/
-    async function saveUserData(key = null, value = null) {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : userData;
-        await userRef.set(dataToSave, { merge: true });
-        console.log('Données utilisateur enregistrées avec succès.');
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
-    }
-
-    /******** Chargement des données utilisateur ********/
-    async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      if (doc.exists) {
-          const data = doc.data() || {};
-          userData = data;
-      } else {
-        userData = {};
-        await saveUserData();
-      }
-    }
-
-    /******** Mise à jour de l'interface utilisateur ********/
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.username || user.displayName || user.email.split('@')[0];
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
-
-    /******** Point d'entrée principal ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                await loadUserData();
-                
-                // 🔒 VÉRIFICATION DU STATUT: Cohérent avec dashboard_SOLUTION_FINALE.html
-                const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
-                const validStatuses = ['paid', 'active'];
-                
-                if (!validStatuses.includes(userStatus)) {
-                    console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid" ou "active")');
-                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                    return;
-                }
-
-                console.log('✅ Accès autorisé: statut =', userStatus);
-                updateUserInfoUI(user, userData);
-                applyTheme();
-                
-                // Vérifier la limite quotidienne APRÈS avoir chargé les données
-                checkDailyLimit();
-
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue!', 'Prêt à gagner avec TikTok!');
-
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-
-    /******** Initialisation ********/
-    document.addEventListener('DOMContentLoaded', () => {
-      // Précharger la vidéo
-      tiktokVideo.load();
-    });
-  </script>
+/******** Petit preload ********/
+document.addEventListener('DOMContentLoaded', () => {
+  // préload de la première url si possible
+  if (publicIdList.length) {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'video';
+    link.href = cloudinaryUrl(publicIdList[0]);
+    document.head.appendChild(link);
+  }
+  // hide loader after a short safety delay in case auth loaded quickly
+  setTimeout(()=> { if (loader) loader.classList.add('hidden'); }, 700);
+});
+</script>
 </body>
 </html>
