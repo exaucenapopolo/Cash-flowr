@@ -1480,9 +1480,32 @@
         opacity: 1;
       }
     }
+
+    /* 🔧 DEBUG BANNER pour iPhone - Visible sur mobile */
+    #debugBanner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+      color: white;
+      padding: 12px 20px;
+      text-align: center;
+      z-index: 10000;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      display: none;
+    }
+    #debugBanner.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
+  <!-- 🔧 DEBUG BANNER (visible sur iPhone) -->
+  <div id="debugBanner" class="show">🔍 DEBUG: Chargement...</div>
+
   <div class="loader-container" id="loader">
     <div class="loader"></div>
   </div>
@@ -2195,8 +2218,23 @@ async function saveUserData(key = null, value = null) {
 /******** Chargement des données utilisateur depuis Firestore ********/
 async function loadUserData() {
   if (!currentUser) throw new Error("Aucun utilisateur connecté.");
-  const userRef = db.collection('users').doc(currentUser.uid);
-  const doc = await userRef.get();
+  
+  // CORRECTION BOUCLE INFINIE: Chercher par UID puis par email (comme paiement.html)
+  let userRef = db.collection('users').doc(currentUser.uid);
+  let doc = await userRef.get();
+  let foundViaEmail = false;
+
+  // 🔧 FALLBACK: Si pas trouvé par UID, chercher par email
+  if (!doc.exists && currentUser.email) {
+    console.log('⚠️ Document non trouvé par UID, recherche par email...');
+    const emailQuery = await db.collection('users').where('email', '==', currentUser.email).limit(1).get();
+    if (!emailQuery.empty) {
+      doc = emailQuery.docs[0];
+      userRef = doc.ref;
+      foundViaEmail = true;
+      console.log('✅ Utilisateur trouvé par email:', currentUser.email);
+    }
+  }
 
   const defaultReferralEarnings = { level1: 0, level2: 0, level3: 0 };
   let parrainageTotal = 0;
@@ -2233,7 +2271,8 @@ async function loadUserData() {
       paid: isUserPaidFromDoc(data),
       theme: data.theme || 'light',
       refEarnings: refEarnings,
-      username: data.username || data.userName || null
+      username: data.username || data.userName || null,
+      status: data.status || data.statut || 'pending'  // ✅ IMPORTANT: Stocker le statut
     };
   } else {
     userData = {
@@ -2242,7 +2281,8 @@ async function loadUserData() {
       triviaGains:0, publiciteGains:0, tiktokGains:0,
       youtubeGains:0, depotSolde:0, paid:false, theme:'light',
       referrer:"Aucun", activeReferrals:0, refEarnings:defaultReferralEarnings,
-      displayName:displayName, email:currentUser.email, username:null
+      displayName:displayName, email:currentUser.email, username:null,
+      status: 'pending'  // ✅ Statut par défaut
     };
     await saveUserData();
   }
@@ -2356,7 +2396,7 @@ async function startStatusWatcherAndTriggerProcessing() {
       const status = (d.status || d.statut || '').toString().toLowerCase();
       const alreadyProcessed = !!d.referralProcessed;
 
-      if (status === 'paid' && !alreadyProcessed) {
+      if (status === 'active' && !alreadyProcessed) {
         showNotification('info', 'Parrainage', 'Paiement détecté — distribution en cours...');
         try {
           const idToken = await currentUser.getIdToken();
@@ -2393,16 +2433,33 @@ auth.onAuthStateChanged(async (user) => {
     try {
       await loadUserData();
 
-      // 🔒 SÉCURITÉ: Vérifier que le statut est "paid" OU "active" avant d'autoriser l'accès au dashboard
+      // 🔧 DEBUG BANNER: Afficher le statut détecté (visible sur iPhone)
+      const debugBanner = document.getElementById('debugBanner');
       const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
       const validStatuses = ['paid', 'active'];
+      
+      if (debugBanner) {
+        debugBanner.textContent = `🔍 DEBUG: Statut détecté = "${userStatus}" | Email = "${userData.email}"`;
+        debugBanner.style.background = validStatuses.includes(userStatus) 
+          ? 'linear-gradient(135deg, #4CD964 0%, #2AB32A 100%)' 
+          : 'linear-gradient(135deg, #FF3B30 0%, #c0392b 100%)';
+      }
+
+      // 🔒 SÉCURITÉ: Vérifier que le statut est "paid" OU "active" avant d'autoriser l'accès au dashboard
       if (!validStatuses.includes(userStatus)) {
         console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid" ou "active")');
+        if (debugBanner) {
+          debugBanner.textContent = `❌ REFUSÉ: Statut "${userStatus}" non valide. Redirection dans 3s...`;
+        }
         showNotification('warning', 'Paiement requis', 'Vous devez finaliser votre paiement pour accéder au dashboard.');
-        setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
+        setTimeout(() => { window.location.href = 'paiement.html'; }, 3000);
         return;
       }
       console.log('✅ Accès autorisé au dashboard: statut =', userStatus);
+      if (debugBanner) {
+        // Cacher le banner après 5 secondes si l'accès est autorisé
+        setTimeout(() => { debugBanner.classList.remove('show'); }, 5000);
+      }
 
       if (!userData.paid) {
         showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription. Nous surveillons le statut et appliquerons le parrainage dès que "paid" sera détecté.');
