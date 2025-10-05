@@ -50,7 +50,6 @@
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
-      /* NOUVEAU: Couleurs pour les badges */
       --badge-active: #4CD964;
       --badge-pending: #FF9500;
       --badge-inactive: #FF3B30;
@@ -75,7 +74,6 @@
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      /* NOUVEAU: Couleurs pour les badges en mode sombre */
       --badge-active: #2ecc71;
       --badge-pending: #f1c40f;
       --badge-inactive: #e74c3c;
@@ -89,7 +87,6 @@
       transition: var(--transition);
     }
     
-    /* Loader */
     .loader-container {
       position: fixed;
       top: 0;
@@ -124,7 +121,6 @@
       }
     }
 
-    /* Header styles */
     .header {
       background-color: var(--card-bg);
       box-shadow: var(--shadow);
@@ -152,19 +148,6 @@
       display: flex;
       align-items: center;
       gap: 15px;
-    }
-
-    .language-selector {
-      background-color: var(--primary-light);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
     }
 
     .theme-toggle {
@@ -259,7 +242,6 @@
         text-align: left;
     }
 
-    /* Styles du bouton hamburger animé */
     .hamburger-btn {
         display: none;
         background: none;
@@ -292,16 +274,14 @@
         transform: translateY(-11px) rotate(-45deg);
     }
 
-    /* Main layout */
     .main-container {
       display: flex;
       flex: 1;
     }
 
-    /* NOUVEAU: Styles de la Sidebar (Menu) */
     .sidebar {
       width: 280px;
-      background: rgba(255, 255, 255, 0.75); /* Effet de verre (Glassmorphism) */
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-right: 1px solid rgba(255, 255, 255, 0.2);
@@ -314,7 +294,6 @@
       transition: transform 0.4s ease-in-out; 
     }
     
-    /* NOUVEAU: Animation pour l'ouverture du menu en mobile */
     .sidebar.open {
         transform: translateX(0);
     }
@@ -346,7 +325,6 @@
       font-weight: 600;
     }
 
-    /* NOUVEAU: Styles pour les options du menu */
     .menu-item {
       padding: 12px 25px 12px 35px;
       display: flex;
@@ -357,17 +335,15 @@
       font-weight: 500;
       border-left: 4px solid transparent;
       position: relative;
-      overflow: hidden; /* Pour l'effet de surbrillance */
-      animation: fadeIn 0.5s ease-out; /* Animation d'apparition */
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
     }
 
-    /* Animation d'apparition */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateX(-20px); }
       to { opacity: 1; transform: translateX(0); }
     }
     
-    /* NOUVEAU: Effet de surbrillance au survol */
     .menu-item::before {
       content: '';
       position: absolute;
@@ -395,12 +371,10 @@
       transition: transform 0.3s ease;
     }
 
-    /* NOUVEAU: Animation des icônes au survol */
     .menu-item:hover i {
       transform: scale(1.1) rotate(5deg);
     }
 
-    /* NOUVEAU: Styles des badges */
     .menu-badge {
       position: absolute;
       right: 25px;
@@ -427,110 +401,170 @@
       color: white;
     }
 
-    /* Contenu du tableau de bord */
     .content {
       flex: 1;
       padding: 30px;
     }
 
     .page-title {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       margin-bottom: 25px;
       color: var(--secondary-color);
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
     }
 
     .page-title i {
       color: var(--primary-color);
+      font-size: 2rem;
     }
 
-    /* Formulaire de retrait */
+    /* Carte de retrait améliorée */
     .retrait-card {
-        background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+        background: var(--card-bg);
         border-radius: 12px;
         padding: 30px;
         box-shadow: var(--shadow);
         display: flex;
         flex-direction: column;
-        gap: 20px;
-        max-width: 600px;
+        gap: 25px;
+        max-width: 700px;
         margin: 0 auto;
         animation: slideInUp 0.6s ease-out forwards;
     }
 
     .retrait-card h2 {
         font-size: 1.8rem;
-        color: var(--primary-dark);
+        color: var(--primary-color);
         margin-bottom: 10px;
         text-align: center;
+        border-bottom: 2px solid var(--primary-light);
+        padding-bottom: 15px;
     }
 
     .retrait-card p {
         font-size: 1rem;
         color: var(--text-light);
         text-align: center;
+        line-height: 1.6;
+    }
+
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        background: var(--background-light);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-color);
+        font-weight: 600;
     }
 
     .solde-actuel {
-        font-size: 1.2rem;
-        font-weight: 600;
+        font-size: 1.3rem;
+        font-weight: 700;
         color: var(--text-color);
         text-align: center;
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
     }
 
     .solde-actuel span {
-        color: var(--primary-color);
-        font-size: 1.5rem;
+        font-size: 1.6rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
     }
 
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
     }
 
     .form-group label {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--secondary-color);
+        font-size: 0.9rem;
     }
 
-    .form-group input {
+    .form-group input, 
+    .form-group select {
         width: 100%;
-        padding: 12px;
+        padding: 12px 15px;
         border-radius: 8px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--background-dark);
         background-color: var(--background-light);
         color: var(--text-color);
         font-size: 1rem;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
     }
 
-    .form-group input:focus {
+    .form-group input:focus, 
+    .form-group select:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 5px rgba(58, 142, 230, 0.5);
+        box-shadow: 0 0 0 3px rgba(58, 142, 230, 0.1);
+        background-color: var(--card-bg);
+    }
+
+    .form-group input:invalid {
+        border-color: var(--danger-color);
+    }
+
+    .form-group input:valid {
+        border-color: var(--success-color);
     }
 
     .submit-btn {
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         color: white;
         border: none;
-        padding: 15px;
+        padding: 16px;
         border-radius: 8px;
         font-size: 1.1rem;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         text-transform: uppercase;
         letter-spacing: 1px;
+        margin-top: 10px;
+        grid-column: 1 / -1;
     }
 
     .submit-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
     .submit-btn:disabled {
@@ -545,6 +579,21 @@
         color: var(--danger-color);
         text-align: center;
         font-style: italic;
+        padding: 10px;
+        background-color: rgba(255, 59, 48, 0.1);
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .success-note {
+        font-size: 0.9rem;
+        color: var(--success-color);
+        text-align: center;
+        font-style: italic;
+        padding: 10px;
+        background-color: rgba(76, 217, 100, 0.1);
+        border-radius: 6px;
+        margin-top: 10px;
     }
 
     @keyframes slideInUp {
@@ -552,7 +601,6 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Footer */
     .footer {
       background-color: var(--card-bg);
       padding: 20px 30px;
@@ -591,7 +639,6 @@
       font-size: 0.9rem;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 992px) {
       .sidebar {
         width: 230px;
@@ -603,10 +650,6 @@
             flex-direction: column;
         }
         
-        .hamburger-menu {
-            display: none;
-        }
-
         .hamburger-btn {
             display: flex;
             position: absolute;
@@ -655,11 +698,21 @@
         }
         
         .content {
-            padding: 20px;
+            padding: 20px 15px;
         }
         
         .retrait-card {
             padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .user-info-grid {
+            grid-template-columns: 1fr;
+            padding: 15px;
         }
 
         .footer-links {
@@ -667,7 +720,7 @@
             gap: 10px;
         }
     }
-    /* Notifications */
+
     .notification-container {
       position: fixed;
       top: 20px;
@@ -715,6 +768,10 @@
         transform: translateX(0);
         opacity: 1;
       }
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
@@ -893,29 +950,81 @@
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-money-bill-wave"></i>
-        <span>Retrait</span>
+        <span>Demande de Retrait</span>
       </h1>
       
       <div class="retrait-card">
-        <h2>Effectuer un retrait</h2>
-        <p>Entrez le montant que vous souhaitez retirer. Le solde sera mis à jour après la transaction.</p>
+        <h2>Formulaire de Retrait</h2>
+        <p>Remplissez les informations ci-dessous pour effectuer votre retrait. Tous les champs sont obligatoires.</p>
         
+        <div class="user-info-grid">
+            <div class="info-item">
+                <span class="info-label">Nom d'utilisateur</span>
+                <span class="info-value" id="infoUsername">Chargement...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value" id="infoEmail">Chargement...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">UID</span>
+                <span class="info-value" id="infoUID">Chargement...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Statut de paiement</span>
+                <span class="info-value" id="infoPaymentStatus">Chargement...</span>
+            </div>
+        </div>
+
         <div class="solde-actuel">
-            Solde actuel: <span id="currentBalance">Chargement...</span>
+            Solde actuel: <span id="currentBalance">0</span> XAF
         </div>
 
-        <div class="form-group">
-            <label for="retraitAmount">Montant du retrait (XAF)</label>
-            <input type="number" id="retraitAmount" placeholder="Entrez le montant" min="3100">
-        </div>
+        <form id="retraitForm" class="form-grid">
+            <div class="form-group">
+                <label for="pays">Pays de retrait *</label>
+                <select id="pays" name="pays" required>
+                    <option value="">Sélectionnez votre pays</option>
+                    <option value="benin">Bénin</option>
+                    <option value="burkina">Burkina Faso</option>
+                    <option value="cameroun">Cameroun</option>
+                    <option value="coteivoire">Côte d'Ivoire</option>
+                    <option value="mali">Mali</option>
+                    <option value="senegal">Sénégal</option>
+                    <option value="togo">Togo</option>
+                </select>
+            </div>
 
-        <button class="submit-btn" id="retraitBtn">
-            Retirer
-        </button>
+            <div class="form-group">
+                <label for="methode">Méthode de retrait *</label>
+                <select id="methode" name="methode" required disabled>
+                    <option value="">Sélectionnez d'abord le pays</option>
+                </select>
+            </div>
 
-        <p class="note">Le montant minimum de retrait est de **3100 XAF**.</p>
+            <div class="form-group">
+                <label for="numeroCompte">Numéro de compte/téléphone *</label>
+                <input type="text" id="numeroCompte" name="numeroCompte" placeholder="Ex: 70 123 45 67" required pattern="[0-9\s\+]{8,15}">
+            </div>
+
+            <div class="form-group">
+                <label for="montant">Montant du retrait (XAF) *</label>
+                <input type="number" id="montant" name="montant" placeholder="Entrez le montant" min="3100" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Description du retrait</label>
+                <input type="text" id="description" name="description" placeholder="Ex: Retrait pour besoins personnels" value="Retrait de fonds MULAFLOWR">
+            </div>
+
+            <button type="submit" class="submit-btn" id="retraitBtn">
+                <i class="fas fa-paper-plane"></i> Soumettre la demande
+            </button>
+        </form>
+
+        <p class="note">Le montant minimum de retrait est de <strong>3100 XAF</strong>. Les frais de traitement peuvent s'appliquer.</p>
+        <p class="success-note">Vérifiez attentivement vos informations avant de soumettre. Le traitement peut prendre 24-48 heures.</p>
       </div>
-
     </main>
   </div>
 
@@ -959,13 +1068,37 @@
     const loader = document.getElementById('loader');
 
     const currentBalanceEl = document.getElementById('currentBalance');
-    const retraitAmountInput = document.getElementById('retraitAmount');
+    const retraitForm = document.getElementById('retraitForm');
     const retraitBtn = document.getElementById('retraitBtn');
     const notificationContainer = document.getElementById('notificationContainer');
+    
+    // Nouveaux éléments d'information
+    const infoUsername = document.getElementById('infoUsername');
+    const infoEmail = document.getElementById('infoEmail');
+    const infoUID = document.getElementById('infoUID');
+    const infoPaymentStatus = document.getElementById('infoPaymentStatus');
+    
+    // Éléments du formulaire
+    const paysSelect = document.getElementById('pays');
+    const methodeSelect = document.getElementById('methode');
+    const numeroCompteInput = document.getElementById('numeroCompte');
+    const montantInput = document.getElementById('montant');
+    const descriptionInput = document.getElementById('description');
 
     /******** Variables d'état ********/
     let currentUser = null;
     let userData = {};
+
+    // Configuration des méthodes de retrait par pays
+    const methodesParPays = {
+        benin: ['Ancient Mobile Money', 'Move Money'],
+        burkina: ['Orange Money', 'Move Money'],
+        cameroun: ['Orange Money', 'Ancient Mobile Money'],
+        coteivoire: ['Orange Money', 'Ancient Mobile Money', 'Move Money', 'Wave Money'],
+        mali: ['Orange Money', 'Move Money'],
+        senegal: ['Orange Money', 'Wizall Money', 'Free Money', 'Wave Money'],
+        togo: ['Move Money', 'T-Money']
+    };
 
     /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
@@ -986,11 +1119,17 @@
       }, duration);
     }
     
+    function formatNumberSafe(n) { 
+        return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; 
+    }
+
+    /******** Gestion des interactions ********/
     hamburgerBtn.addEventListener('click', () => {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
         hamburgerBtn.classList.toggle('open');
     });
+    
     overlay.addEventListener('click', () => {
         sidebar.classList.remove('open');
         overlay.classList.remove('active');
@@ -1001,6 +1140,7 @@
         event.stopPropagation();
         profileDropdown.classList.toggle('active');
     });
+    
     document.addEventListener('click', (event) => {
         if (!userProfile.contains(event.target)) {
             profileDropdown.classList.remove('active');
@@ -1024,8 +1164,53 @@
             ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
             : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
     }
-    
-    function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
+
+    /******** Gestion des méthodes de retrait ********/
+    paysSelect.addEventListener('change', function() {
+        const paysSelectionne = this.value;
+        
+        // Réinitialiser la sélection de méthode
+        methodeSelect.innerHTML = '';
+        methodeSelect.disabled = true;
+        
+        if (paysSelectionne && methodesParPays[paysSelectionne]) {
+            methodeSelect.disabled = false;
+            methodeSelect.innerHTML = '<option value="">Sélectionnez une méthode</option>';
+            
+            methodesParPays[paysSelectionne].forEach(methode => {
+                const option = document.createElement('option');
+                option.value = methode.toLowerCase().replace(/\s+/g, '-');
+                option.textContent = methode;
+                methodeSelect.appendChild(option);
+            });
+        } else {
+            methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
+        }
+    });
+
+    /******** Validation du formulaire ********/
+    function validerFormulaire() {
+        const montant = parseFloat(montantInput.value);
+        const solde = userData.solde || 0;
+        const minMontant = 3100;
+
+        if (montant < minMontant) {
+            showNotification('error', 'Erreur', `Le montant minimum de retrait est de ${minMontant.toLocaleString('fr-FR')} XAF.`);
+            return false;
+        }
+        
+        if (montant > solde) {
+            showNotification('error', 'Solde insuffisant', `Votre solde actuel est de ${formatNumberSafe(solde)} XAF.`);
+            return false;
+        }
+        
+        if (!numeroCompteInput.checkValidity()) {
+            showNotification('error', 'Numéro invalide', 'Veuillez entrer un numéro de compte/téléphone valide.');
+            return false;
+        }
+        
+        return true;
+    }
 
     /******** Sauvegarde des données utilisateur ********/
     async function saveUserData(key = null, value = null) {
@@ -1041,6 +1226,7 @@
       }
     }
 
+    /******** Vérification du statut de paiement (repris de equipe.html) ********/
     function isUserPaidFromDoc(docData) {
       if (!docData) return false;
       const candidates = [
@@ -1052,7 +1238,7 @@
           if (typeof candidate === 'boolean') return candidate;
           if (typeof candidate === 'string') {
             const v = candidate.toLowerCase().trim();
-            return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1'].includes(v);
+            return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', 'active', '1'].includes(v);
           }
           if (typeof candidate === 'number') return candidate === 1;
         }
@@ -1063,59 +1249,86 @@
     /******** Logique de chargement des données ********/
     async function loadUserData() {
       if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
+      
+      let userRef = db.collection('users').doc(currentUser.uid);
+      let doc = await userRef.get();
+      let foundViaEmail = false;
+
+      // Recherche par email si non trouvé par UID (repris de equipe.html)
+      if (!doc.exists && currentUser.email) {
+        console.log('⚠️ Utilisateur non trouvé par UID, recherche par email...');
+        const q = db.collection('users').where('email', '==', currentUser.email);
+        const snapshot = await q.get();
+        if (!snapshot.empty) {
+          doc = snapshot.docs[0];
+          userRef = doc.ref;
+          foundViaEmail = true;
+          console.log('✅ Utilisateur trouvé par email:', doc.id);
+        }
+      }
+
       if (doc.exists) {
           const data = doc.data() || {};
           userData = {
+              uid: foundViaEmail ? doc.id : currentUser.uid,
+              displayName: data.displayName || currentUser.displayName || currentUser.email,
+              username: data.username || data.displayName || currentUser.email.split('@')[0],
+              email: data.email || currentUser.email,
               solde: Number(data.solde || data.balance || 0),
               retire: Number(data.retire || data.withdrawn || 0),
-              displayName: data.displayName || currentUser.displayName,
-              email: data.email || currentUser.email,
               paid: isUserPaidFromDoc(data),
               theme: data.theme || 'light'
           };
       } else {
-        userData = { solde: 0, retire: 0, paid: false, theme: 'light' };
+        userData = { 
+            uid: currentUser.uid,
+            username: currentUser.email.split('@')[0],
+            email: currentUser.email,
+            solde: 0, 
+            retire: 0, 
+            paid: false, 
+            theme: 'light' 
+        };
         await saveUserData();
       }
     }
     
     function updateUI() {
-        if (sidebarUsername) sidebarUsername.textContent = userData.displayName.split('@')[0];
-        if (userAvatar) userAvatar.textContent = userData.displayName.charAt(0).toUpperCase();
-        if (currentBalanceEl) currentBalanceEl.textContent = `XAF ${formatNumberSafe(userData.solde)}`;
+        if (sidebarUsername) sidebarUsername.textContent = userData.username;
+        if (userAvatar) userAvatar.textContent = userData.username.charAt(0).toUpperCase();
+        if (currentBalanceEl) currentBalanceEl.textContent = formatNumberSafe(userData.solde);
+        
+        // Mettre à jour les informations utilisateur
+        infoUsername.textContent = userData.username;
+        infoEmail.textContent = userData.email;
+        infoUID.textContent = userData.uid;
+        infoPaymentStatus.textContent = userData.paid ? '✅ Payé' : '❌ Non payé';
+        infoPaymentStatus.style.color = userData.paid ? 'var(--success-color)' : 'var(--danger-color)';
     }
 
     /******** Logique de retrait ********/
-    retraitBtn.addEventListener('click', async () => {
+    retraitForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
         if (!currentUser) {
             showNotification('error', 'Erreur', 'Veuillez vous connecter pour effectuer un retrait.');
             return;
         }
 
-        const amount = parseFloat(retraitAmountInput.value);
-        const minAmount = 3100;
-        const currentSolde = userData.solde;
-
-        if (isNaN(amount) || amount <= 0) {
-            showNotification('error', 'Erreur', 'Veuillez entrer un montant valide.');
+        if (!validerFormulaire()) {
             return;
         }
 
-        if (amount < minAmount) {
-            showNotification('error', 'Erreur', `Le montant minimum de retrait est de ${minAmount.toLocaleString('fr-FR')} XAF.`);
-            return;
-        }
-        
-        if (amount > currentSolde) {
-            showNotification('error', 'Erreur', 'Solde insuffisant.');
-            return;
-        }
+        const montant = parseFloat(montantInput.value);
+        const pays = paysSelect.options[paysSelect.selectedIndex].text;
+        const methode = methodeSelect.options[methodeSelect.selectedIndex].text;
+        const numeroCompte = numeroCompteInput.value;
+        const description = descriptionInput.value;
 
-        // Simuler le traitement du retrait
+        // Simulation du traitement du retrait
         retraitBtn.disabled = true;
-        retraitBtn.textContent = 'Traitement...';
+        retraitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        
         showNotification('info', 'Traitement', 'Votre demande de retrait est en cours de traitement.');
 
         try {
@@ -1128,8 +1341,8 @@
                     throw "Le document utilisateur n'existe pas !";
                 }
 
-                const newSolde = (userDoc.data().solde || 0) - amount;
-                const newRetire = (userDoc.data().retire || 0) + amount;
+                const newSolde = (userDoc.data().solde || 0) - montant;
+                const newRetire = (userDoc.data().retire || 0) + montant;
 
                 if (newSolde < 0) {
                     throw "Le solde est devenu négatif, la transaction est annulée.";
@@ -1141,18 +1354,42 @@
                 });
             });
 
+            // Enregistrer la transaction de retrait
+            const retraitData = {
+                userId: currentUser.uid,
+                username: userData.username,
+                email: userData.email,
+                montant: montant,
+                pays: pays,
+                methode: methode,
+                numeroCompte: numeroCompte,
+                description: description,
+                date: new Date(),
+                statut: 'en_attente'
+            };
+
+            await db.collection('retraits').add(retraitData);
+
             // Mettre à jour les données locales et l'UI
-            userData.solde = userData.solde - amount;
-            userData.retire = userData.retire + amount;
+            userData.solde = userData.solde - montant;
+            userData.retire = userData.retire + montant;
             updateUI();
             
-            showNotification('success', 'Retrait réussi', `Vous avez retiré ${formatNumberSafe(amount)} XAF. Le solde sera mis à jour. ✅`);
+            showNotification('success', 'Retrait réussi', 
+                `Votre demande de retrait de ${formatNumberSafe(montant)} XAF a été envoyée. ` +
+                `Méthode: ${methode} (${pays}). Le traitement peut prendre 24-48 heures.`);
+            
+            // Réinitialiser le formulaire
+            retraitForm.reset();
+            methodeSelect.disabled = true;
+            methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
+            
         } catch (error) {
             console.error("Erreur lors du retrait :", error);
             showNotification('error', 'Erreur de retrait', 'Une erreur est survenue. Veuillez réessayer.');
         } finally {
             retraitBtn.disabled = false;
-            retraitBtn.textContent = 'Retirer';
+            retraitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre la demande';
         }
     });
 
@@ -1162,15 +1399,21 @@
             currentUser = user;
             try {
                 await loadUserData();
+                
+                // Vérification du statut de paiement (comme dans equipe.html)
                 if (!userData.paid) {
                     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
                     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
                     return;
                 }
+                
                 updateUI();
                 applyTheme();
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
+                
+                showNotification('success', 'Bienvenue !', `Solde actuel: ${formatNumberSafe(userData.solde)} XAF`);
+                
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
                 showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
