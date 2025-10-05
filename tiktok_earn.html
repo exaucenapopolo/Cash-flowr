@@ -1477,18 +1477,15 @@ claimButton.addEventListener('click', async () => {
   }
 
   try {
-    // Récupérer le token Firebase (forcer le refresh si expiré)
-    let idToken;
-    try {
-      idToken = await currentUser.getIdToken(true);
-    } catch (tokenError) {
-      console.error('Erreur récupération token:', tokenError);
-      showNotification('error','Session expirée','Veuillez vous reconnecter.');
+    // Utiliser directement firebase.auth().currentUser
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      showNotification('error','Non connecté','Session expirée. Reconnectez-vous.');
       setTimeout(() => { window.location.href = 'login.html'; }, 2000);
       return;
     }
     
-    // Appel à l'API backend
+    const idToken = await user.getIdToken(true);
     const response = await fetch('/api/tiktok-claim-reward', {
       method: 'POST',
       headers: {
