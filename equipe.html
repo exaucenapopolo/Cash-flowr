@@ -50,7 +50,6 @@
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
-      /* NOUVEAU: Couleurs pour les badges */
       --badge-active: #4CD964;
       --badge-pending: #FF9500;
       --badge-inactive: #FF3B30;
@@ -75,7 +74,6 @@
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      /* NOUVEAU: Couleurs pour les badges en mode sombre */
       --badge-active: #2ecc71;
       --badge-pending: #f1c40f;
       --badge-inactive: #e74c3c;
@@ -89,7 +87,6 @@
       transition: var(--transition);
     }
     
-    /* Loader */
     .loader-container {
       position: fixed;
       top: 0;
@@ -124,7 +121,6 @@
       }
     }
 
-    /* Header styles */
     .header {
       background-color: var(--card-bg);
       box-shadow: var(--shadow);
@@ -152,19 +148,6 @@
       display: flex;
       align-items: center;
       gap: 15px;
-    }
-
-    .language-selector {
-      background-color: var(--primary-light);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
     }
 
     .theme-toggle {
@@ -259,7 +242,6 @@
         text-align: left;
     }
 
-    /* Styles du bouton hamburger animé */
     .hamburger-btn {
         display: none;
         background: none;
@@ -292,16 +274,14 @@
         transform: translateY(-11px) rotate(-45deg);
     }
 
-    /* Main layout */
     .main-container {
       display: flex;
       flex: 1;
     }
 
-    /* NOUVEAU: Styles de la Sidebar (Menu) */
     .sidebar {
       width: 280px;
-      background: rgba(255, 255, 255, 0.75); /* Effet de verre (Glassmorphism) */
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-right: 1px solid rgba(255, 255, 255, 0.2);
@@ -314,7 +294,6 @@
       transition: transform 0.4s ease-in-out; 
     }
     
-    /* NOUVEAU: Animation pour l'ouverture du menu en mobile */
     .sidebar.open {
         transform: translateX(0);
     }
@@ -346,7 +325,6 @@
       font-weight: 600;
     }
 
-    /* NOUVEAU: Styles pour les options du menu */
     .menu-item {
       padding: 12px 25px 12px 35px;
       display: flex;
@@ -357,17 +335,15 @@
       font-weight: 500;
       border-left: 4px solid transparent;
       position: relative;
-      overflow: hidden; /* Pour l'effet de surbrillance */
-      animation: fadeIn 0.5s ease-out; /* Animation d'apparition */
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
     }
 
-    /* Animation d'apparition */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateX(-20px); }
       to { opacity: 1; transform: translateX(0); }
     }
     
-    /* NOUVEAU: Effet de surbrillance au survol */
     .menu-item::before {
       content: '';
       position: absolute;
@@ -395,12 +371,10 @@
       transition: transform 0.3s ease;
     }
 
-    /* NOUVEAU: Animation des icônes au survol */
     .menu-item:hover i {
       transform: scale(1.1) rotate(5deg);
     }
 
-    /* NOUVEAU: Styles des badges */
     .menu-badge {
       position: absolute;
       right: 25px;
@@ -427,7 +401,6 @@
       color: white;
     }
 
-    /* Contenu du tableau de bord */
     .content {
       flex: 1;
       padding: 30px;
@@ -447,7 +420,6 @@
       color: var(--primary-color);
     }
 
-    /* Styles pour la page Équipe */
     .team-stats {
         display: flex;
         gap: 20px;
@@ -503,7 +475,6 @@
         margin-top: 5px;
     }
 
-    /* Styles pour la liste des membres de l'équipe */
     .team-list-container {
         background: var(--card-bg);
         border-radius: 12px;
@@ -553,7 +524,6 @@
         background-color: var(--background-light);
     }
 
-    /* Style spécifique pour le niveau dans le tableau */
     .level-badge {
         font-size: 0.8rem;
         font-weight: 700;
@@ -566,7 +536,17 @@
     .level-2 { background-color: #5AC8FA; }
     .level-3 { background-color: #AF52DE; }
 
-    /* Footer */
+    .status-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+        color: white;
+    }
+
+    .status-active { background-color: var(--success-color); }
+    .status-inactive { background-color: var(--danger-color); }
+
     .footer {
       background-color: var(--card-bg);
       padding: 20px 30px;
@@ -605,7 +585,6 @@
       font-size: 0.9rem;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 992px) {
       .sidebar {
         width: 230px;
@@ -681,7 +660,7 @@
             gap: 10px;
         }
     }
-    /* Notifications */
+
     .notification-container {
       position: fixed;
       top: 20px;
@@ -826,79 +805,79 @@
       <div class="menu-category">PRODUIT / TACHE</div>
       <a href="whatsapp_earn.html" class="menu-item">
         <i class="fab fa-whatsapp"></i>
-        <span>Gagner via Whatsapp</span>
+        <span>WhatsAppEarn</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="movies.html" class="menu-item">
         <i class="fas fa-film"></i>
-        <span>Movies</span>
+        <span>Films</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="paris_fixes.html" class="menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Paris fixes</span>
+        <i class="fas fa-futbol"></i>
+        <span>Paris Fixés</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="gains_publicitaires.html" class="menu-item">
         <i class="fas fa-ad"></i>
-        <span>Gains publicitaires</span>
+        <span>Publicités</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="spin_wheel.html" class="menu-item">
-        <i class="fas fa-trophy"></i>
-        <span>Spin wheel 🏆</span>
+        <i class="fas fa-life-ring"></i>
+        <span>Roue de la fortune</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="tiktok_earn.html" class="menu-item">
         <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
+        <span>TikTokEarn</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="youtube_earn.html" class="menu-item">
         <i class="fab fa-youtube"></i>
-        <span>YouTube Earn</span>
+        <span>YouTubeEarn</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="instagram_earn.html" class="menu-item">
         <i class="fab fa-instagram"></i>
-        <span>Instagram Earn</span>
+        <span>InstagramEarn</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="trivia_challenge.html" class="menu-item">
-        <i class="fas fa-brain"></i>
-        <span>TRIVIA challenge</span>
+        <i class="fas fa-question-circle"></i>
+        <span>Quiz</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <div class="menu-category">BONUS</div>
       <a href="liste_contacts.html" class="menu-item">
         <i class="fas fa-address-book"></i>
-        <span>Liste de contacts gratuit 🆓</span>
+        <span>Contacts</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="booster_visibilite.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>Booster ma visibilité</span>
+        <i class="fas fa-bullhorn"></i>
+        <span>Visibilité</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
-
+      
       <a href="canva_pro.html" class="menu-item">
-        <i class="fas fa-palette"></i>
+        <i class="fas fa-paint-brush"></i>
         <span>Canva Pro</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
       
       <a href="connexion_gratuite.html" class="menu-item">
-        <i class="fas fa-shield-alt"></i>
+        <i class="fas fa-wifi"></i>
         <span>Connexion gratuite</span>
         <span class="menu-badge badge-inactive">☐</span>
       </a>
@@ -907,68 +886,70 @@
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-users"></i>
-        <span>Mon Équipe</span>
+        Mon Équipe
       </h1>
-      
+
       <div class="team-stats">
         <div class="team-card">
           <h3>Niveau 1</h3>
-          <span class="stat-value" id="level1Count">0</span>
-          <span class="gain-value" id="level1Gains">Gains: XAF 0</span>
+          <div class="stat-value" id="level1Count">0</div>
+          <div class="gain-value" id="level1Gains">Gains: XAF 0</div>
         </div>
-        
+
         <div class="team-card">
           <h3>Niveau 2</h3>
-          <span class="stat-value" id="level2Count">0</span>
-          <span class="gain-value" id="level2Gains">Gains: XAF 0</span>
+          <div class="stat-value" id="level2Count">0</div>
+          <div class="gain-value" id="level2Gains">Gains: XAF 0</div>
         </div>
-        
+
         <div class="team-card">
           <h3>Niveau 3</h3>
-          <span class="stat-value" id="level3Count">0</span>
-          <span class="gain-value" id="level3Gains">Gains: XAF 0</span>
+          <div class="stat-value" id="level3Count">0</div>
+          <div class="gain-value" id="level3Gains">Gains: XAF 0</div>
         </div>
       </div>
-      
+
       <div class="team-list-container">
-        <h2>Détails de mon équipe</h2>
-        
+        <h2>Liste des Parrainages Actifs</h2>
         <table class="team-table">
           <thead>
             <tr>
               <th>Nom d'utilisateur</th>
               <th>Niveau</th>
-              <th>Date de parrainage</th>
+              <th>Statut</th>
               <th>Gains</th>
             </tr>
           </thead>
           <tbody id="teamTableBody">
-            </tbody>
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 30px; color: var(--text-light);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <br>Chargement des données de votre équipe...
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
-
     </main>
   </div>
 
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-links">
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
+        <a href="terms.html" class="footer-link">Conditions d'utilisation</a>
+        <a href="privacy.html" class="footer-link">Politique de confidentialité</a>
+        <a href="support.html" class="footer-link">Support</a>
       </div>
-      <div class="footer-text">
-        © 2025 MULAFLOWR. Tous droits réservés.
-      </div>
+      <div class="footer-text">© 2025 MULAFLOWR. Tous droits réservés.</div>
     </div>
   </footer>
 
   <script>
-    /******** CONFIG FIREBASE ********/
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
       projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
+      storageBucket: "cash-flowr.firebasestorage.app",
       messagingSenderId: "1091928501310",
       appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
       measurementId: "G-5SF6VDLZCB"
@@ -978,7 +959,6 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    /******** DOM Elements ********/
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -998,11 +978,9 @@
     const teamTableBody = document.getElementById('teamTableBody');
     const notificationContainer = document.getElementById('notificationContainer');
 
-    /******** Variables d'état ********/
     let currentUser = null;
     let userData = {};
 
-    /******** UI helpers ********/
     function showNotification(type, title, message, duration = 4000) {
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -1062,7 +1040,6 @@
     
     function formatNumberSafe(n) { return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; }
 
-    /******** Sauvegarde des données utilisateur ********/
     async function saveUserData(key = null, value = null) {
       if (!currentUser) return;
       try {
@@ -1087,7 +1064,7 @@
           if (typeof candidate === 'boolean') return candidate;
           if (typeof candidate === 'string') {
             const v = candidate.toLowerCase().trim();
-            return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', '1'].includes(v);
+            return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', 'active', '1'].includes(v);
           }
           if (typeof candidate === 'number') return candidate === 1;
         }
@@ -1095,81 +1072,127 @@
       return false;
     }
 
-    /******** Logique de chargement des données ********/
     async function loadUserData() {
       if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
+      
+      let userRef = db.collection('users').doc(currentUser.uid);
+      let doc = await userRef.get();
+      let foundViaEmail = false;
+
+      if (!doc.exists && currentUser.email) {
+        console.log('⚠️ Utilisateur non trouvé par UID, recherche par email...');
+        const q = db.collection('users').where('email', '==', currentUser.email);
+        const snapshot = await q.get();
+        if (!snapshot.empty) {
+          doc = snapshot.docs[0];
+          userRef = doc.ref;
+          foundViaEmail = true;
+          console.log('✅ Utilisateur trouvé par email:', doc.id);
+        }
+      }
+
       if (doc.exists) {
           const data = doc.data() || {};
           userData = {
-              displayName: data.displayName || currentUser.displayName,
+              uid: foundViaEmail ? doc.id : currentUser.uid,
+              displayName: data.displayName || currentUser.displayName || currentUser.email,
+              username: data.username || data.displayName || currentUser.email.split('@')[0],
+              email: data.email || currentUser.email,
               paid: isUserPaidFromDoc(data),
-              theme: data.theme || 'light'
+              theme: data.theme || 'light',
+              referralLevel1: data.referralLevel1 || [],
+              referralLevel2: data.referralLevel2 || [],
+              referralLevel3: data.referralLevel3 || []
           };
       } else {
-        userData = { paid: false, theme: 'light' };
+        userData = { paid: false, theme: 'light', referralLevel1: [], referralLevel2: [], referralLevel3: [] };
         await saveUserData();
       }
     }
     
-    /******** SIMULATION de données de parrainage ********/
-    const referralData = {
-        level1: [
-            { name: "Jeanne M.", date: "15/09/2025", gain: 1500 },
-            { name: "Marc A.", date: "12/09/2025", gain: 1500 },
-            { name: "Léa C.", date: "10/09/2025", gain: 1500 }
-        ],
-        level2: [
-            { name: "Kevin G.", date: "09/09/2025", gain: 750 },
-            { name: "Sophie P.", date: "08/09/2025", gain: 750 }
-        ],
-        level3: [
-            { name: "David T.", date: "07/09/2025", gain: 300 }
-        ]
-    };
+    async function fetchReferralsByLevel(referralIds, level) {
+      if (!referralIds || referralIds.length === 0) return [];
+      
+      const activeReferrals = [];
+      const gainsByLevel = { 1: 1500, 2: 700, 3: 300 };
+      
+      for (const refId of referralIds) {
+        try {
+          const refDoc = await db.collection('users').doc(refId).get();
+          if (refDoc.exists) {
+            const refData = refDoc.data();
+            const isActive = isUserPaidFromDoc(refData);
+            
+            if (isActive) {
+              activeReferrals.push({
+                username: refData.username || refData.displayName || refData.email || 'Utilisateur',
+                level: level,
+                status: 'active',
+                gain: gainsByLevel[level] || 0
+              });
+            }
+          }
+        } catch (err) {
+          console.error(`Erreur lors de la récupération du filleul ${refId}:`, err);
+        }
+      }
+      
+      return activeReferrals;
+    }
     
-    function updateTeamUI() {
-        const level1Count = referralData.level1.length;
-        const level1Gains = level1Count * 1500;
-        level1CountEl.textContent = level1Count;
-        level1GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level1Gains)}`;
+    async function updateTeamUI() {
+      const level1Refs = await fetchReferralsByLevel(userData.referralLevel1 || [], 1);
+      const level2Refs = await fetchReferralsByLevel(userData.referralLevel2 || [], 2);
+      const level3Refs = await fetchReferralsByLevel(userData.referralLevel3 || [], 3);
 
-        const level2Count = referralData.level2.length;
-        const level2Gains = level2Count * 750;
-        level2CountEl.textContent = level2Count;
-        level2GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level2Gains)}`;
+      const level1Count = level1Refs.length;
+      const level1Gains = level1Count * 1500;
+      level1CountEl.textContent = level1Count;
+      level1GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level1Gains)}`;
 
-        const level3Count = referralData.level3.length;
-        const level3Gains = level3Count * 300;
-        level3CountEl.textContent = level3Count;
-        level3GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level3Gains)}`;
+      const level2Count = level2Refs.length;
+      const level2Gains = level2Count * 700;
+      level2CountEl.textContent = level2Count;
+      level2GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level2Gains)}`;
 
-        teamTableBody.innerHTML = '';
-        const allReferrals = [
-            ...referralData.level1.map(r => ({ ...r, level: 1 })),
-            ...referralData.level2.map(r => ({ ...r, level: 2 })),
-            ...referralData.level3.map(r => ({ ...r, level: 3 }))
-        ];
+      const level3Count = level3Refs.length;
+      const level3Gains = level3Count * 300;
+      level3CountEl.textContent = level3Count;
+      level3GainsEl.textContent = `Gains: XAF ${formatNumberSafe(level3Gains)}`;
 
-        allReferrals.forEach(referral => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${referral.name}</td>
-                <td><span class="level-badge level-${referral.level}">Niv. ${referral.level}</span></td>
-                <td>${referral.date}</td>
-                <td>XAF ${formatNumberSafe(referral.gain)}</td>
-            `;
-            teamTableBody.appendChild(row);
-        });
+      teamTableBody.innerHTML = '';
+      const allReferrals = [...level1Refs, ...level2Refs, ...level3Refs];
+
+      if (allReferrals.length === 0) {
+        teamTableBody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 30px; color: var(--text-light);">
+              <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+              <br>Aucun parrainage actif pour le moment.
+              <br><small>Invitez vos amis pour commencer à gagner !</small>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      allReferrals.forEach(referral => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td>${referral.username}</td>
+              <td><span class="level-badge level-${referral.level}">Niv. ${referral.level}</span></td>
+              <td><span class="status-badge status-${referral.status}">✓ Actif</span></td>
+              <td>XAF ${formatNumberSafe(referral.gain)}</td>
+          `;
+          teamTableBody.appendChild(row);
+      });
     }
 
     function updateUI() {
-        if (sidebarUsername) sidebarUsername.textContent = userData.displayName.split('@')[0];
-        if (userAvatar) userAvatar.textContent = userData.displayName.charAt(0).toUpperCase();
+        if (sidebarUsername) sidebarUsername.textContent = userData.username || userData.displayName.split('@')[0];
+        if (userAvatar) userAvatar.textContent = (userData.username || userData.displayName).charAt(0).toUpperCase();
     }
     
-    /******** Point d'entrée principal de l'application ********/
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
@@ -1181,10 +1204,11 @@
                     return;
                 }
                 updateUI();
-                updateTeamUI();
+                await updateTeamUI();
                 applyTheme();
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
+                showNotification('success', 'Bienvenue !', `Voici votre équipe, ${userData.username || userData.displayName.split('@')[0]} !`);
             } catch (error) {
                 console.error("Erreur critique lors de l'initialisation :", error);
                 showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
