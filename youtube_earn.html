@@ -1067,369 +1067,339 @@
   </footer>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script>
-    /******** CONFIG FIREBASE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
-    };
+<script>
+(async function() {
+  // ---------- CONFIG ----------
+  const WATCH_THRESHOLD_MS = 10000; // 10 secondes
+  const REWARD_PER_VIDEO = 250; // FCFA par vidéo
+  const MAX_VIDEOS_PER_DAY = 2;
+  const CLOUDINARY_CLOUD = 'do83voiqy';
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    const functions = firebase.functions();
-    
-    // Décommente cette ligne si tu testes en local avec Firebase Emulator
-    // functions.useEmulator('localhost', 5001);
+  // Cloudinary publicIds fournies
+  const videos = [
+    { publicId: 'VID_20241105_050400_335.mp4_dymcpm', reward: REWARD_PER_VIDEO, durationRequired: 10 },
+    { publicId: 'snaptik_7556919248086519070_v2_oihciw', reward: REWARD_PER_VIDEO, durationRequired: 10 }
+  ];
 
-    /******** DOM Elements ********/
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    // YouTube Earn specific elements
-    const timerProgress = document.getElementById('timerProgress');
-    const timerText = document.getElementById('timerText');
-    const startButton = document.getElementById('startButton');
-    const claimButton = document.getElementById('claimButton');
-    const videosWatched = document.getElementById('videosWatched');
-    const earnedToday = document.getElementById('earnedToday');
-    const rewardAmountElement = document.getElementById('rewardAmount');
+  // ---------- DÉPENDANCES (doivent être initialisées ailleurs dans la page) ----------
+  if (!window.firebase) {
+    console.error('Firebase non trouvé. Assure-toi d\'avoir initialisé Firebase avant ce script.');
+    return;
+  }
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const functions = firebase.functions();
 
-    /******** Variables d'état ********/
-    let currentUser = null;
-    let userData = {};
-    let timerInterval = null;
-    let youtubePlayer;
-    let videoIndex = 0;
+  // ---------- DOM ----------
+  const videoPlayer = document.getElementById('video-player');
+  const dayOverlay = document.getElementById('dayOverlay');
+  const timerProgress = document.getElementById('timerProgress');
+  const timerText = document.getElementById('timerText');
+  const startButton = document.getElementById('startButton');
+  const claimButton = document.getElementById('claimButton');
+  const videosWatchedEl = document.getElementById('videosWatched');
+  const earnedTodayEl = document.getElementById('earnedToday');
+  const rewardAmountEl = document.getElementById('rewardAmount');
 
-    // ATTENTION: Remplace ces IDs et durées par tes propres vidéos YouTube
-    // La durée est le nombre de secondes que l'utilisateur doit regarder pour être récompensé.
-    const videos = [
-        { id: 'tq6T9fP6xJ8', duration: 30, reward: 250 },
-        { id: '1k8g7H10t8w', duration: 45, reward: 300 },
-        { id: 'oD_J3T1gB8U', duration: 25, reward: 200 }
-        // Ajoute d'autres vidéos ici
-    ];
-    
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
+  // ---------- ETAT ----------
+  let currentUser = null;
+  let userData = {};
+  let videoIndex = 0;
+  let timerInterval = null;
+  let claimedThisVideo = false;
+
+  // ---------- UTILITAIRES ----------
+  function notify(type, title, message, duration = 4000) {
+    if (typeof window.showNotification === 'function') {
+      return window.showNotification(type, title, message, duration);
+    }
+    // fallback simple
+    const containerId = 'localNotificationContainer';
+    let container = document.getElementById(containerId);
+    if (!container) {
+      container = document.createElement('div');
+      container.id = containerId;
+      container.style.position = 'fixed';
+      container.style.top = '16px';
+      container.style.right = '16px';
+      container.style.zIndex = '99999';
+      document.body.appendChild(container);
+    }
+    const n = document.createElement('div');
+    n.style.background = (type === 'success' ? '#2ab32a' : (type === 'error' ? '#c0392b' : '#3a8ee6'));
+    n.style.color = '#fff';
+    n.style.padding = '12px 14px';
+    n.style.borderRadius = '8px';
+    n.style.marginTop = '8px';
+    n.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+    n.innerHTML = `<strong style="display:block">${title}</strong><small>${message}</small>`;
+    container.appendChild(n);
+    setTimeout(() => { n.style.transition = 'opacity .3s'; n.style.opacity = '0'; setTimeout(()=>n.remove(), 350); }, duration);
+  }
+
+  function isTuesdayInDouala() {
+    // retourne true si c'est mardi en Africa/Douala
+    try {
+      const localeStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Douala' });
+      const dt = new Date(localeStr);
+      return dt.getDay() === 2; // 0 dimanche, 1 lundi, 2 mardi
+    } catch (e) {
+      // fallback local
+      return new Date().getDay() === 2;
+    }
+  }
+
+  function doualaDateString() {
+    const localeStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Douala' });
+    return new Date(localeStr).toDateString();
+  }
+
+  function cloudinaryUrl(publicId) {
+    // Si le publicId contient des caractères spéciaux, il devrait déjà être valide en entrée.
+    return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload/${publicId}`;
+  }
+
+  function updateTimerUI(currentTimeSeconds) {
+    const required = videos[videoIndex]?.durationRequired || 10;
+    const remaining = Math.max(0, Math.ceil(required - currentTimeSeconds));
+    const progress = Math.min(360, ((required - remaining) / required) * 360);
+    if (timerProgress) timerProgress.style.transform = `rotate(${progress}deg)`;
+    if (timerText) timerText.textContent = `${remaining}s`;
+  }
+
+  function updateDailyStatsUI() {
+    const watched = userData.youTubeWatchesToday || 0;
+    const earned = userData.youTubeEarningsToday || 0;
+    if (videosWatchedEl) videosWatchedEl.textContent = `${watched}/${MAX_VIDEOS_PER_DAY}`;
+    if (earnedTodayEl) earnedTodayEl.textContent = `${earned} FCFA`;
+    if (rewardAmountEl) {
+      if (videoIndex < videos.length) rewardAmountEl.textContent = `+${videos[videoIndex].reward} FCFA`;
+      else rewardAmountEl.textContent = 'Terminé';
+    }
+  }
+
+  // ---------- CHARGER / CHECK UTILISATEUR ----------
+  async function loadUserData(uid) {
+    const ref = db.collection('users').doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      userData = snap.data() || {};
+    } else {
+      userData = {
+        youTubeWatchesToday: 0,
+        youTubeEarningsToday: 0,
+        lastYouTubeWatchDate: doualaDateString(),
+        solde: 0
+      };
+      await ref.set(userData);
     }
 
-    /******** Gestion du menu et du thème ********/
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
-    });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
-
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
-
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
-    });
-
-    /******** Fonctions pour YouTube Earn ********/
-    
-    // Fonction qui met à jour l'UI du minuteur
-    function updateTimerUI(currentTime) {
-      const duration = videos[videoIndex].duration;
-      const remainingTime = Math.max(0, Math.ceil(duration - currentTime));
-      const progress = ((duration - remainingTime) / duration) * 360;
-      timerProgress.style.transform = `rotate(${progress}deg)`;
-      timerText.textContent = `${remainingTime}s`;
+    // Reset quotidien si nécessaire
+    const today = doualaDateString();
+    if (userData.lastYouTubeWatchDate !== today) {
+      userData.youTubeWatchesToday = 0;
+      userData.youTubeEarningsToday = 0;
+      userData.lastYouTubeWatchDate = today;
+      // appliqué localement; serveur fera la vraie MAJ quand on réclame
+      await ref.set({
+        youTubeWatchesToday: 0,
+        youTubeEarningsToday: 0,
+        lastYouTubeWatchDate: today
+      }, { merge: true });
     }
-    
-    // Fonction appelée quand la vidéo est terminée ou le temps minimum atteint
-    function videoCompleted() {
+  }
+
+  // ---------- CHARGER VIDEO ----------
+  function loadVideoAtIndex(idx) {
+    if (!videos[idx]) {
+      // pas de vidéo restante
+      rewardAmountEl && (rewardAmountEl.textContent = 'Terminé');
+      startButton && (startButton.disabled = true);
+      claimButton && (claimButton.disabled = true);
+      return;
+    }
+    videoIndex = idx;
+    if (videoPlayer) {
+      videoPlayer.pause();
+      videoPlayer.removeAttribute('src');
+      videoPlayer.src = cloudinaryUrl(videos[idx].publicId);
+      videoPlayer.load();
+    }
+    claimedThisVideo = false;
+    updateTimerUI(0);
+    claimButton && (claimButton.disabled = true);
+    // start button activé uniquement si mardi
+    if (startButton) {
+      startButton.disabled = !isTuesdayInDouala() || ((userData.youTubeWatchesToday || 0) >= Math.min(videos.length, MAX_VIDEOS_PER_DAY));
+      startButton.textContent = isTuesdayInDouala() ? 'Commencer à regarder' : 'Disponible mardi';
+    }
+    // overlay
+    if (dayOverlay) dayOverlay.style.display = isTuesdayInDouala() ? 'none' : 'flex';
+    updateDailyStatsUI();
+  }
+
+  // ---------- LECTEUR - gestion du temps de lecture ----------
+  function startWatchInterval() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (!videoPlayer) return;
+      const t = videoPlayer.currentTime || 0;
+      updateTimerUI(t);
+      const required = videos[videoIndex]?.durationRequired || 10;
+      if (!claimedThisVideo && t >= required) {
+        claimedThisVideo = true;
+        clearInterval(timerInterval);
+        videoPlayer.pause();
         claimButton.disabled = false;
-        showNotification('success', 'Vidéo terminée!', 'Vous pouvez maintenant réclamer votre récompense.');
-    }
-
-    // Fonction pour réclamer la récompense
-    async function claimReward() {
-        if (!currentUser || claimButton.disabled) return;
-        
-        claimButton.disabled = true;
-        startButton.disabled = true;
-        claimButton.textContent = 'Réclamation...';
-
-        try {
-            const videoReward = videos[videoIndex].reward;
-            
-            // On appelle la fonction Cloud pour valider et attribuer la récompense
-            // Note: Pour que cela fonctionne, tu dois créer cette fonction dans Firebase Functions
-            const claimRewardFunction = functions.httpsCallable('claimYouTubeReward');
-            const result = await claimRewardFunction({ amount: videoReward });
-
-            // Mise à jour de l'UI avec les données du serveur
-            userData = result.data.userData;
-            updateDailyStats();
-            
-            showNotification('success', 'Récompense réclamée!', `${videoReward} FCFA ajoutés à votre solde.`);
-            
-            // Préparer la prochaine vidéo si disponible
-            if (videoIndex < videos.length - 1) {
-                videoIndex++;
-                loadNextVideo();
-            } else {
-                showNotification('info', 'Toutes les vidéos vues!', 'Revenez demain pour de nouvelles vidéos.');
-                startButton.textContent = 'Limite atteinte';
-                startButton.disabled = true;
-                rewardAmountElement.textContent = 'Terminé';
-            }
-
-        } catch (error) {
-            console.error("Erreur lors de la réclamation :", error);
-            showNotification('error', 'Erreur de réclamation', 'Une erreur est survenue. Veuillez réessayer.');
-            claimButton.disabled = false;
-        } finally {
-            claimButton.textContent = 'Réclamer la récompense';
-            updateDailyStats();
-        }
-    }
-    
-    // Fonction pour mettre à jour les statistiques sur l'interface
-    function updateDailyStats() {
-      const videosWatchedCount = userData.youTubeWatchesToday || 0;
-      const earningsCount = userData.youTubeEarningsToday || 0;
-      videosWatched.textContent = `${videosWatchedCount}/${videos.length}`;
-      earnedToday.textContent = `${earningsCount} FCFA`;
-      if (videoIndex < videos.length) {
-          rewardAmountElement.textContent = `+${videos[videoIndex].reward} FCFA`;
-      } else {
-          rewardAmountElement.textContent = 'Terminé';
+        notify('success', 'Prêt à réclamer', 'Vous pouvez réclamer la récompense pour cette vidéo.');
       }
-    }
+    }, 300);
+  }
 
-    // Fonction pour vérifier la limite quotidienne
-    function checkDailyLimit() {
-        const today = new Date().toDateString();
-        if (userData.lastYouTubeWatchDate !== today) {
-            userData.youTubeWatchesToday = 0;
-            userData.youTubeEarningsToday = 0;
-            userData.lastYouTubeWatchDate = today;
-        }
-        
-        const watchedCount = userData.youTubeWatchesToday || 0;
-        videoIndex = watchedCount; // Commence à l'index de la prochaine vidéo à regarder
-        
-        if (watchedCount >= videos.length) {
-            startButton.disabled = true;
-            startButton.textContent = 'Limite atteinte';
-        } else {
-            startButton.disabled = false;
-            startButton.textContent = 'Commencer à regarder';
-        }
-        updateDailyStats();
-    }
+  // ---------- RECLAMATION VIA CLOUD FUNCTION ----------
+  async function claimReward() {
+    if (!currentUser) { notify('error','Non connecté','Veuillez vous reconnecter.'); return; }
+    if (claimButton.disabled) return;
+    claimButton.disabled = true;
+    startButton.disabled = true;
+    const publicId = videos[videoIndex].publicId;
+    const watchMs = Math.floor((videoPlayer.currentTime || 0) * 1000);
 
-    /******** Fonctions YouTube IFrame API ********/
-    // Cette fonction est appelée automatiquement par l'API
-    function onYouTubeIframeAPIReady() {
-        loadNextVideo();
-    }
-    
-    // Fonction pour charger la vidéo suivante
-    function loadNextVideo() {
-        if (videoIndex >= videos.length) {
-            // Pas de vidéos restantes
-            console.log("Toutes les vidéos ont été regardées pour aujourd'hui.");
-            return;
-        }
-        
-        const videoId = videos[videoIndex].id;
-        
-        // Détruire l'ancien lecteur si il existe
-        if (youtubePlayer) {
-            youtubePlayer.destroy();
-        }
-        
-        // Créer un nouveau lecteur
-        youtubePlayer = new YT.Player('youtube-player', {
-            height: '100%',
-            width: '100%',
-            videoId: videoId,
-            playerVars: {
-                'playsinline': 1,
-                'autoplay': 0,
-                'controls': 1,
-                'showinfo': 0,
-                'rel': 0,
-                'modestbranding': 1,
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-        
-        // Réinitialiser l'UI pour la nouvelle vidéo
-        updateTimerUI(0);
-        startButton.disabled = false;
-        claimButton.disabled = true;
-    }
+    // payload envoyé au serveur : { videoId, watchMs }
+    try {
+      const claimFn = functions.httpsCallable('claimYouTubeReward');
+      const res = await claimFn({ videoId: publicId, watchMs });
+      const data = res.data || {};
 
-    // Fonction appelée quand le lecteur est prêt
-    function onPlayerReady(event) {
-        // Mettre à jour l'UI avec la durée de la vidéo
-        updateTimerUI(0);
-        checkDailyLimit();
-    }
+      // serveur doit renvoyer reward et éventuellement userData mis à jour
+      const reward = data.reward ?? videos[videoIndex].reward ?? REWARD_PER_VIDEO;
+      const updatedUserData = data.userData ?? null;
 
-    // Fonction gérant les changements d'état du lecteur (lecture, pause, fin)
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            // Démarrer le minuteur en se basant sur le temps de lecture
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const currentTime = youtubePlayer.getCurrentTime();
-                updateTimerUI(currentTime);
-                if (currentTime >= videos[videoIndex].duration) {
-                    clearInterval(timerInterval);
-                    youtubePlayer.pauseVideo();
-                    videoCompleted();
-                }
-            }, 500);
-        } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-            // Mettre le minuteur en pause
-            clearInterval(timerInterval);
-        } else if (event.data === YT.PlayerState.ENDED) {
-            // Si la vidéo se termine, on arrête le minuteur et on complète la tâche
-            clearInterval(timerInterval);
-            videoCompleted();
-        }
-    }
-    
-    /******** Sauvegarde et chargement des données utilisateur ********/
-    async function saveUserData(key, value) {
-        if (!currentUser) return;
-        try {
-            const userRef = db.collection('users').doc(currentUser.uid);
-            await userRef.set({ [key]: value }, { merge: true });
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde des données :", error);
-        }
-    }
+      // mise à jour locale optimiste
+      userData.youTubeWatchesToday = (userData.youTubeWatchesToday || 0) + 1;
+      userData.youTubeEarningsToday = (userData.youTubeEarningsToday || 0) + Number(reward || 0);
+      userData.lastYouTubeWatchDate = doualaDateString();
+      userData.solde = (userData.solde || 0) + Number(reward || 0);
 
-    async function loadUserData() {
-        if (!currentUser) {
-            throw new Error("Aucun utilisateur connecté pour charger les données.");
-        }
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const doc = await userRef.get();
-        if (doc.exists) {
-            userData = doc.data() || {};
-        } else {
-            userData = {};
-            await userRef.set({
-                youTubeWatchesToday: 0,
-                youTubeEarningsToday: 0,
-                lastYouTubeWatchDate: new Date().toDateString(),
-                solde: 0,
-                youtubeGains: 0
-            });
-        }
-        checkDailyLimit();
-    }
+      // sync local -> Firestore (au cas où la fonction Cloud ne mettrait pas à jour le doc)
+      try {
+        await db.collection('users').doc(currentUser.uid).set({
+          youTubeWatchesToday: userData.youTubeWatchesToday,
+          youTubeEarningsToday: userData.youTubeEarningsToday,
+          lastYouTubeWatchDate: userData.lastYouTubeWatchDate,
+          solde: userData.solde
+        }, { merge: true });
+      } catch (syncErr) {
+        console.warn('Impossible de synchroniser local->firestore:', syncErr);
+      }
 
-    /******** Mise à jour de l'interface utilisateur ********/
-    function updateUserInfoUI(user) {
-        const displayName = userData.displayName || user.displayName || user.email.split('@')[0];
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
+      notify('success', 'Récompense reçue', `${reward} FCFA ajouté(s) à votre solde.`);
+      updateDailyStatsUI();
 
-    /******** Point d'entrée principal ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                await loadUserData();
-                updateUserInfoUI(user);
-                applyTheme();
-                
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue!', 'Prêt à gagner avec YouTube!');
-                
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
+      // charger la prochaine vidéo si non dépassé
+      if ((userData.youTubeWatchesToday || 0) < Math.min(videos.length, MAX_VIDEOS_PER_DAY)) {
+        loadVideoAtIndex(userData.youTubeWatchesToday);
+      } else {
+        // limite atteinte
+        startButton.disabled = true;
+        startButton.textContent = 'Limite atteinte';
+        rewardAmountEl && (rewardAmountEl.textContent = 'Terminé');
+      }
+
+    } catch (err) {
+      console.error('Erreur claimReward:', err);
+      // Gestion d'erreurs précises renvoyées par la fonction (Firebase Error)
+      let message = 'Erreur lors de la réclamation. Réessaye.';
+      if (err && err.message) message = err.message;
+      notify('error', 'Erreur de réclamation', message);
+      claimButton.disabled = false;
+      startButton.disabled = !isTuesdayInDouala();
+    }
+  }
+
+  // ---------- ÉVÉNEMENTS LECTEUR ----------
+  // play: vérifie mardi, puis commence intervalle
+  videoPlayer.addEventListener('play', () => {
+    if (!isTuesdayInDouala()) {
+      videoPlayer.pause();
+      notify('info', 'Disponible mardi', 'Lecture verrouillée : les vidéos et récompenses sont disponibles uniquement le mardi.');
+      return;
+    }
+    // Si l'utilisateur a déjà atteint sa limite journalière, stop
+    if ((userData.youTubeWatchesToday || 0) >= Math.min(videos.length, MAX_VIDEOS_PER_DAY)) {
+      videoPlayer.pause();
+      notify('info', 'Limite journalière', 'Vous avez atteint la limite de vidéos pour aujourd\'hui.');
+      startButton.disabled = true;
+      return;
+    }
+    // Démarrer suivi
+    startWatchInterval();
+  });
+
+  videoPlayer.addEventListener('pause', () => {
+    clearInterval(timerInterval);
+  });
+
+  videoPlayer.addEventListener('ended', () => {
+    clearInterval(timerInterval);
+    const curSec = Math.floor(videoPlayer.currentTime || 0);
+    const required = videos[videoIndex]?.durationRequired || 10;
+    if (!claimedThisVideo && curSec >= required) {
+      claimedThisVideo = true;
+      claimButton.disabled = false;
+      notify('success', 'Vidéo complétée', 'Vous pouvez réclamer la récompense.');
+    }
+  });
+
+  videoPlayer.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // ---------- BOUTONS ----------
+  startButton.addEventListener('click', () => {
+    if (!isTuesdayInDouala()) {
+      notify('info','Disponible mardi','Les récompenses sont disponibles uniquement le mardi.');
+      return;
+    }
+    // Vérifier limite locale
+    if ((userData.youTubeWatchesToday || 0) >= Math.min(videos.length, MAX_VIDEOS_PER_DAY)) {
+      notify('info','Limite','Vous avez atteint le nombre maximum de vidéos pour aujourd\'hui.');
+      startButton.disabled = true;
+      return;
+    }
+    videoPlayer.play().catch(err => {
+      console.warn('Play error', err);
+      notify('error', 'Erreur lecture', 'Impossible de lancer la lecture (autoplay bloqué?). Appuyez sur play manuellement.');
     });
+  });
 
-    /******** Événements ********/
-    startButton.addEventListener('click', () => {
-        if (youtubePlayer && youtubePlayer.playVideo) {
-            youtubePlayer.playVideo();
-        }
-    });
-    
-    claimButton.addEventListener('click', claimReward);
-    
-  </script>
+  claimButton.addEventListener('click', claimReward);
+
+  // ---------- AUTH ET INITIALISATION ----------
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      // redirection si non connecté
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+    try {
+      await loadUserData(user.uid);
+      // calculer l'index de départ
+      const watched = userData.youTubeWatchesToday || 0;
+      const startIdx = Math.min(watched, videos.length - 1);
+      loadVideoAtIndex(startIdx);
+      notify('success','Bienvenue','Prêt à gagner avec YouTube !');
+    } catch (e) {
+      console.error('Init error', e);
+      notify('error','Erreur', 'Impossible de charger les données utilisateur.');
+    }
+  });
+
+  // ---------- CLEANUP à la fermeture de la page ----------
+  window.addEventListener('beforeunload', () => {
+    clearInterval(timerInterval);
+  });
+})();
+</script>
 </body>
 </html>
 
