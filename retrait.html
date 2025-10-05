@@ -431,7 +431,7 @@
         flex-direction: column;
         gap: 25px;
         max-width: 700px;
-        margin: 0 auto;
+        margin: 0 auto 30px;
         animation: slideInUp 0.6s ease-out forwards;
     }
 
@@ -596,6 +596,116 @@
         margin-top: 10px;
     }
 
+    /* STYLES POUR L'HISTORIQUE DES RETRAITS */
+    .historique-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        max-width: 1200px;
+        margin: 30px auto;
+        animation: slideInUp 0.6s ease-out forwards;
+    }
+
+    .historique-card h2 {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid var(--primary-light);
+        padding-bottom: 15px;
+    }
+
+    .historique-table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .historique-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+    .historique-table thead {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .historique-table th {
+        padding: 15px 10px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .historique-table tbody tr {
+        border-bottom: 1px solid var(--background-dark);
+        transition: background-color 0.2s ease;
+    }
+
+    .historique-table tbody tr:hover {
+        background-color: var(--background-light);
+    }
+
+    .historique-table td {
+        padding: 15px 10px;
+        font-size: 0.95rem;
+        color: var(--text-color);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-badge.en_attente {
+        background-color: rgba(255, 149, 0, 0.2);
+        color: var(--warning-color);
+        border: 1px solid var(--warning-color);
+    }
+
+    .status-badge.approuve {
+        background-color: rgba(76, 217, 100, 0.2);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+    }
+
+    .status-badge.rejete {
+        background-color: rgba(255, 59, 48, 0.2);
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+    }
+
+    .montant-cell {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-light);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--background-dark);
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+    }
+
     @keyframes slideInUp {
       from { transform: translateY(50px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -701,7 +811,7 @@
             padding: 20px 15px;
         }
         
-        .retrait-card {
+        .retrait-card, .historique-card {
             padding: 20px;
         }
 
@@ -718,6 +828,15 @@
         .footer-links {
             flex-direction: column;
             gap: 10px;
+        }
+
+        .historique-table {
+            font-size: 0.85rem;
+        }
+
+        .historique-table th,
+        .historique-table td {
+            padding: 10px 8px;
         }
     }
 
@@ -947,6 +1066,21 @@
         <p class="note">Le montant minimum de retrait est de <strong>3000 XAF</strong>. Les frais de traitement peuvent s'appliquer.</p>
         <p class="success-note">Vérifiez attentivement vos informations avant de soumettre. Le traitement peut prendre 24-48 heures.</p>
       </div>
+
+      <!-- HISTORIQUE DES RETRAITS -->
+      <div class="historique-card">
+        <h2>
+          <i class="fas fa-history"></i>
+          Historique de mes retraits
+        </h2>
+        
+        <div class="historique-table-container" id="historiqueContainer">
+          <div class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Chargement de l'historique...</p>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -996,6 +1130,7 @@
     const retraitForm = document.getElementById('retraitForm');
     const retraitBtn = document.getElementById('retraitBtn');
     const notificationContainer = document.getElementById('notificationContainer');
+    const historiqueContainer = document.getElementById('historiqueContainer');
     
     // Éléments d'information (UID retiré)
     const infoUsername = document.getElementById('infoUsername');
@@ -1045,6 +1180,39 @@
     
     function formatNumberSafe(n) { 
         return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; 
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      let date;
+      if (timestamp.toDate) {
+        date = timestamp.toDate();
+      } else if (timestamp instanceof Date) {
+        date = timestamp;
+      } else {
+        date = new Date(timestamp);
+      }
+      return date.toLocaleDateString('fr-FR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getStatusBadgeClass(statut) {
+      const s = (statut || 'en_attente').toLowerCase().replace(/\s+/g, '_');
+      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed') return 'approuve';
+      if (s === 'rejete' || s === 'rejeté' || s === 'rejected') return 'rejete';
+      return 'en_attente';
+    }
+
+    function getStatusText(statut) {
+      const s = (statut || 'en_attente').toLowerCase().replace(/\s+/g, '_');
+      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed') return 'Approuvé';
+      if (s === 'rejete' || s === 'rejeté' || s === 'rejected') return 'Rejeté';
+      return 'En attente';
     }
 
     /******** Gestion des interactions ********/
@@ -1229,6 +1397,88 @@
         infoPaymentStatus.style.color = userData.paid ? 'var(--success-color)' : 'var(--danger-color)';
     }
 
+    /******** CHARGEMENT DE L'HISTORIQUE DES RETRAITS ********/
+    async function loadHistoriqueRetraits() {
+      if (!currentUser || !userData.uid) {
+        console.warn('Impossible de charger l\'historique: utilisateur non connecté');
+        return;
+      }
+
+      try {
+        console.log('📊 Chargement de l\'historique des retraits pour:', userData.uid);
+        
+        // Requête Firestore pour récupérer les retraits de l'utilisateur
+        const retraitsQuery = db.collection('retraits')
+          .where('userId', '==', userData.uid)
+          .orderBy('date', 'desc')
+          .limit(50);
+        
+        const snapshot = await retraitsQuery.get();
+        
+        if (snapshot.empty) {
+          historiqueContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>Aucun retrait effectué pour le moment.</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Créer le tableau avec les données
+        let tableHTML = `
+          <table class="historique-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Pays</th>
+                <th>Méthode</th>
+                <th>Numéro</th>
+                <th>Description</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        snapshot.forEach(doc => {
+          const retrait = doc.data();
+          const statusClass = getStatusBadgeClass(retrait.statut);
+          const statusText = getStatusText(retrait.statut);
+          
+          tableHTML += `
+            <tr>
+              <td>${formatDate(retrait.date)}</td>
+              <td class="montant-cell">${formatNumberSafe(retrait.montant)} XAF</td>
+              <td>${retrait.pays || 'N/A'}</td>
+              <td>${retrait.methode || 'N/A'}</td>
+              <td>${retrait.numeroCompte || 'N/A'}</td>
+              <td>${retrait.description || 'N/A'}</td>
+              <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            </tr>
+          `;
+        });
+
+        tableHTML += `
+            </tbody>
+          </table>
+        `;
+
+        historiqueContainer.innerHTML = tableHTML;
+        console.log('✅ Historique chargé:', snapshot.size, 'retrait(s)');
+        
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement de l\'historique:', error);
+        historiqueContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Erreur lors du chargement de l'historique.</p>
+          </div>
+        `;
+      }
+    }
+
     /******** Logique de retrait - COMMUNICATION AVEC LE SERVEUR ********/
     retraitForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1294,6 +1544,9 @@
             methodeSelect.disabled = true;
             methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
             
+            // Recharger l'historique des retraits
+            await loadHistoriqueRetraits();
+            
         } catch (error) {
             console.error("Erreur lors du retrait :", error);
             showNotification('error', 'Erreur de retrait', error.message || 'Une erreur est survenue. Veuillez réessayer.');
@@ -1319,6 +1572,10 @@
                 
                 updateUI();
                 applyTheme();
+                
+                // Charger l'historique des retraits
+                await loadHistoriqueRetraits();
+                
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
                 
