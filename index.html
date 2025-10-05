@@ -79,9 +79,11 @@
     label{display:block;margin-bottom:8px;font-weight:500;color:#2c3e50;font-size:0.95rem}
     .input-group{display:flex;align-items:center;background-color:#f8f9fa;border-radius:8px;overflow:hidden;border:1px solid #ddd;transition:all 0.3s ease}
     .input-group:focus-within{border-color:#3498db;box-shadow:0 0 0 2px rgba(52,152,219,0.2)}
+    .input-group.disabled{background-color:#e9ecef;opacity:0.7}
     .input-icon{padding:0 15px;color:#7f8c8d}
     input,select{width:100%;padding:14px;border:none;background:transparent;color:#2c3e50;font-size:1rem;outline:none}
     input::placeholder{color:#95a5a6}
+    input:disabled{cursor:not-allowed;color:#6c757d}
     select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 15px center;background-size:15px}
     .phone-group{display:flex}
     .country-code{flex:0 0 30%;display:flex;align-items:center;background-color:#eef2f7;padding:0 15px;border-right:1px solid #ddd;font-weight:500;color:#2c3e50}
@@ -93,8 +95,9 @@
     .terms-text a{color:#3498db;text-decoration:none;font-weight:500}
     .terms-text a:hover{text-decoration:underline}
     .btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#4CD964 0%,#2AB32A 100%);color:white;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;box-shadow:0 4px 10px rgba(76,217,100,0.3)}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
-    .btn:active{transform:translateY(0)}
+    .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 15px rgba(76,217,100,0.4)}
+    .btn:active:not(:disabled){transform:translateY(0)}
+    .btn:disabled{opacity:0.6;cursor:not-allowed}
     .login-link{text-align:center;margin-top:25px;font-size:0.95rem;color:#7f8c8d}
     .login-link a{color:#3498db;text-decoration:none;font-weight:500}
     .login-link a:hover{text-decoration:underline}
@@ -274,9 +277,9 @@
 
         <div class="form-group">
           <label for="par">Par (Parrain)</label>
-          <div class="input-group">
+          <div class="input-group" id="parInputGroup">
             <div class="input-icon"><i class="fas fa-user-friends"></i></div>
-            <input type="text" id="par" name="par" placeholder="Aucun parrain détecté" readonly>
+            <input type="text" id="par" name="par" placeholder="Aucun parrain détecté" disabled>
           </div>
         </div>
 
@@ -531,12 +534,20 @@ async function checkUsernameExists(username){
 
 /* ---------- Gestion du formulaire / enregistrement ---------- */
 let sponsorData = null;
+let isSubmitting = false; // ✅ Flag pour éviter les doubles soumissions
 
 const registrationForm = document.getElementById('registrationForm');
 if (!registrationForm) throw new Error('Formulaire non trouvé (#registrationForm).');
 
 registrationForm.addEventListener('submit', async function(e){
   e.preventDefault();
+  
+  // ✅ Empêcher la double soumission
+  if (isSubmitting) {
+    console.log('⚠️ Soumission déjà en cours, ignorée');
+    return;
+  }
+  
   const username = document.getElementById('username').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -555,11 +566,12 @@ registrationForm.addEventListener('submit', async function(e){
   const exists = await checkUsernameExists(username);
   if(exists){ showError("Ce nom d'utilisateur est déjà pris."); return; }
 
-  // Gestion UI
+  // ✅ Gestion UI : désactiver le bouton DÉFINITIVEMENT
   const submitBtn = this.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
   submitBtn.disabled = true;
+  isSubmitting = true; // ✅ Marquer comme en cours
 
   try {
     console.log('📝 Création du compte Firebase Auth...');
@@ -615,8 +627,10 @@ registrationForm.addEventListener('submit', async function(e){
     else if(err.code === 'auth/weak-password') message = "Le mot de passe est trop faible (min 6 caractères).";
     else message = err.message || message;
     showError(message);
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
+    
+    // ✅ NE PAS réactiver le bouton pour éviter les doubles inscriptions
+    // Le bouton reste désactivé même en cas d'erreur
+    console.log('⚠️ Bouton d\'inscription reste désactivé pour éviter les doublons');
   }
 });
 
@@ -631,9 +645,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const refParam = urlParams.get('ref') || urlParams.get('par') || '';
 
   const parInput = document.getElementById('par');
+  const parInputGroup = document.getElementById('parInputGroup');
 
   if(refParam){
     console.log('🔍 Recherche du parrain:', refParam);
+    // ✅ TOUJOURS désactiver et griser le champ si un lien de parrainage existe
+    if(parInputGroup) parInputGroup.classList.add('disabled');
+    
     // On cherche le parrain par username dans Firestore
     try {
       const found = await findSponsorByUsername(refParam);
@@ -642,27 +660,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const display = found.displayName || found.username;
         if(parInput) {
           parInput.value = display;
-          parInput.readOnly = true;
+          parInput.disabled = true; // ✅ Toujours désactivé
         }
         console.log('✅ Parrain trouvé:', found);
       } else {
-        // Pas trouvé: on affiche le param brut
+        // ✅ Pas trouvé: on affiche le param brut MAIS le champ reste désactivé
         if(parInput){
           parInput.value = refParam;
-          parInput.readOnly = false;
+          parInput.disabled = true; // ✅ CORRECTION: Reste désactivé même si non trouvé
         }
         console.warn('⚠️ Parrain non trouvé avec username:', refParam);
       }
     } catch(err){
       console.error('❌ Erreur lors de la recherche du parrain:', err);
-      if(parInput) parInput.value = refParam;
+      if(parInput) {
+        parInput.value = refParam;
+        parInput.disabled = true; // ✅ CORRECTION: Reste désactivé même en cas d'erreur
+      }
     }
   } else {
-    // Aucun param: garde le champ par vide
+    // Aucun param: garde le champ par vide et modifiable
     if(parInput) { 
       parInput.value = ''; 
       parInput.placeholder = 'Aucun parrain détecté'; 
-      parInput.readOnly = false; 
+      parInput.disabled = true; // ✅ Toujours désactivé (même sans parrain)
     }
   }
 
