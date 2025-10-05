@@ -13,7 +13,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
-    /* ... (Le CSS reste le même, aucun changement nécessaire) ... */
     /* Styles de base */
     body {
       background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
@@ -883,51 +882,29 @@
   <div class="main-container">
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">TikTok Earn >> MULAFLOWR</div>
-        <div class="username" id="sidebarUsername">Utilisateur</div>
+        <p class="welcome-text">Bienvenue,</p>
+        <h3 class="username" id="sidebarUsername">Utilisateur</h3>
       </div>
-      
-      <div class="menu-category">PRINCIPAL</div>
-      <a href="dashboard.html" class="menu-item">
+
+      <div class="menu-category">MENU PRINCIPAL</div>
+      <a href="dashboard_SOLUTION_FINALE.html" class="menu-item">
         <i class="fas fa-home"></i>
-        <span>Tableau de bord</span>
+        <span>Accueil</span>
       </a>
       
-      <a href="depot.html" class="menu-item">
-        <i class="fas fa-wallet"></i>
-        <span>Dépôt 💵</span>
+      <a href="equipe.html" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Mon équipe</span>
       </a>
       
-      <a href="bonus_bienvenue.html" class="menu-item">
-        <i class="fas fa-gift"></i>
-        <span>Bonus de bienvenue</span>
-      </a>
-      
-      <div class="menu-category">COMPTES</div>
       <a href="retrait.html" class="menu-item">
         <i class="fas fa-money-bill-wave"></i>
         <span>Retrait</span>
       </a>
       
-      <a href="equipe.html" class="menu-item">
-        <i class="fas fa-users"></i>
-        <span>Équipe</span>
-      </a>
-
-      <div class="menu-category">SPÉCIAL</div>
-      <a href="love_earn.html" class="menu-item">
-        <i class="fas fa-heart"></i>
-        <span>LoveEarn</span>
-      </a>
-      
-      <a href="social_boost.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>SBH</span>
-      </a>
-      
-      <a href="challenge_reward.html" class="menu-item">
-        <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
+      <a href="depot.html" class="menu-item">
+        <i class="fas fa-wallet"></i>
+        <span>Dépôt</span>
       </a>
       
       <div class="menu-category">PRODUIT / TACHE</div>
@@ -936,40 +913,19 @@
         <span>Gagner via Whatsapp</span>
       </a>
       
-      <a href="movies.html" class="menu-item">
-        <i class="fas fa-film"></i>
-        <span>Movies</span>
-      </a>
-      
-      <a href="paris_fixes.html" class="menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Paris fixes</span>
-      </a>
-      
-      <a href="gains_publicitaires.html" class="menu-item">
-        <i class="fas fa-ad"></i>
-        <span>Gains publicitaires</span>
-      </a>
-      
-      <a href="spin_wheel.html" class="menu-item">
-        <i class="fas fa-trophy"></i>
-        <span>Spin wheel 🏆</span>
-      </a>
-      
       <a href="tiktok_earn.html" class="menu-item active">
         <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
-        <span class="menu-badge active">☑</span>
+        <span>Gagner via TikTok</span>
       </a>
       
       <a href="youtube_earn.html" class="menu-item">
         <i class="fab fa-youtube"></i>
-        <span>YouTube Earn</span>
+        <span>Gagner via YouTube</span>
       </a>
       
-      <a href="instagram_earn.html" class="menu-item">
-        <i class="fab fa-instagram"></i>
-        <span>Instagram Earn</span>
+      <a href="publicite_earn.html" class="menu-item">
+        <i class="fas fa-ad"></i>
+        <span>Pub + Clics</span>
       </a>
       
       <a href="trivia_challenge.html" class="menu-item">
@@ -1201,7 +1157,7 @@
       showNotification('success', 'Félicitations!', 'Vous avez regardé la vidéo avec succès. Cliquez pour réclamer votre récompense!');
     }
     
-    function claimReward() {
+    async function claimReward() {
       if (!currentUser) return;
       
       // Mettre à jour les données utilisateur
@@ -1211,14 +1167,17 @@
       // Mettre à jour les statistiques du jour
       videosWatchedToday++;
       earningsToday += 250;
+      userData.tikTokWatchesToday = videosWatchedToday;
+      userData.tikTokEarningsToday = earningsToday;
+      
       updateDailyStats();
       
       // Sauvegarder les données
-      saveUserData();
+      await saveUserData();
       
       // Mettre à jour l'UI
       claimButton.disabled = true;
-      startButton.disabled = canWatchMore && videosWatchedToday < 2;
+      startButton.disabled = !(canWatchMore && videosWatchedToday < 2);
       
       showNotification('success', 'Récompense ajoutée!', '250 FCFA ont été ajoutés à votre solde!');
     }
@@ -1304,7 +1263,7 @@
 
     /******** Mise à jour de l'interface utilisateur ********/
     function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+        const displayName = dbData.username || user.displayName || user.email.split('@')[0];
         if (sidebarUsername) sidebarUsername.textContent = displayName;
         if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
     }
@@ -1324,14 +1283,18 @@
             try {
                 await loadUserData();
                 
-                // --- Début du code retiré pour enlever la redirection ---
-                // if (!userData.paid) {
-                //     showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
-                //     setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
-                //     return;
-                // }
-                // --- Fin du code retiré ---
+                // 🔒 VÉRIFICATION DU STATUT: Cohérent avec dashboard_SOLUTION_FINALE.html
+                const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
+                const validStatuses = ['paid', 'active'];
+                
+                if (!validStatuses.includes(userStatus)) {
+                    console.log('⛔ Accès refusé: statut =', userStatus, '(requis: "paid" ou "active")');
+                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                    return;
+                }
 
+                console.log('✅ Accès autorisé: statut =', userStatus);
                 updateUserInfoUI(user, userData);
                 applyTheme();
                 
