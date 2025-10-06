@@ -1477,15 +1477,29 @@ claimButton.addEventListener('click', async () => {
   }
 
   try {
-    // Utiliser directement firebase.auth().currentUser
-    const user = firebase.auth().currentUser;
+    // Attendre que Firebase Auth soit prêt et obtenir l'utilisateur actuel
+    await auth.authStateReady();
+    const user = auth.currentUser;
+    
     if (!user) {
       showNotification('error','Non connecté','Session expirée. Reconnectez-vous.');
       setTimeout(() => { window.location.href = 'login.html'; }, 2000);
       return;
     }
     
-    const idToken = await user.getIdToken(true);
+    // Obtenir le token en le forçant à se rafraîchir
+    let idToken;
+    try {
+      idToken = await user.getIdToken(true);
+    } catch (tokenErr) {
+      console.error('Erreur getIdToken:', tokenErr);
+      showNotification('error','Session invalide','Veuillez vous reconnecter.');
+      await auth.signOut();
+      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      return;
+    }
+    
+    console.log('🔑 Token Firebase obtenu, envoi requête au serveur...');
     const response = await fetch('/api/youtube-claim-reward', {
       method: 'POST',
       headers: {
