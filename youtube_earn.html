@@ -1120,8 +1120,7 @@
       </div>
     </div>
   </footer>
-
-<script>
+  <script>
 /******** CONFIG FIREBASE ********/
 const firebaseConfig = {
   apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
@@ -1171,7 +1170,10 @@ function cloudinaryUrl(publicId) {
 const REQUIRED_SECONDS = 10;
 const REWARD_AMOUNT = 250;
 const MAX_VIDEOS_PER_DAY = 2;
-const ENFORCE_TUESDAY = false;  // ⏸️ RESTRICTION DÉSACTIVÉE: Vidéos disponibles tous les jours (mardi uniquement plus tard)
+// 🟢 CHANGEMENT: Passage à true pour forcer la restriction
+const ENFORCE_TUESDAY = true;  
+// 🟢 NOUVELLE RÈGLE: max 500 FCFA par transaction (2 vidéos de 250)
+const MAX_INCREMENT_PER_REQUEST = 500; 
 
 /******** Variables d'état ********/
 let currentUser = null;
@@ -1239,6 +1241,7 @@ themeToggle.addEventListener('click', (event) => {
 });
 
 /******** Helpers pour jour (Tuesday) - Timezone Africa/Douala ********/
+// 🟢 CHANGEMENT: Jour ciblé = Mardi (Tuesday)
 function isTodayTuesday() {
   try {
     // Utiliser le timezone Africa/Douala (CEMAC) pour cohérence avec le serveur
@@ -1249,36 +1252,36 @@ function isTodayTuesday() {
     const dayName = formatter.format(new Date());
     return dayName === 'Tuesday';
   } catch (error) {
-    // Fallback en cas d'erreur de timezone
+    // Fallback en cas d'erreur de timezone: 2 = Mardi (Date.getDay() 0=Dimanche, 1=Lundi, 2=Mardi)
     console.warn('Timezone Africa/Douala non supporté, utilisation locale');
     const d = new Date();
-    return d.getDay() === 1;
+    return d.getDay() === 2;
   }
 }
 
+function getTodayString() {
+  return new Date().toDateString();
+}
+
 function getNextTuesdayCountdown() {
-  try {
-    const now = new Date();
-    const currentDay = now.getDay(); // 0 = Dimanche, 1 = Mardi, etc.
-    
-    // Calculer combien de jours jusqu'au prochain mardi
-    let daysUntilTuesday = (8 - currentDay) % 7;
-    if (daysUntilTuesday === 0) daysUntilTuesday = 7; // Si on est mardi, prochain mardi = dans 7 jours
-    
-    const nextTuesday = new Date(now);
-    nextTuesday.setDate(now.getDate() + daysUntilTuesday);
-    nextTuesday.setHours(0, 0, 0, 0);
-    
-    const diff = nextTuesday - now;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    return { days, hours, minutes, seconds };
-  } catch (error) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, 2 = Mardi, etc.
+  
+  // Calculer combien de jours jusqu'au prochain mardi (2)
+  let daysUntilTuesday = (2 - currentDay + 7) % 7;
+  if (daysUntilTuesday === 0) daysUntilTuesday = 7; // Si on est mardi, prochain mardi = dans 7 jours
+  
+  const nextTuesday = new Date(now);
+  nextTuesday.setDate(now.getDate() + daysUntilTuesday);
+  nextTuesday.setHours(0, 0, 0, 0);
+  
+  const diff = nextTuesday - now;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  return { days, hours, minutes, seconds };
 }
 
 function updateTuesdayUI() {
@@ -1348,6 +1351,7 @@ function loadByIndex(i) {
   validatedFlags[currentIndex] = validatedFlags[currentIndex] || false;
   
   updateTimerUI();
+  // 🟢 UTILISER claimedFlags pour désactiver le bouton
   claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
   startButton.disabled = !canWatchMore;
   playButton.style.display = 'flex';
@@ -1440,6 +1444,10 @@ playButton.addEventListener('click', () => {
     showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le mardi.');
     return;
   }
+  if (!canWatchMore) {
+    showNotification('info', 'Limite atteinte', `Vous avez déjà réclamé ${MAX_VIDEOS_PER_DAY} récompenses aujourd'hui.`);
+    return;
+  }
   youtubeVideo.muted = false;
   youtubeVideo.play().catch(err => console.warn('play blocked', err));
   playButton.style.display = 'none';
@@ -1450,6 +1458,10 @@ startButton.addEventListener('click', () => {
     showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le mardi.');
     return;
   }
+  if (!canWatchMore) {
+    showNotification('info', 'Limite atteinte', `Vous avez déjà réclamé ${MAX_VIDEOS_PER_DAY} récompenses aujourd'hui.`);
+    return;
+  }
   youtubeVideo.currentTime = 0;
   youtubeVideo.muted = false;
   youtubeVideo.play().catch(err => console.warn('play blocked', err));
@@ -1457,7 +1469,8 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
-/******** 🚀 NOUVELLE FONCTION: Appel API serveur pour réclamation ********/
+
+/******** 🚀 NOUVELLE FONCTION: Réclamation avec logique transactionnelle TikTok ********/
 claimButton.addEventListener('click', async () => {
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
@@ -1468,7 +1481,7 @@ claimButton.addEventListener('click', async () => {
     return; 
   }
   if (claimedFlags[currentIndex]) { 
-    showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo.'); 
+    showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo cette journée.'); 
     return; 
   }
   if (videosWatchedToday >= MAX_VIDEOS_PER_DAY) { 
@@ -1477,64 +1490,147 @@ claimButton.addEventListener('click', async () => {
   }
 
   try {
-    // Obtenir l'utilisateur actuel
     const user = auth.currentUser;
-    
     if (!user) {
       showNotification('error','Non connecté','Session expirée. Reconnectez-vous.');
-      setTimeout(() => { window.location.href = 'login.html'; }, 2000);
       return;
     }
-    
-    // Obtenir le token en le forçant à se rafraîchir
-    let idToken;
+
+    // 1) Tentative d'appel au serveur API (recommandé si disponible)
     try {
-      idToken = await user.getIdToken(true);
-    } catch (tokenErr) {
-      console.error('Erreur getIdToken:', tokenErr);
-      showNotification('error','Session invalide','Veuillez vous reconnecter.');
-      await auth.signOut();
-      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      const idToken = await user.getIdToken(true).catch(()=>null);
+
+      // ⚠️ ADAPTATION: Utiliser l'endpoint YouTube-specific
+      const resp = await fetch('/api/youtube-claim-reward', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: idToken, rewardAmount: REWARD_AMOUNT, videoIndex: currentIndex })
+      });
+
+      const text = await resp.text().catch(()=>null);
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
+
+      if (resp.ok && data && data.success) {
+        // Succès serveur -> mise à jour UI
+        claimedFlags[currentIndex] = true;
+        videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
+        earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
+        updateDailyStatsUI();
+        updateNextButtonVisibility();
+        showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
+        claimButton.disabled = true;
+        canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
+        startButton.disabled = !canWatchMore;
+        return;
+      } else {
+        console.warn('Server claim failed or returned non-json:', resp.status, text);
+      }
+    } catch (serverErr) {
+      console.warn('Erreur fetch serveur (tentative de fallback client):', serverErr);
+    }
+
+    // 2) Fallback: transaction côté client (copié/adapté de TikTok)
+    const uid = user.uid;
+    const userRef = db.collection('users').doc(uid);
+    const todayStr = getTodayString();
+
+    try {
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(userRef);
+        if (!snap.exists) throw new Error('Utilisateur introuvable (transaction).');
+
+        const doc = snap.data() || {};
+
+        // 🟢 ADAPTATION: Lire les champs YouTube
+        const lastDate = doc.lastYouTubeWatchDate || null;
+        const claimedArr = Array.isArray(doc.youtubeClaimedToday) ? doc.youtubeClaimedToday.slice() : [];
+        let watchesTodayDoc = Number(doc.youTubeWatchesToday || 0);
+        let earningsTodayDoc = Number(doc.youTubeEarningsToday || 0);
+        let profitDoc = Number(doc.profit || 0);
+        // 🟢 ADAPTATION: Utiliser le champ YouTube-specific
+        let youtubeGainsDoc = Number(doc.youtubeGains || 0); 
+
+        // Si la date du doc n'est pas aujourd'hui -> réinitialiser
+        if (lastDate !== todayStr) {
+          claimedArr.length = 0;
+          watchesTodayDoc = 0;
+          earningsTodayDoc = 0;
+        }
+
+        // Vérification de réclamation pour cette vidéo
+        if (claimedArr.indexOf(currentIndex) !== -1) {
+          throw new Error('Cette vidéo a déjà été réclamée aujourd\'hui.');
+        }
+
+        // Vérification limite quotidienne
+        if (watchesTodayDoc >= MAX_VIDEOS_PER_DAY) {
+          throw new Error('Limite quotidienne atteinte (doc)');
+        }
+
+        // Vérification montant réclamé (règle des 500)
+        if (REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) {
+          throw new Error('Montant par requête trop élevé.');
+        }
+
+        // Calcul des nouvelles valeurs
+        const newProfit = profitDoc + REWARD_AMOUNT;
+        // 🟢 ADAPTATION: Mise à jour du champ YouTube-specific
+        const newYoutubeGains = youtubeGainsDoc + REWARD_AMOUNT; 
+        const newEarningsToday = earningsTodayDoc + REWARD_AMOUNT;
+        const newWatchesToday = watchesTodayDoc + 1;
+
+        // V-Safe Checks (si besoin)
+        if ((newProfit - profitDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment profit > allowed');
+        if ((newYoutubeGains - youtubeGainsDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment youtubeGains > allowed');
+        if ((newEarningsToday - earningsTodayDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment youTubeEarningsToday > allowed');
+        if ((newWatchesToday - watchesTodayDoc) > 1) throw new Error('Increment youTubeWatchesToday > 1 interdit');
+        if (newWatchesToday > MAX_VIDEOS_PER_DAY) throw new Error('Limite quotidienne dépassée');
+
+        // Ajouter l'index à la liste des réclamées
+        claimedArr.push(currentIndex);
+
+        // 🟢 ADAPTATION: Objet de mise à jour avec les bons champs YouTube
+        const updateObj = {
+          profit: newProfit,
+          youtubeGains: newYoutubeGains,
+          youTubeEarningsToday: newEarningsToday,
+          youTubeWatchesToday: newWatchesToday,
+          lastYouTubeWatchDate: todayStr,
+          youtubeClaimedToday: claimedArr
+        };
+
+        console.log('Transaction preparing updateObj (Fallback):', updateObj);
+        tx.update(userRef, updateObj);
+      });
+
+      // Si transaction réussit (Fallback):
+      claimedFlags[currentIndex] = true;
+      videosWatchedToday = videosWatchedToday + 1;
+      earningsToday = earningsToday + REWARD_AMOUNT;
+      updateDailyStatsUI();
+      updateNextButtonVisibility();
+      showNotification('success','Récompense (fallback)','250 FCFA ajouté et vidéo marquée réclamée.');
+      claimButton.disabled = true;
+      canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
+      startButton.disabled = !canWatchMore;
       return;
-    }
-    
-    console.log('🔑 Token Firebase obtenu, envoi requête au serveur...');
-    const response = await fetch('/api/youtube-claim-reward', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        idToken: idToken,
-        rewardAmount: REWARD_AMOUNT,
-        videoIndex: currentIndex
-      })
-    });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || data.message || 'Erreur serveur');
+    } catch (txErr) {
+      console.error('Transaction failed:', txErr);
+      const msg = (txErr && txErr.message) ? txErr.message : 'Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.';
+      showNotification('error','Erreur', msg);
+      throw txErr;
     }
 
-    // Mise à jour de l'état local
-    claimedFlags[currentIndex] = true;
-    videosWatchedToday = data.videosWatchedToday || (videosWatchedToday + 1);
-    earningsToday = data.earningsToday || (earningsToday + REWARD_AMOUNT);
-    
-    updateDailyStatsUI();
-    updateNextButtonVisibility();
-
-    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance} FCFA`);
-
-    claimButton.disabled = true;
-    startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
-    
   } catch (err) {
-    console.error('Erreur lors de la réclamation:', err);
-    showNotification('error','Erreur', err.message || 'Impossible d\'enregistrer la récompense. Réessayez.');
+    console.error('Erreur lors de la réclamation (global):', err);
+    let msg = 'Impossible d\'enregistrer la récompense. Réessayez.';
+    if (err && err.message) msg = err.message;
+    showNotification('error','Erreur', msg);
   }
 });
+
 
 /******** Sauvegarde / chargement utilisateur (Firestore) ********/
 async function saveUserData(key = null, value = null) {
@@ -1559,6 +1655,17 @@ async function loadUserData() {
   } else {
     userData = {};
     await saveUserData();
+  }
+  // 🟢 ADAPTATION: Charger les flags réclamés pour YouTube
+  const todayStr = getTodayString();
+  const claimed = Array.isArray(userData.youtubeClaimedToday) && userData.lastYouTubeWatchDate === todayStr ? userData.youtubeClaimedToday : [];
+  // marquer claimedFlags
+  if (Array.isArray(claimed)) {
+    claimed.forEach(idx => {
+      if (typeof idx === 'number' && idx >= 0 && idx < claimedFlags.length) {
+        claimedFlags[idx] = true;
+      }
+    });
   }
 }
 
@@ -1593,8 +1700,8 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
-      // Charger statistiques quotidiennes depuis Firestore
-      const today = new Date().toDateString();
+      // 🟢 ADAPTATION: Charger statistiques quotidiennes YouTube
+      const today = getTodayString();
       if ((userData.lastYouTubeWatchDate || '') !== today) {
         videosWatchedToday = 0;
         earningsToday = 0;
@@ -1607,7 +1714,7 @@ auth.onAuthStateChanged(async (user) => {
 
       ensureNextButtonExists();
 
-      // 🔒 Gérer l'UI en fonction du jour (mardi uniquement)
+      // 🟢 ADAPTATION: Gérer l'UI en fonction du jour (mardi uniquement)
       updateTuesdayUI();
 
       if (ENFORCE_TUESDAY && !isTodayTuesday()) {
@@ -1616,9 +1723,15 @@ auth.onAuthStateChanged(async (user) => {
         claimButton.disabled = true;
         showNotification('info','Non disponible', 'Les vidéos YouTube sont disponibles uniquement le mardi.');
       } else {
+        // Désactiver le bouton si la limite est atteinte
         startButton.disabled = !canWatchMore;
-        playButton.style.display = 'flex';
-        showNotification('success','Bienvenue','Prêt à gagner avec YouTube!');
+        playButton.style.display = canWatchMore ? 'flex' : 'none';
+        
+        if (canWatchMore) {
+           showNotification('success','Bienvenue','Prêt à gagner avec YouTube!');
+        } else {
+           showNotification('info','Limite atteinte', `Vous avez atteint la limite de ${MAX_VIDEOS_PER_DAY} vidéos pour aujourd'hui. Revenez demain.`);
+        }
       }
 
       loadByIndex(0);
@@ -1649,5 +1762,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(()=> { if (loader) loader.classList.add('hidden'); }, 700);
 });
 </script>
+
 </body>
 </html>
