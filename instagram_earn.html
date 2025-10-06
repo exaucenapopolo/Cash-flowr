@@ -609,6 +609,7 @@
       gap: 15px;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap; /* Ajout pour le responsive */
     }
 
     .btn {
@@ -1111,9 +1112,9 @@
           <div class="timer-circle">
             <div class="timer-bg"></div>
             <div class="timer-progress" id="timerProgress"></div>
-            <div class="timer-text" id="timerText">20s</div>
+            <div class="timer-text" id="timerText">10s</div>
           </div>
-          <div class="timer-label">Temps restant</div>
+          <div class="timer-label">Temps restant (10s requis)</div>
         </div>
         
         <div class="reward-info">
@@ -1195,27 +1196,30 @@ const claimButton = document.getElementById('claimButton');
 const videosWatched = document.getElementById('videosWatched');
 const earnedToday = document.getElementById('earnedToday');
 const notificationContainer = document.getElementById('notificationContainer');
-const videoOverlay = document.getElementById('videoOverlay'); // 🆕 Ajout
-const wednesdayAlert = document.getElementById('wednesdayAlert'); // 🆕 Ajout
-const wednesdayCountdown = document.getElementById('wednesdayCountdown'); // 🆕 Ajout
+const videoOverlay = document.getElementById('videoOverlay');
+const wednesdayAlert = document.getElementById('wednesdayAlert');
+const wednesdayCountdown = document.getElementById('wednesdayCountdown');
 
 
 /******** Config Cloudinary & paramètres ********/
 const CLOUD_NAME = 'do83voiqy';
+// 💡 NOTE: Assurez-vous d'avoir plus de vidéos ici pour tester la fonction "Vidéo suivante"
 const publicIdList = [
   'snaptik_7555088908866866443_v2_zccavx',
-  'snaptik_7442037328115191072_v2_akgrvi'
+  'snaptik_7442037328115191072_v2_akgrvi',
+  // Ajoutez d'autres ID publics ici pour les vidéos 3, 4, etc.
 ];
 function cloudinaryUrl(publicId) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/q_auto,f_auto/${publicId}.mp4`;
 }
 
-const REQUIRED_SECONDS = 10;            // secondes uniques à regarder (la valeur était 20s dans le HTML original)
+// ⚠️ CORRECTION: Le temps requis est 10s dans le code (et 20s dans le HTML original). On maintient 10s.
+const REQUIRED_SECONDS = 10;            // secondes uniques à regarder 
 const REWARD_AMOUNT = 250;             // FCFA par vidéo
 const MAX_VIDEOS_PER_DAY = 2;
-// 🛑 MODIFICATION: Limiter au mercredi (Wednesday)
-const ENFORCE_WEDNESDAY = false;         
-// 🟢 NOUVELLE RÈGLE: max 500 FCFA par transaction (limite de $500\ \text{FCFA}$)
+// 🛑 MODIFICATION: Activation du mercredi pour respecter votre demande
+const ENFORCE_WEDNESDAY = true;         
+// 🟢 NOUVELLE RÈGLE: max 500 FCFA par transaction 
 const MAX_INCREMENT_PER_REQUEST = 500; 
 
 /******** Variables d'état ********/
@@ -1257,6 +1261,7 @@ function showNotification(type, title, message, duration = 3500) {
 }
 
 /******** Menu & interactions UI ********/
+// (Logique inchangée pour le menu, le thème et le profil)
 hamburgerBtn.addEventListener('click', () => {
   sidebar.classList.toggle('open');
   overlay.classList.toggle('active');
@@ -1277,6 +1282,7 @@ themeToggle.addEventListener('click', (ev)=> {
   if (currentUser) saveUserData('theme', isDark ? 'dark' : 'light');
 });
 
+
 /******** Helpers Mercredi ********/
 function getTodayString() {
   return new Date().toDateString();
@@ -1284,9 +1290,11 @@ function getTodayString() {
 
 function isTodayWednesday() {
   try {
+    // Tenter de respecter le fuseau horaire de Douala si possible (pour une logique de jour cohérente)
     const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Douala', weekday: 'long' });
     return fmt.format(new Date()) === 'Wednesday';
   } catch (e) {
+    // Fallback: heure locale de l'utilisateur
     const d = new Date();
     return d.getDay() === 3; // 3 = Wednesday (0=Dim, 1=Lun, 2=Mar, 3=Mer)
   }
@@ -1298,11 +1306,23 @@ function getNextWednesdayCountdown() {
   
   // Calculer combien de jours jusqu'au prochain mercredi (3)
   let daysUntilWednesday = (3 - currentDay + 7) % 7;
-  if (daysUntilWednesday === 0) daysUntilWednesday = 7; // Si on est mercredi, prochain mercredi = dans 7 jours
+  // Si on est mercredi, le jour de déblocage est AUJOURD'HUI. Le compte à rebours est 0.
+  if (daysUntilWednesday === 0) {
+      if (isTodayWednesday()) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      daysUntilWednesday = 7; // Si on n'est pas mercredi (problème de timezone ou décalage), le prochain est dans 7 jours.
+  } 
   
   const nextWednesday = new Date(now);
   nextWednesday.setDate(now.getDate() + daysUntilWednesday);
   nextWednesday.setHours(0, 0, 0, 0); // À minuit
+
+  // Si on est déjà mercredi, on calcule jusqu'à minuit passé.
+  if (isTodayWednesday()) {
+    nextWednesday.setDate(now.getDate() + 7);
+    nextWednesday.setHours(0, 0, 0, 0);
+  } else {
+    nextWednesday.setHours(0, 0, 0, 0);
+  }
   
   const diff = nextWednesday - now;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1326,12 +1346,12 @@ function updateWednesdayUI() {
     countdownInterval = setInterval(() => {
       const countdown = getNextWednesdayCountdown();
       if (wednesdayCountdown) {
-        wednesdayCountdown.textContent = `Prochain mercredi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
-      }
-      
-      // Recharger la page si on arrive à mercredi
-      if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
-        window.location.reload();
+        if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
+            wednesdayCountdown.textContent = `Les vidéos sont disponibles maintenant!`;
+            window.location.reload(); // Recharger pour débloquer l'interface
+        } else {
+            wednesdayCountdown.textContent = `Prochain mercredi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
+        }
       }
     }, 1000);
   } else {
@@ -1347,11 +1367,14 @@ function ensureNextButtonExists() {
   if (nextButton) return;
   const actionRow = document.querySelector('.action-buttons');
   if (!actionRow) return;
+  
+  // 🆕 Création du bouton "Vidéo suivante"
   nextButton = document.createElement('button');
   nextButton.className = 'btn btn-primary';
   nextButton.id = 'nextButton';
-  nextButton.style.display = 'none';
-  nextButton.innerHTML = '<i class="fas fa-forward"></i><span> Regarder la suivante</span>';
+  // 💡 Le style est 'none' par défaut, on l'affichera au besoin
+  nextButton.style.display = 'none'; 
+  nextButton.innerHTML = '<i class="fas fa-forward"></i><span> Vidéo suivante</span>';
   actionRow.appendChild(nextButton);
 
   nextButton.addEventListener('click', () => {
@@ -1360,14 +1383,25 @@ function ensureNextButtonExists() {
       loadByIndex(nextIndex);
       showNotification('info','Prochaine vidéo','Vous êtes sur la vidéo suivante. Bonne visualisation!');
     } else {
-      showNotification('info','Info','Pas d\'autre vidéo disponible.');
+      nextButton.style.display = 'none';
+      showNotification('info','Info','Pas d\'autre vidéo disponible pour le moment.');
     }
   });
 }
 
 /******** Video logic (multi vidéos) ********/
 function loadByIndex(i) {
-  if (i < 0 || i >= publicIdList.length) return;
+  if (i < 0 || i >= publicIdList.length) {
+    showNotification('error', 'Erreur', 'Index de vidéo non valide.');
+    return;
+  }
+  
+  // Si on change de vidéo, on met la vidéo en pause
+  if (currentIndex !== i) {
+    instagramVideo.pause();
+    instagramVideo.currentTime = 0;
+  }
+  
   currentIndex = i;
 
   seenSeconds = {};
@@ -1376,20 +1410,24 @@ function loadByIndex(i) {
   
   updateTimerUI();
   
-  // S'assurer que les tableaux d'état sont de la bonne taille
+  // Mettre à jour l'état des drapeaux
   while (validatedFlags.length < publicIdList.length) validatedFlags.push(false);
   while (claimedFlags.length < publicIdList.length) claimedFlags.push(false);
 
   // Mettre à jour l'état des boutons
-  claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
-  startButton.disabled = !canWatchMore || claimedFlags[currentIndex]; // On ne peut pas regarder une vidéo déjà réclamée
-  playButton.style.display = 'flex';
+  const isClaimed = claimedFlags[currentIndex];
+  const isValidated = validatedFlags[currentIndex];
+
+  claimButton.disabled = isClaimed || !isValidated;
+  startButton.disabled = !canWatchMore || isClaimed; 
+  playButton.style.display = isClaimed ? 'none' : 'flex'; // Cacher le bouton Play/Start si déjà réclamé
 
   instagramVideo.src = cloudinaryUrl(publicIdList[currentIndex]);
   instagramVideo.load();
-
+  
+  // Le bouton suivant est géré à la fin de loadData ou après la réclamation
   ensureNextButtonExists();
-  updateNextButtonVisibility();
+  updateNextButtonVisibility(); 
 }
 
 function updateTimerUI() {
@@ -1404,10 +1442,17 @@ function updateDailyStatsUI() {
   earnedToday.textContent = `${earningsToday} FCFA`;
 }
 
+// 🆕 NOUVELLE LOGIQUE: Afficher le bouton suivant
 function updateNextButtonVisibility() {
   if (!nextButton) return;
+  
   const haveNext = currentIndex + 1 < publicIdList.length;
-  if (haveNext && validatedFlags[currentIndex] && claimedFlags[currentIndex]) {
+  const isCurrentClaimed = claimedFlags[currentIndex];
+  
+  // Le bouton est visible si :
+  // 1. Il existe une vidéo suivante ET
+  // 2. La vidéo actuelle a été réclamée (ce qui signifie qu'elle était validée)
+  if (haveNext && isCurrentClaimed) {
     nextButton.style.display = 'inline-flex';
   } else {
     nextButton.style.display = 'none';
@@ -1419,6 +1464,7 @@ function markVideoValidated(index) {
   validatedFlags[index] = true;
   if (index === currentIndex) {
     claimButton.disabled = claimedFlags[index] || !validatedFlags[index];
+    startButton.disabled = true; // Une fois validée, on ne peut plus "Commencer à regarder"
     updateNextButtonVisibility();
     showNotification('success','Vidéo validée','Vous pouvez réclamer la récompense.');
   }
@@ -1430,7 +1476,9 @@ instagramVideo.addEventListener('timeupdate', () => {
   if (validatedFlags[currentIndex]) return;
   const sec = Math.floor(instagramVideo.currentTime);
   if (sec < 0) return;
-  if (!seenSeconds[sec]) {
+  
+  // Utiliser une petite marge pour ne pas compter 0.00s comme 0s
+  if (sec > 0 && !seenSeconds[sec]) {
     seenSeconds[sec] = true;
     seenCount++;
     updateTimerUI();
@@ -1441,10 +1489,12 @@ instagramVideo.addEventListener('timeupdate', () => {
 });
 
 /******** play/pause/ended handlers ********/
-instagramVideo.addEventListener('play', () => { isPlaying = true; });
+instagramVideo.addEventListener('play', () => { isPlaying = true; startButton.disabled = true; });
 instagramVideo.addEventListener('pause', () => { isPlaying = false; });
 instagramVideo.addEventListener('ended', () => {
+  isPlaying = false;
   if (seenCount >= REQUIRED_SECONDS) markVideoValidated(currentIndex);
+  else showNotification('info', 'Fin de vidéo', 'Vous n\'avez pas atteint le temps requis. Réessayez.');
 });
 
 /******** IntersectionObserver: pause si hors viewport ********/
@@ -1454,6 +1504,9 @@ const io = new IntersectionObserver(entries => {
     if (!isVisible && isPlaying) {
       instagramVideo.pause();
       showNotification('info','Lecture en pause','La vidéo est hors de l\'écran, la lecture a été mise en pause.');
+    } else if (isVisible && !isPlaying && !instagramVideo.paused) {
+      // Si la vidéo n'était pas en pause (ex: juste sortie du viewport)
+      instagramVideo.play().catch(err => console.warn('Play blocked after visibility:', err));
     }
   });
 }, { threshold: 0.6 });
@@ -1489,53 +1542,64 @@ playButton.addEventListener('click', () => {
   instagramVideo.muted = false;
   instagramVideo.play().catch(err => console.warn('play blocked', err));
   playButton.style.display = 'none';
+  startButton.disabled = true; // Une fois la lecture lancée, désactiver le bouton 'Commencer'
 });
 
 startButton.addEventListener('click', () => {
   if (!handlePlayStart()) return;
   instagramVideo.currentTime = 0;
+  // Reset seen status for a fresh start
+  seenSeconds = {};
+  seenCount = 0;
+  updateTimerUI();
+  
   instagramVideo.muted = false;
   instagramVideo.play().catch(err => console.warn('play blocked', err));
   playButton.style.display = 'none';
   startButton.disabled = true;
+  
+  // S'assurer que le bouton de réclamation est désactivé si on recommence
+  claimButton.disabled = true;
 });
 
 
-/******** 🚀 NOUVELLE LOGIQUE: Réclamation transactionnelle (copié/adapté de YouTube) ********/
+/******** 🚀 NOUVELLE LOGIQUE: Réclamation transactionnelle ********/
 claimButton.addEventListener('click', async () => {
+  claimButton.disabled = true; // Empêcher les clics multiples
+  
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
     return; 
   }
   if (!validatedFlags[currentIndex]) { 
     showNotification('error','Non validé','Vous n\'avez pas encore regardé la vidéo suffisamment.'); 
+    claimButton.disabled = false;
     return; 
   }
   if (claimedFlags[currentIndex]) { 
     showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo cette journée.'); 
+    claimButton.disabled = false;
     return; 
   }
   if (videosWatchedToday >= MAX_VIDEOS_PER_DAY) { 
     showNotification('info','Limite atteinte','Vous avez atteint la limite quotidienne de réclamations.'); 
+    claimButton.disabled = false;
     return; 
   }
   if (ENFORCE_WEDNESDAY && !isTodayWednesday()) {
     showNotification('error','Erreur','La réclamation n\'est possible que le mercredi.');
+    claimButton.disabled = false;
     return;
   }
 
   try {
     const user = auth.currentUser;
-    if (!user) {
-      showNotification('error','Non connecté','Session expirée. Reconnectez-vous.');
-      return;
-    }
+    if (!user) throw new Error('Session expirée. Reconnectez-vous.');
 
-    // 1) Tentative d'appel au serveur API (si existant)
+    // 1) Tentative d'appel au serveur API (si existant) - la logique reste la même
+    let serverSuccess = false;
     try {
       const idToken = await user.getIdToken(true).catch(()=>null);
-
-      // ⚠️ Utiliser l'endpoint Instagram-specific
       const resp = await fetch('/api/instagram-claim-reward', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1551,119 +1615,95 @@ claimButton.addEventListener('click', async () => {
         claimedFlags[currentIndex] = true;
         videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
         earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
-        updateDailyStatsUI();
-        updateNextButtonVisibility();
         showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
-        claimButton.disabled = true;
-        canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
-        startButton.disabled = !canWatchMore || claimedFlags[currentIndex+1]; // Désactiver si limite atteinte ou si la prochaine est réclamée (pour éviter un bug de UI)
-        return;
+        serverSuccess = true;
       } else {
         console.warn('Server claim failed or returned non-json. Fallback to client transaction:', resp.status, text);
       }
     } catch (serverErr) {
       console.warn('Erreur fetch serveur (tentative de fallback client):', serverErr);
     }
+    
+    // 2) Fallback: transaction côté client si serveur non atteint ou échoué
+    if (!serverSuccess) {
+        const uid = user.uid;
+        const userRef = db.collection('users').doc(uid);
+        const todayStr = getTodayString();
 
-    // 2) Fallback: transaction côté client (avec champs Instagram-specifics)
-    const uid = user.uid;
-    const userRef = db.collection('users').doc(uid);
-    const todayStr = getTodayString();
+        await db.runTransaction(async (tx) => {
+            const snap = await tx.get(userRef);
+            if (!snap.exists) throw new Error('Utilisateur introuvable (transaction).');
 
-    try {
-      await db.runTransaction(async (tx) => {
-        const snap = await tx.get(userRef);
-        if (!snap.exists) throw new Error('Utilisateur introuvable (transaction).');
+            const doc = snap.data() || {};
+            const lastDate = doc.lastInstagramWatchDate || null;
+            const claimedArr = Array.isArray(doc.instagramClaimedToday) ? doc.instagramClaimedToday.slice() : [];
+            let watchesTodayDoc = Number(doc.instagramWatchesToday || 0);
+            let earningsTodayDoc = Number(doc.instagramEarningsToday || 0);
+            let profitDoc = Number(doc.profit || 0);
+            let instagramGainsDoc = Number(doc.instagramGains || 0); 
 
-        const doc = snap.data() || {};
+            // Si la date du doc n'est pas aujourd'hui -> réinitialiser
+            if (lastDate !== todayStr) {
+              claimedArr.length = 0;
+              watchesTodayDoc = 0;
+              earningsTodayDoc = 0;
+            }
 
-        // 🟢 ADAPTATION: Lire les champs Instagram (nouveaux champs à créer si inexistants)
-        const lastDate = doc.lastInstagramWatchDate || null;
-        const claimedArr = Array.isArray(doc.instagramClaimedToday) ? doc.instagramClaimedToday.slice() : [];
-        let watchesTodayDoc = Number(doc.instagramWatchesToday || 0);
-        let earningsTodayDoc = Number(doc.instagramEarningsToday || 0);
-        let profitDoc = Number(doc.profit || 0);
-        // 🟢 ADAPTATION: Champ Instagram Gains
-        let instagramGainsDoc = Number(doc.instagramGains || 0); 
+            // Vérifications
+            if (claimedArr.indexOf(currentIndex) !== -1) throw new Error('Cette vidéo a déjà été réclamée aujourd\'hui.');
+            if (watchesTodayDoc >= MAX_VIDEOS_PER_DAY) throw new Error('Limite quotidienne atteinte (doc)');
+            if (REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) throw new Error(`Montant par requête (${REWARD_AMOUNT}) trop élevé.`);
 
-        // Si la date du doc n'est pas aujourd'hui -> réinitialiser
-        if (lastDate !== todayStr) {
-          claimedArr.length = 0;
-          watchesTodayDoc = 0;
-          earningsTodayDoc = 0;
-        }
+            // Calcul
+            const newProfit = profitDoc + REWARD_AMOUNT; 
+            const newInstagramGains = instagramGainsDoc + REWARD_AMOUNT;
+            const newEarningsToday = earningsTodayDoc + REWARD_AMOUNT;
+            const newWatchesToday = watchesTodayDoc + 1;
 
-        // Vérification de réclamation pour cette vidéo
-        if (claimedArr.indexOf(currentIndex) !== -1) {
-          throw new Error('Cette vidéo a déjà été réclamée aujourd\'hui.');
-        }
+            // V-Safe Checks 
+            if ((newProfit - profitDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment profit > allowed');
+            
+            claimedArr.push(currentIndex);
 
-        // Vérification limite quotidienne
-        if (watchesTodayDoc >= MAX_VIDEOS_PER_DAY) {
-          throw new Error('Limite quotidienne atteinte (doc)');
-        }
+            // 🟢 ADAPTATION: Objet de mise à jour avec les champs Instagram-specifics
+            const updateObj = {
+              profit: newProfit, 
+              instagramGains: newInstagramGains, 
+              instagramEarningsToday: newEarningsToday, 
+              instagramWatchesToday: newWatchesToday, 
+              lastInstagramWatchDate: todayStr, 
+              instagramClaimedToday: claimedArr
+            };
 
-        // Vérification montant réclamé (règle des 500 FCFA max)
-        if (REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) {
-          throw new Error(`Montant par requête (${REWARD_AMOUNT}) trop élevé (max ${MAX_INCREMENT_PER_REQUEST} FCFA).`);
-        }
-        
-        // 🛑 RÈGLE CRUCIALE : NE JAMAIS ÉCRIRE DANS solde/balance
-        // Le champ 'profit' est le solde qui sera incrémenté.
-        const newProfit = profitDoc + REWARD_AMOUNT; 
-        
-        // Calcul des nouvelles valeurs spécifiques à Instagram
-        const newInstagramGains = instagramGainsDoc + REWARD_AMOUNT;
-        const newEarningsToday = earningsTodayDoc + REWARD_AMOUNT;
-        const newWatchesToday = watchesTodayDoc + 1;
+            tx.update(userRef, updateObj);
+        });
 
-        // V-Safe Checks pour la transaction (garantie de limite de 500 par écriture)
-        if ((newProfit - profitDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment profit > allowed');
-        if ((newInstagramGains - instagramGainsDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment instagramGains > allowed');
-        if ((newEarningsToday - earningsTodayDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment instagramEarningsToday > allowed');
-        if ((newWatchesToday - watchesTodayDoc) > 1) throw new Error('Increment instagramWatchesToday > 1 interdit');
-        if (newWatchesToday > MAX_VIDEOS_PER_DAY) throw new Error('Limite quotidienne dépassée');
-
-        // Ajouter l'index à la liste des réclamées
-        claimedArr.push(currentIndex);
-
-        // 🟢 ADAPTATION: Objet de mise à jour avec les champs Instagram-specifics
-        const updateObj = {
-          profit: newProfit, // 🛑 MISE À JOUR DU SOLDE GLOBAL
-          instagramGains: newInstagramGains, // 🆕 NOUVEAU CHAMP
-          instagramEarningsToday: newEarningsToday, // 🆕 NOUVEAU CHAMP
-          instagramWatchesToday: newWatchesToday, // 🆕 NOUVEAU CHAMP
-          lastInstagramWatchDate: todayStr, // 🆕 NOUVEAU CHAMP
-          instagramClaimedToday: claimedArr // 🆕 NOUVEAU CHAMP
-        };
-
-        console.log('Transaction preparing updateObj (Fallback):', updateObj);
-        tx.update(userRef, updateObj);
-      });
-
-      // Si transaction réussit (Fallback):
-      claimedFlags[currentIndex] = true;
-      videosWatchedToday = videosWatchedToday + 1;
-      earningsToday = earningsToday + REWARD_AMOUNT;
-      updateDailyStatsUI();
-      updateNextButtonVisibility();
-      showNotification('success','Récompense (fallback)','250 FCFA ajouté et vidéo marquée réclamée.');
-      claimButton.disabled = true;
-      canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
-      startButton.disabled = !canWatchMore || claimedFlags[currentIndex+1];
-      return;
-
-    } catch (txErr) {
-      console.error('Transaction failed:', txErr);
-      const msg = (txErr && txErr.message) ? txErr.message : 'Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.';
-      showNotification('error','Erreur', msg);
+        // Si transaction réussit (Fallback):
+        claimedFlags[currentIndex] = true;
+        videosWatchedToday = videosWatchedToday + 1;
+        earningsToday = earningsToday + REWARD_AMOUNT;
+        showNotification('success','Récompense (fallback)','250 FCFA ajouté et vidéo marquée réclamée.');
     }
+    
+    // Mise à jour finale de l'UI après succès (serveur ou fallback)
+    updateDailyStatsUI();
+    
+    // Mettre à jour la possibilité de regarder
+    canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
+    
+    // Désactiver/Activer les boutons
+    claimButton.disabled = true;
+    startButton.disabled = !canWatchMore;
+    playButton.style.display = 'none'; // Le bouton Play est caché car la vidéo est réclamée
+
+    // 🆕 Afficher le bouton suivant
+    updateNextButtonVisibility();
 
   } catch (err) {
     console.error('Erreur lors de la réclamation (global):', err);
-    let msg = 'Impossible d\'enregistrer la récompense. Réessayez.';
-    if (err && err.message) msg = err.message;
+    let msg = (err && err.message) ? err.message : 'Impossible d\'enregistrer la récompense. Réessayez.';
     showNotification('error','Erreur', msg);
+    claimButton.disabled = false; // Réactiver en cas d'erreur
   }
 });
 
@@ -1697,12 +1737,14 @@ async function loadUserData() {
   const todayStr = getTodayString();
   const claimed = Array.isArray(userData.instagramClaimedToday) && userData.lastInstagramWatchDate === todayStr ? userData.instagramClaimedToday : [];
   
-  // Marquer claimedFlags
-  claimedFlags.fill(false); // Réinitialiser pour éviter les bugs si publicIdList change
+  claimedFlags.fill(false);
+  // Initialiser les flags de validation/réclamation
+  validatedFlags.fill(false); // On assume qu'il faut revalider chaque jour
   if (Array.isArray(claimed)) {
     claimed.forEach(idx => {
       if (typeof idx === 'number' && idx >= 0 && idx < claimedFlags.length) {
         claimedFlags[idx] = true;
+        validatedFlags[idx] = true; // Si réclamée, elle était forcément validée
       }
     });
   }
@@ -1736,7 +1778,6 @@ auth.onAuthStateChanged(async (user) => {
     try {
       await loadUserData();
 
-      // Vérification statut (conservé de l'original)
       const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
       const validStatuses = ['paid', 'active', 'true', '1'];
       if (!validStatuses.includes(userStatus) && !userData.paid) {
@@ -1746,12 +1787,11 @@ auth.onAuthStateChanged(async (user) => {
       updateUserInfoUI(user, userData);
       applyTheme();
 
+      // 🟢 ADAPTATION: Gérer l'UI en fonction du jour (mercredi uniquement)
+      updateWednesdayUI();
       canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
       updateDailyStatsUI();
       ensureNextButtonExists();
-
-      // 🟢 ADAPTATION: Gérer l'UI en fonction du jour (mercredi uniquement)
-      updateWednesdayUI();
 
       if (ENFORCE_WEDNESDAY && !isTodayWednesday()) {
         startButton.disabled = true;
@@ -1759,19 +1799,15 @@ auth.onAuthStateChanged(async (user) => {
         claimButton.disabled = true;
         showNotification('info','Non disponible', 'Les vidéos Instagram sont disponibles uniquement le mercredi.');
       } else {
-        // Désactiver le bouton si la limite est atteinte
-        startButton.disabled = !canWatchMore;
-        playButton.style.display = canWatchMore ? 'flex' : 'none';
-        
+        // Charger la première vidéo et mettre à jour l'UI des boutons
+        loadByIndex(0); 
+
         if (canWatchMore) {
            showNotification('success','Bienvenue','Prêt à gagner avec Instagram!');
         } else {
            showNotification('info','Limite atteinte', `Vous avez atteint la limite de ${MAX_VIDEOS_PER_DAY} vidéos pour aujourd'hui. Revenez demain.`);
         }
       }
-
-      // Charger la première vidéo
-      loadByIndex(0);
 
       document.body.classList.add('loaded');
       if (loader) loader.classList.add('hidden');
@@ -1796,7 +1832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     link.href = cloudinaryUrl(publicIdList[0]);
     document.head.appendChild(link);
   }
-  // initial UI timer
+  // Initial UI timer
   timerText.textContent = `${REQUIRED_SECONDS}s`;
   setTimeout(()=> { if (loader) loader.classList.add('hidden'); }, 700);
 });
