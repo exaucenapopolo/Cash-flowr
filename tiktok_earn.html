@@ -1120,7 +1120,6 @@
       </div>
     </div>
   </footer>
-
 <script>
 /******** CONFIG FIREBASE ********/
 const firebaseConfig = {
@@ -1171,7 +1170,7 @@ function cloudinaryUrl(publicId) {
 const REQUIRED_SECONDS = 10;
 const REWARD_AMOUNT = 250;
 const MAX_VIDEOS_PER_DAY = 2;
-const ENFORCE_MONDAY = true;  // 🔒 RESTRICTION ACTIVÉE: Vidéos disponibles uniquement le lundi
+const ENFORCE_MONDAY = true;  // Vidéos disponibles uniquement le lundi
 
 /******** Variables d'état ********/
 let currentUser = null;
@@ -1246,32 +1245,28 @@ function isTodayMonday() {
       weekday: 'long' 
     });
     const dayName = formatter.format(new Date());
-    return dayName.toLowerCase() === 'monday';
+    return dayName === 'Monday';
   } catch (error) {
-    console.warn('Timezone Africa/Douala non supporté, utilisation locale');
+    console.warn('Timezone Africa/Douala non supporté, fallback local');
     const d = new Date();
     return d.getDay() === 1;
   }
 }
 
 function getNextMondayCountdown() {
-  try {
-    const now = new Date();
-    const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
-    let daysUntilMonday = (8 - currentDay) % 7;
-    if (daysUntilMonday === 0) daysUntilMonday = 7;
-    const nextMonday = new Date(now);
-    nextMonday.setDate(now.getDate() + daysUntilMonday);
-    nextMonday.setHours(0, 0, 0, 0);
-    const diff = nextMonday - now;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    return { days, hours, minutes, seconds };
-  } catch (error) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday
+  let daysUntilMonday = (8 - currentDay) % 7;
+  if (daysUntilMonday === 0) daysUntilMonday = 7;
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + daysUntilMonday);
+  nextMonday.setHours(0, 0, 0, 0);
+  const diff = nextMonday - now;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { days, hours, minutes, seconds };
 }
 
 function updateMondayUI() {
@@ -1279,16 +1274,13 @@ function updateMondayUI() {
   const videoOverlay = document.getElementById('videoOverlay');
   const mondayCountdown = document.getElementById('mondayCountdown');
   const isMonday = isTodayMonday();
-
   if (ENFORCE_MONDAY && !isMonday) {
     if (mondayAlert) mondayAlert.style.display = 'block';
     if (videoOverlay) videoOverlay.classList.add('active');
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
       const countdown = getNextMondayCountdown();
-      if (mondayCountdown) {
-        mondayCountdown.textContent = `Prochain lundi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
-      }
+      if (mondayCountdown) mondayCountdown.textContent = `Prochain lundi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
       if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
         window.location.reload();
       }
@@ -1300,7 +1292,7 @@ function updateMondayUI() {
   }
 }
 
-/******** Gestion du bouton "Regarder la suivante" ********/
+/******** Next button helper ********/
 function ensureNextButtonExists() {
   if (nextButton) return;
   const actionRow = document.querySelector('.action-buttons');
@@ -1323,24 +1315,20 @@ function ensureNextButtonExists() {
   });
 }
 
-/******** Fonctions vidéo & logique ********/
+/******** Video logic ********/
 function loadByIndex(i) {
   if (i < 0 || i >= publicIdList.length) return;
   currentIndex = i;
-
   seenSeconds = {};
   seenCount = 0;
   isPlaying = false;
   validatedFlags[currentIndex] = validatedFlags[currentIndex] || false;
-
   updateTimerUI();
   claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
   startButton.disabled = !canWatchMore;
   playButton.style.display = 'flex';
-
   tiktokVideo.src = cloudinaryUrl(publicIdList[currentIndex]);
   tiktokVideo.load();
-
   ensureNextButtonExists();
   updateNextButtonVisibility();
 }
@@ -1377,7 +1365,7 @@ function markVideoValidated(index) {
   }
 }
 
-/******** timeupdate: compter secondes uniques ********/
+/******** timeupdate counting unique seconds ********/
 tiktokVideo.addEventListener('timeupdate', () => {
   if (!isPlaying || !isVisible) return;
   if (validatedFlags[currentIndex]) return;
@@ -1400,7 +1388,7 @@ tiktokVideo.addEventListener('ended', () => {
   if (seenCount >= REQUIRED_SECONDS) markVideoValidated(currentIndex);
 });
 
-/******** IntersectionObserver: pause si hors viewport ********/
+/******** IntersectionObserver & visibility ********/
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => {
     isVisible = e.isIntersecting;
@@ -1412,7 +1400,6 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.6 });
 io.observe(tiktokVideo);
 
-/******** Visibility API: pause si onglet caché ********/
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && isPlaying) {
     tiktokVideo.pause();
@@ -1420,7 +1407,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-/******** Buttons events ********/
+/******** Buttons ********/
 playButton.addEventListener('click', () => {
   if (ENFORCE_MONDAY && !isTodayMonday()) {
     showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le lundi.');
@@ -1443,7 +1430,7 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
-/******** 🚀 HANDLER : réclamation (serveur puis fallback) ********/
+/******** 🚀 claimButton : try server, else fallback client (no solde write) ********/
 claimButton.addEventListener('click', async () => {
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
@@ -1469,7 +1456,8 @@ claimButton.addEventListener('click', async () => {
       return;
     }
 
-    // 1) Essayer d'appeler le serveur (/api/tiktok-claim-reward)
+    // 1) Try server endpoint
+    let usedServer = false;
     try {
       const idToken = await user.getIdToken(true).catch(()=>null);
       const headers = { 'Content-Type': 'application/json' };
@@ -1481,44 +1469,53 @@ claimButton.addEventListener('click', async () => {
         body: JSON.stringify({ idToken: idToken, rewardAmount: REWARD_AMOUNT, videoIndex: currentIndex })
       });
 
-      let data = null;
       const text = await resp.text().catch(()=>null);
+      let data = null;
       try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
 
-      if (resp.ok && data && (data.success || data.ok)) {
-        // Serveur a traité correctement
+      if (resp.ok && data && data.success) {
+        // server accepted -> update local state with returned values (safest)
         claimedFlags[currentIndex] = true;
         videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
         earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
         updateDailyStatsUI();
         updateNextButtonVisibility();
-        showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'inconnu'} FCFA`);
+        showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
         claimButton.disabled = true;
         startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
+        usedServer = true;
         return;
       } else {
-        console.warn('Réponse serveur non OK ou non JSON :', resp.status, text);
+        console.warn('Server claim failed or returned non-json:', resp.status, text);
       }
     } catch (serverErr) {
-      console.warn('Erreur fetch serveur (fallback) :', serverErr);
+      console.warn('Erreur fetch serveur (fallback):', serverErr);
     }
 
-    // 2) FALLBACK (TEMPORAIRE) : écrire directement côté client dans Firestore
-    // ATTENTION : insecure en production — utiliser uniquement pour dépannage / tests
-    try {
+    // 2) FALLBACK: Update Firestore client-side (only permitted fields). NO solde write.
+    if (!usedServer) {
       const uid = user.uid;
       const userRef = db.collection('users').doc(uid);
       const todayStr = new Date().toDateString();
 
-      await userRef.update({
-        solde: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-        tiktokGains: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-        tikTokWatchesToday: firebase.firestore.FieldValue.increment(1),
-        tikTokEarningsToday: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
-        lastTikTokWatchDate: todayStr
-      });
+      // Build update object: increment profit, tiktokGains, tikTokWatchesToday, tikTokEarningsToday and set lastTikTokWatchDate
+      const updateObj = {};
+      updateObj.profit = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
+      updateObj.tiktokGains = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
+      updateObj.tikTokWatchesToday = firebase.firestore.FieldValue.increment(1);
+      updateObj.tikTokEarningsToday = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
+      updateObj.lastTikTokWatchDate = todayStr;
 
-      // Mise à jour UI locale
+      // Attempt update
+      try {
+        await userRef.update(updateObj);
+      } catch (err) {
+        console.error('Erreur update Firestore (fallback):', err);
+        showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.');
+        throw err;
+      }
+
+      // Update local UI state
       claimedFlags[currentIndex] = true;
       videosWatchedToday = videosWatchedToday + 1;
       earningsToday = earningsToday + REWARD_AMOUNT;
@@ -1529,12 +1526,7 @@ claimButton.addEventListener('click', async () => {
       claimButton.disabled = true;
       startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
       return;
-    } catch (fwErr) {
-      console.error('Fallback Firestore update failed:', fwErr);
-      showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.');
-      return;
     }
-
   } catch (err) {
     console.error('Erreur lors de la réclamation (global):', err);
     showNotification('error','Erreur','Impossible d\'enregistrer la récompense. Réessayez.');
@@ -1612,7 +1604,7 @@ auth.onAuthStateChanged(async (user) => {
 
       ensureNextButtonExists();
 
-      // 🔒 Gérer l'UI en fonction du jour (lundi uniquement)
+      // Gérer l'UI en fonction du jour (lundi uniquement)
       updateMondayUI();
 
       if (ENFORCE_MONDAY && !isTodayMonday()) {
