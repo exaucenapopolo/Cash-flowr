@@ -1445,7 +1445,7 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
-/******** 🚀 NOUVELLE FONCTION: Appel API serveur pour réclamation ********/
+// ----- REMPLACER ICI : handler de claimButton -----
 claimButton.addEventListener('click', async () => {
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
@@ -1466,61 +1466,89 @@ claimButton.addEventListener('click', async () => {
 
   try {
     const user = auth.currentUser;
-    
     if (!user) {
       showNotification('error','Non connecté','Session expirée. Reconnectez-vous.');
-      setTimeout(() => { window.location.href = 'login.html'; }, 2000);
       return;
     }
-    
-    // Obtenir le token en le forçant à se rafraîchir
-    let idToken;
+
+    // Première tentative : appeler le serveur (si disponible)
+    let serverOk = false;
     try {
-      idToken = await user.getIdToken(true);
-    } catch (tokenErr) {
-      console.error('Erreur getIdToken:', tokenErr);
-      showNotification('error','Session invalide','Veuillez vous reconnecter.');
-      await auth.signOut();
-      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      // on récupère un idToken pour sécurité si le serveur en a besoin
+      const idToken = await user.getIdToken(true).catch(()=>null);
+      const fetchOpts = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: idToken, rewardAmount: REWARD_AMOUNT, videoIndex: currentIndex })
+      };
+      if (idToken) fetchOpts.headers['Authorization'] = 'Bearer ' + idToken;
+
+      const resp = await fetch('/api/tiktok-claim-reward', fetchOpts);
+      const text = await resp.text().catch(()=>null);
+
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
+
+      if (resp.ok && data && data.success) {
+        // Serveur a répondu OK
+        serverOk = true;
+        claimedFlags[currentIndex] = true;
+        videosWatchedToday = data.videosWatchedToday || (videosWatchedToday + 1);
+        earningsToday = data.earningsToday || (earningsToday + REWARD_AMOUNT);
+        updateDailyStatsUI();
+        updateNextButtonVisibility();
+        showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'inconnu'} FCFA`);
+        claimButton.disabled = true;
+        startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
+        return;
+      } else {
+        // réponse non-OK du serveur : on tombe dans le fallback
+        console.warn('Server claim failed or returned non-json:', resp.status, text);
+      }
+    } catch (serverErr) {
+      console.warn('Erreur fetch serveur (fallback):', serverErr);
+    }
+
+    // ----- FALLBACK DEV: mettre à jour directement Firestore (temporaire) -----
+    // IMPORTANT: solution temporaire uniquement - insecure en production
+    if (!serverOk) {
+      // On écrit dans le doc user (privilege client via rules...)
+      const uid = user.uid;
+      const userRef = db.collection('users').doc(uid);
+      const todayStr = new Date().toDateString();
+
+      // Appliquer la mise à jour locale (client SDK)
+      await userRef.update({
+        solde: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+        tiktokGains: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+        tikTokWatchesToday: firebase.firestore.FieldValue.increment(1),
+        tikTokEarningsToday: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
+        lastTikTokWatchDate: todayStr
+      }).catch(async (err) => {
+        console.error('Erreur update Firestore (fallback):', err);
+        // Si update échoue (ex: règles Firestore bloquent), on prévient l'utilisateur
+        showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez vos règles Firestore.');
+        throw err;
+      });
+
+      // Mise à jour UI locale
+      claimedFlags[currentIndex] = true;
+      videosWatchedToday = videosWatchedToday + 1;
+      earningsToday = earningsToday + REWARD_AMOUNT;
+      updateDailyStatsUI();
+      updateNextButtonVisibility();
+      showNotification('success','Récompense (fallback)','250 FCFA ajouté localement (mode dépannage).');
+
+      claimButton.disabled = true;
+      startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
       return;
     }
 
-    // Vérifier format JWT simple avant envoi
-    const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
-    if (!idToken || !jwtRegex.test(idToken.trim())) {
-      console.error('Token invalide (format) :', idToken ? idToken.slice(0,30) + '...' : 'null');
-      showNotification('error','Token invalide','Le token renvoyé n\'a pas le format attendu. Reconnectez-vous.');
-      await auth.signOut();
-      setTimeout(() => { window.location.href = 'login.html'; }, 1200);
-      return;
-    }
-    
-    console.log('🔑 Token Firebase obtenu (format OK), envoi requête au serveur...');
-    const response = await fetch('/api/tiktok-claim-reward', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + idToken
-      },
-      body: JSON.stringify({
-        rewardAmount: REWARD_AMOUNT,
-        videoIndex: currentIndex
-      })
-    });
-
-    let data;
-    try {
-      data = await response.json();
-    } catch (parseErr) {
-      console.error('Réponse non-JSON du serveur:', parseErr);
-      throw new Error('Réponse du serveur invalide. Voir la console serveur.');
-    }
-
-    if (!response.ok) {
-      const errMsg = data.error || data.message || 'Erreur serveur';
-      throw new Error(errMsg);
-    }
-
+  } catch (err) {
+    console.error('Erreur lors de la réclamation (global):', err);
+    showNotification('error','Erreur','Impossible d\'enregistrer la récompense. Réessayez.');
+  }
+});
     // Mise à jour de l'état local (utiliser valeurs renvoyées par le serveur si présentes)
     claimedFlags[currentIndex] = true;
     videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
