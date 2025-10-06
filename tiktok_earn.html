@@ -1246,7 +1246,7 @@ function isTodayMonday() {
       weekday: 'long' 
     });
     const dayName = formatter.format(new Date());
-    return dayName === 'Monday';
+    return dayName.toLowerCase() === 'monday';
   } catch (error) {
     console.warn('Timezone Africa/Douala non supporté, utilisation locale');
     const d = new Date();
@@ -1278,13 +1278,11 @@ function updateMondayUI() {
   const mondayAlert = document.getElementById('mondayAlert');
   const videoOverlay = document.getElementById('videoOverlay');
   const mondayCountdown = document.getElementById('mondayCountdown');
-  
   const isMonday = isTodayMonday();
-  
+
   if (ENFORCE_MONDAY && !isMonday) {
     if (mondayAlert) mondayAlert.style.display = 'block';
     if (videoOverlay) videoOverlay.classList.add('active');
-    
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
       const countdown = getNextMondayCountdown();
@@ -1334,7 +1332,7 @@ function loadByIndex(i) {
   seenCount = 0;
   isPlaying = false;
   validatedFlags[currentIndex] = validatedFlags[currentIndex] || false;
-  
+
   updateTimerUI();
   claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
   startButton.disabled = !canWatchMore;
@@ -1445,7 +1443,7 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
-// ----- REMPLACER ICI : handler de claimButton -----
+/******** 🚀 HANDLER : réclamation (serveur puis fallback) ********/
 claimButton.addEventListener('click', async () => {
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
@@ -1471,30 +1469,27 @@ claimButton.addEventListener('click', async () => {
       return;
     }
 
-    // Première tentative : appeler le serveur (si disponible)
-    let serverOk = false;
+    // 1) Essayer d'appeler le serveur (/api/tiktok-claim-reward)
     try {
-      // on récupère un idToken pour sécurité si le serveur en a besoin
       const idToken = await user.getIdToken(true).catch(()=>null);
-      const fetchOpts = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: idToken, rewardAmount: REWARD_AMOUNT, videoIndex: currentIndex })
-      };
-      if (idToken) fetchOpts.headers['Authorization'] = 'Bearer ' + idToken;
+      const headers = { 'Content-Type': 'application/json' };
+      if (idToken) headers['Authorization'] = 'Bearer ' + idToken;
 
-      const resp = await fetch('/api/tiktok-claim-reward', fetchOpts);
-      const text = await resp.text().catch(()=>null);
+      const resp = await fetch('/api/tiktok-claim-reward', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ idToken: idToken, rewardAmount: REWARD_AMOUNT, videoIndex: currentIndex })
+      });
 
       let data = null;
+      const text = await resp.text().catch(()=>null);
       try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
 
-      if (resp.ok && data && data.success) {
-        // Serveur a répondu OK
-        serverOk = true;
+      if (resp.ok && data && (data.success || data.ok)) {
+        // Serveur a traité correctement
         claimedFlags[currentIndex] = true;
-        videosWatchedToday = data.videosWatchedToday || (videosWatchedToday + 1);
-        earningsToday = data.earningsToday || (earningsToday + REWARD_AMOUNT);
+        videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
+        earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
         updateDailyStatsUI();
         updateNextButtonVisibility();
         showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'inconnu'} FCFA`);
@@ -1502,33 +1497,25 @@ claimButton.addEventListener('click', async () => {
         startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
         return;
       } else {
-        // réponse non-OK du serveur : on tombe dans le fallback
-        console.warn('Server claim failed or returned non-json:', resp.status, text);
+        console.warn('Réponse serveur non OK ou non JSON :', resp.status, text);
       }
     } catch (serverErr) {
-      console.warn('Erreur fetch serveur (fallback):', serverErr);
+      console.warn('Erreur fetch serveur (fallback) :', serverErr);
     }
 
-    // ----- FALLBACK DEV: mettre à jour directement Firestore (temporaire) -----
-    // IMPORTANT: solution temporaire uniquement - insecure en production
-    if (!serverOk) {
-      // On écrit dans le doc user (privilege client via rules...)
+    // 2) FALLBACK (TEMPORAIRE) : écrire directement côté client dans Firestore
+    // ATTENTION : insecure en production — utiliser uniquement pour dépannage / tests
+    try {
       const uid = user.uid;
       const userRef = db.collection('users').doc(uid);
       const todayStr = new Date().toDateString();
 
-      // Appliquer la mise à jour locale (client SDK)
       await userRef.update({
         solde: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
         tiktokGains: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
         tikTokWatchesToday: firebase.firestore.FieldValue.increment(1),
         tikTokEarningsToday: firebase.firestore.FieldValue.increment(REWARD_AMOUNT),
         lastTikTokWatchDate: todayStr
-      }).catch(async (err) => {
-        console.error('Erreur update Firestore (fallback):', err);
-        // Si update échoue (ex: règles Firestore bloquent), on prévient l'utilisateur
-        showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez vos règles Firestore.');
-        throw err;
       });
 
       // Mise à jour UI locale
@@ -1542,29 +1529,15 @@ claimButton.addEventListener('click', async () => {
       claimButton.disabled = true;
       startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
       return;
+    } catch (fwErr) {
+      console.error('Fallback Firestore update failed:', fwErr);
+      showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.');
+      return;
     }
 
   } catch (err) {
     console.error('Erreur lors de la réclamation (global):', err);
     showNotification('error','Erreur','Impossible d\'enregistrer la récompense. Réessayez.');
-  }
-});
-    // Mise à jour de l'état local (utiliser valeurs renvoyées par le serveur si présentes)
-    claimedFlags[currentIndex] = true;
-    videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
-    earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
-    
-    updateDailyStatsUI();
-    updateNextButtonVisibility();
-
-    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'N/A'} FCFA`);
-
-    claimButton.disabled = true;
-    startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
-    
-  } catch (err) {
-    console.error('Erreur lors de la réclamation:', err);
-    showNotification('error','Erreur', err.message || 'Impossible d\'enregistrer la récompense. Réessayez.');
   }
 });
 
