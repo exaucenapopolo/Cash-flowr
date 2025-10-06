@@ -1073,291 +1073,499 @@
     </div>
   </footer>
 
-  <script>
-    /******** CONFIG FIREBASE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
-    };
+<script>
+/******** CONFIG FIREBASE ********/
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.appspot.com",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+/******** DOM Elements ********/
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const themeToggle = document.getElementById('themeToggle');
+const userProfile = document.getElementById('userProfile');
+const profileDropdown = document.getElementById('profileDropdown');
+const languageSelector = document.getElementById('languageSelector');
+const loader = document.getElementById('loader');
+const sidebarUsername = document.getElementById('sidebarUsername');
+const userAvatar = document.getElementById('userAvatar');
 
-    /******** DOM Elements ********/
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    // Instagram Earn specific elements
-    const instagramVideo = document.getElementById('instagramVideo');
-    const playButton = document.getElementById('playButton');
-    const timerProgress = document.getElementById('timerProgress');
-    const timerText = document.getElementById('timerText');
-    const startButton = document.getElementById('startButton');
-    const claimButton = document.getElementById('claimButton');
-    const videosWatched = document.getElementById('videosWatched');
-    const earnedToday = document.getElementById('earnedToday');
+const instagramVideo = document.getElementById('instagramVideo');
+const playButton = document.getElementById('playButton');
+const timerProgress = document.getElementById('timerProgress');
+const timerText = document.getElementById('timerText');
+const startButton = document.getElementById('startButton');
+const claimButton = document.getElementById('claimButton');
+const videosWatched = document.getElementById('videosWatched');
+const earnedToday = document.getElementById('earnedToday');
+const notificationContainer = document.getElementById('notificationContainer');
 
-    /******** Variables d'état ********/
-    let currentUser = null;
-    let userData = {};
-    let timerInterval = null;
-    let remainingTime = 20;
-    let videosWatchedToday = 0;
-    let earningsToday = 0;
-    let canWatchMore = true;
+/******** Config Cloudinary & paramètres ********/
+const CLOUD_NAME = 'do83voiqy';
+const publicIdList = [
+  'snaptik_7555088908866866443_v2_zccavx',
+  'snaptik_7442037328115191072_v2_akgrvi'
+];
+function cloudinaryUrl(publicId) {
+  return `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/q_auto,f_auto/${publicId}.mp4`;
+}
 
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
+const REQUIRED_SECONDS = 10;            // secondes uniques à regarder
+const REWARD_AMOUNT = 250;             // FCFA par vidéo
+const MAX_VIDEOS_PER_DAY = 2;
+const ENFORCE_TUESDAY = false;         // mettre true si tu veux limiter au mardi
+
+/******** Variables d'état ********/
+let currentUser = null;
+let userData = {};
+let currentIndex = 0;
+let seenSeconds = {};
+let seenCount = 0;
+let isPlaying = false;
+let isVisible = true;
+let videosWatchedToday = 0;
+let earningsToday = 0;
+let canWatchMore = true;
+
+const validatedFlags = new Array(publicIdList.length).fill(false);
+const claimedFlags = new Array(publicIdList.length).fill(false);
+
+let nextButton = null;
+let countdownInterval = null;
+
+/******** UI helpers (notifications) ********/
+function showNotification(type, title, message, duration = 3500) {
+  if (!notificationContainer) return;
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+  notification.innerHTML = `
+    <i class="fas ${icon}" style="font-size:1.5rem"></i>
+    <div>
+      <strong style="display:block;margin-bottom:5px;">${title}</strong>
+      <span>${message}</span>
+    </div>`;
+  notificationContainer.appendChild(notification);
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(()=> { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
+  }, duration);
+}
+
+/******** Menu & interactions UI ********/
+hamburgerBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+  hamburgerBtn.classList.toggle('open');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  hamburgerBtn.classList.remove('open');
+});
+userProfile.addEventListener('click', (ev) => { ev.stopPropagation(); profileDropdown.classList.toggle('active'); });
+document.addEventListener('click', (ev) => { if (!userProfile.contains(ev.target)) profileDropdown.classList.remove('active'); });
+themeToggle.addEventListener('click', (ev)=> {
+  ev.stopPropagation();
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i><span>Mode jour</span>' : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+  if (currentUser) saveUserData('theme', isDark ? 'dark' : 'light');
+});
+
+/******** Helpers Tuesday (optionnel) ********/
+function isTodayTuesday() {
+  try {
+    const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Douala', weekday: 'long' });
+    return fmt.format(new Date()) === 'Tuesday';
+  } catch (e) {
+    const d = new Date();
+    return d.getDay() === 2; // 2 = Tuesday (but browser locale differences)
+  }
+}
+function getNextTuesdayCountdown() {
+  const now = new Date();
+  let daysUntil = (9 - now.getDay()) % 7;
+  if (daysUntil === 0) daysUntil = 7;
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntil);
+  next.setHours(0,0,0,0);
+  const diff = next - now;
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const seconds = Math.floor((diff % (1000*60)) / 1000);
+  return { days, hours, minutes, seconds };
+}
+
+/******** Next button ********/
+function ensureNextButtonExists() {
+  if (nextButton) return;
+  const actionRow = document.querySelector('.action-buttons');
+  if (!actionRow) return;
+  nextButton = document.createElement('button');
+  nextButton.className = 'btn btn-primary';
+  nextButton.id = 'nextButton';
+  nextButton.style.display = 'none';
+  nextButton.innerHTML = '<i class="fas fa-forward"></i><span> Regarder la suivante</span>';
+  actionRow.appendChild(nextButton);
+
+  nextButton.addEventListener('click', () => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < publicIdList.length) {
+      loadByIndex(nextIndex);
+      showNotification('info','Prochaine vidéo','Vous êtes sur la vidéo suivante. Bonne visualisation!');
+    } else {
+      showNotification('info','Info','Pas d\'autre vidéo disponible.');
+    }
+  });
+}
+
+/******** Video logic (multi vidéos) ********/
+function loadByIndex(i) {
+  if (i < 0 || i >= publicIdList.length) return;
+  currentIndex = i;
+
+  seenSeconds = {};
+  seenCount = 0;
+  isPlaying = false;
+
+  // ensure arrays length in case publicIdList changed
+  while (validatedFlags.length < publicIdList.length) validatedFlags.push(false);
+  while (claimedFlags.length < publicIdList.length) claimedFlags.push(false);
+
+  claimButton.disabled = claimedFlags[currentIndex] || !validatedFlags[currentIndex];
+  startButton.disabled = !canWatchMore;
+  playButton.style.display = 'flex';
+
+  instagramVideo.src = cloudinaryUrl(publicIdList[currentIndex]);
+  instagramVideo.load();
+
+  ensureNextButtonExists();
+  updateNextButtonVisibility();
+  updateTimerUI();
+}
+
+function updateTimerUI() {
+  const remaining = Math.max(0, REQUIRED_SECONDS - seenCount);
+  timerText.textContent = `${remaining}s`;
+  const progress = ((REQUIRED_SECONDS - remaining) / REQUIRED_SECONDS) * 360;
+  timerProgress.style.transform = `rotate(${progress}deg)`;
+}
+
+function updateDailyStatsUI() {
+  videosWatched.textContent = `${videosWatchedToday}/${MAX_VIDEOS_PER_DAY}`;
+  earnedToday.textContent = `${earningsToday} FCFA`;
+}
+
+function updateNextButtonVisibility() {
+  if (!nextButton) return;
+  const haveNext = currentIndex + 1 < publicIdList.length;
+  if (haveNext && validatedFlags[currentIndex]) {
+    nextButton.style.display = 'inline-flex';
+  } else {
+    nextButton.style.display = 'none';
+  }
+}
+
+function markVideoValidated(index) {
+  if (validatedFlags[index]) return;
+  validatedFlags[index] = true;
+  if (index === currentIndex) {
+    claimButton.disabled = claimedFlags[index];
+    updateNextButtonVisibility();
+    showNotification('success','Vidéo validée','Vous pouvez réclamer la récompense ou regarder la suivante.');
+  }
+}
+
+/******** timeupdate: compter secondes uniques ********/
+instagramVideo.addEventListener('timeupdate', () => {
+  if (!isPlaying || !isVisible) return;
+  if (validatedFlags[currentIndex]) return;
+  const sec = Math.floor(instagramVideo.currentTime);
+  if (sec < 0) return;
+  if (!seenSeconds[sec]) {
+    seenSeconds[sec] = true;
+    seenCount++;
+    updateTimerUI();
+    if (seenCount >= REQUIRED_SECONDS) {
+      markVideoValidated(currentIndex);
+    }
+  }
+});
+
+/******** play/pause/ended handlers ********/
+instagramVideo.addEventListener('play', () => { isPlaying = true; });
+instagramVideo.addEventListener('pause', () => { isPlaying = false; });
+instagramVideo.addEventListener('ended', () => {
+  if (seenCount >= REQUIRED_SECONDS) markVideoValidated(currentIndex);
+});
+
+/******** IntersectionObserver: pause si hors viewport ********/
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    isVisible = e.isIntersecting;
+    if (!isVisible && isPlaying) {
+      instagramVideo.pause();
+      showNotification('info','Lecture en pause','La vidéo est hors de l\'écran, la lecture a été mise en pause.');
+    }
+  });
+}, { threshold: 0.6 });
+io.observe(instagramVideo);
+
+/******** Visibility API: pause si onglet caché ********/
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isPlaying) {
+    instagramVideo.pause();
+    showNotification('info','Lecture en pause','Vous avez quitté l\'onglet: la lecture est en pause.');
+  }
+});
+
+/******** Buttons events (play/start) ********/
+playButton.addEventListener('click', () => {
+  if (ENFORCE_TUESDAY && !isTodayTuesday()) {
+    showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le mardi.');
+    return;
+  }
+  instagramVideo.muted = false;
+  instagramVideo.play().catch(err => console.warn('play blocked', err));
+  playButton.style.display = 'none';
+});
+
+startButton.addEventListener('click', () => {
+  if (ENFORCE_TUESDAY && !isTodayTuesday()) {
+    showNotification('info','Non disponible', 'Les vidéos sont disponibles seulement le mardi.');
+    return;
+  }
+  instagramVideo.currentTime = 0;
+  instagramVideo.muted = false;
+  instagramVideo.play().catch(err => console.warn('play blocked', err));
+  playButton.style.display = 'none';
+  startButton.disabled = true;
+});
+
+/******** Claim reward: appel serveur + sauvegarde Firestore ********/
+claimButton.addEventListener('click', async () => {
+  if (!currentUser) { 
+    showNotification('error','Non connecté','Veuillez vous connecter.'); 
+    return; 
+  }
+  if (!validatedFlags[currentIndex]) { 
+    showNotification('error','Non validé','Vous n\'avez pas encore regardé la vidéo suffisamment.'); 
+    return; 
+  }
+  if (claimedFlags[currentIndex]) { 
+    showNotification('info','Déjà réclamé','Vous avez déjà réclamé cette vidéo.'); 
+    return; 
+  }
+  if (videosWatchedToday >= MAX_VIDEOS_PER_DAY) { 
+    showNotification('info','Limite atteinte','Vous avez atteint la limite quotidienne de réclamations.'); 
+    return; 
+  }
+
+  try {
+    const user = auth.currentUser;
+    if (!user) { showNotification('error','Non connecté','Session expirée. Reconnectez-vous.'); setTimeout(()=>{ window.location.href='login.html'; },1500); return; }
+    let idToken;
+    try { idToken = await user.getIdToken(true); } catch (tokenErr) {
+      console.error('Erreur getIdToken:', tokenErr);
+      showNotification('error','Session invalide','Veuillez vous reconnecter.');
+      await auth.signOut();
+      setTimeout(()=>{ window.location.href='login.html'; },1500);
+      return;
     }
 
-    /******** Gestion du menu ********/
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
-    });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
-
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
+    showNotification('info','Envoi','Envoi de la requête de réclamation au serveur...');
+    const response = await fetch('/api/instagram-claim-reward', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        idToken: idToken,
+        rewardAmount: REWARD_AMOUNT,
+        videoIndex: currentIndex
+      })
     });
 
-    /******** Theme toggle ********/
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
-    });
+    let data = null;
+    try { data = await response.json(); } catch(e) { data = null; }
 
-    /******** Fonctions pour Instagram Earn ********/
-    function startTimer() {
-      clearInterval(timerInterval);
-      remainingTime = 20;
-      updateTimerUI();
-      
-      timerInterval = setInterval(() => {
-        remainingTime--;
-        updateTimerUI();
-        
-        if (remainingTime <= 0) {
-          clearInterval(timerInterval);
-          videoCompleted();
-        }
-      }, 1000);
+    if (!response.ok) {
+      // serveur a renvoyé erreur -> fallback local
+      throw new Error((data && (data.error || data.message)) || 'Erreur serveur lors de la réclamation');
     }
-    
-    function updateTimerUI() {
-      const progress = ((20 - remainingTime) / 20) * 360;
-      timerProgress.style.transform = `rotate(${progress}deg)`;
-      timerText.textContent = `${remainingTime}s`;
-    }
-    
-    function videoCompleted() {
-      claimButton.disabled = false;
-      startButton.disabled = true;
-      showNotification('success', 'Félicitations!', 'Vous avez regardé la vidéo avec succès. Cliquez pour réclamer votre récompense!');
-    }
-    
-    function claimReward() {
-      if (!currentUser) return;
-      
-      // Mettre à jour les données utilisateur
-      userData.instagramGains = (userData.instagramGains || 0) + 250;
-      userData.solde = (userData.solde || 0) + 250;
-      
-      // Mettre à jour les statistiques du jour
-      videosWatchedToday++;
-      earningsToday += 250;
-      updateDailyStats();
-      
-      // Sauvegarder les données
-      saveUserData();
-      
-      // Mettre à jour l'UI
+
+    // Mise à jour de l'état local à partir de la réponse serveur
+    claimedFlags[currentIndex] = true;
+    videosWatchedToday = data.videosWatchedToday ?? (videosWatchedToday + 1);
+    earningsToday = data.earningsToday ?? (earningsToday + REWARD_AMOUNT);
+
+    // Mettre à jour Firestore localement aussi (synchronisation)
+    userData.instagramWatchesToday = videosWatchedToday;
+    userData.instagramEarningsToday = earningsToday;
+    userData.lastInstagramWatchDate = new Date().toDateString();
+    await saveUserData();
+
+    updateDailyStatsUI();
+    updateNextButtonVisibility();
+
+    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
+
+    claimButton.disabled = true;
+    startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
+
+  } catch (err) {
+    console.error('Erreur lors de la réclamation:', err);
+    // fallback local: si l'API serveur indisponible, ajouter localement et sauvegarder en firestore
+    try {
+      claimedFlags[currentIndex] = true;
+      videosWatchedToday = videosWatchedToday + 1;
+      earningsToday = earningsToday + REWARD_AMOUNT;
+
+      userData.instagramWatchesToday = videosWatchedToday;
+      userData.instagramEarningsToday = earningsToday;
+      userData.lastInstagramWatchDate = new Date().toDateString();
+      userData.instagramGains = (userData.instagramGains || 0) + REWARD_AMOUNT;
+      userData.solde = (userData.solde || 0) + REWARD_AMOUNT;
+
+      await saveUserData();
+
+      updateDailyStatsUI();
+      updateNextButtonVisibility();
+
+      showNotification('success','Récompense ajoutée (local)', `${REWARD_AMOUNT} FCFA ajouté localement à votre solde.`);
       claimButton.disabled = true;
-      startButton.disabled = canWatchMore && videosWatchedToday < 2;
-      
-      showNotification('success', 'Récompense ajoutée!', '250 FCFA ont été ajoutés à votre solde!');
+      startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
+    } catch (saveErr) {
+      console.error('Erreur fallback save:', saveErr);
+      showNotification('error','Erreur', err.message || 'Impossible d\'enregistrer la récompense. Réessayez.');
     }
-    
-    function updateDailyStats() {
-      videosWatched.textContent = `${videosWatchedToday}/2`;
-      earnedToday.textContent = `${earningsToday} FCFA`;
-    }
-    
-    function checkDailyLimit() {
-      const today = new Date().toDateString();
-      const lastWatchDate = userData.lastInstagramWatchDate || '';
-      
-      if (lastWatchDate !== today) {
-        // Nouveau jour, réinitialiser le compteur
-        videosWatchedToday = 0;
-        earningsToday = 0;
-        userData.instagramWatchesToday = 0;
-        userData.instagramEarningsToday = 0;
-        userData.lastInstagramWatchDate = today;
-      } else {
-        // Même jour, récupérer les valeurs sauvegardées
-        videosWatchedToday = userData.instagramWatchesToday || 0;
-        earningsToday = userData.instagramEarningsToday || 0;
-      }
-      
-      canWatchMore = videosWatchedToday < 2;
-      startButton.disabled = !canWatchMore;
-      
-      updateDailyStats();
-    }
+  }
+});
 
-    /******** Gestion des événements Instagram ********/
-    playButton.addEventListener('click', () => {
-      instagramVideo.play();
-      playButton.style.display = 'none';
-    });
-    
-    startButton.addEventListener('click', () => {
-      if (canWatchMore && videosWatchedToday < 2) {
-        instagramVideo.currentTime = 0;
-        instagramVideo.play();
-        playButton.style.display = 'none';
-        startTimer();
+/******** Sauvegarde / chargement utilisateur (Firestore) ********/
+async function saveUserData(key = null, value = null) {
+  if (!currentUser) return;
+  try {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    const dataToSave = key ? { [key]: value } : userData;
+    await userRef.set(dataToSave, { merge: true });
+    console.log('Données utilisateur enregistrées.');
+  } catch (error) {
+    console.error('Erreur sauvegarde:', error);
+    showNotification('error','Erreur sauvegarde','Impossible de sauvegarder vos données.');
+  }
+}
+
+async function loadUserData() {
+  if (!currentUser) throw new Error('Aucun utilisateur connecté.');
+  const userRef = db.collection('users').doc(currentUser.uid);
+  const doc = await userRef.get();
+  if (doc.exists) {
+    userData = doc.data() || {};
+  } else {
+    userData = {};
+    await saveUserData();
+  }
+  // Vérifier la limite quotidienne pour Instagram
+  const today = new Date().toDateString();
+  if ((userData.lastInstagramWatchDate || '') !== today) {
+    videosWatchedToday = 0;
+    earningsToday = 0;
+    userData.instagramWatchesToday = 0;
+    userData.instagramEarningsToday = 0;
+    userData.lastInstagramWatchDate = today;
+  } else {
+    videosWatchedToday = userData.instagramWatchesToday || 0;
+    earningsToday = userData.instagramEarningsToday || 0;
+  }
+  canWatchMore = videosWatchedToday < MAX_VIDEOS_PER_DAY;
+}
+
+/******** Mise à jour UI user ********/
+function updateUserInfoUI(user, dbData = {}) {
+  const displayName = dbData.username || dbData.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Utilisateur');
+  if (sidebarUsername) sidebarUsername.textContent = displayName;
+  if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+}
+function applyTheme() {
+  const isDarkMode = userData.theme === 'dark';
+  document.body.classList.toggle('dark-mode', isDarkMode);
+  themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i><span>Mode jour</span>' : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+}
+
+/******** Auth & init principal ********/
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try {
+      await loadUserData();
+
+      // Optionel: vérifier statut payé (ne redirige pas automatiquement ici)
+      const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
+      const validStatuses = ['paid', 'active', 'true', '1'];
+      if (!validStatuses.includes(userStatus) && !userData.paid) {
+        // On montre une notification mais on n'empêche pas l'accès (conforme au fichier fourni)
+        showNotification('info','Action requise','Veuillez finaliser votre inscription pour profiter de toutes les fonctionnalités.');
+      }
+
+      updateUserInfoUI(user, userData);
+      applyTheme();
+
+      // initialiser UI
+      updateDailyStatsUI();
+      ensureNextButtonExists();
+
+      // Tuesday logic (optionnel)
+      if (ENFORCE_TUESDAY && !isTodayTuesday()) {
         startButton.disabled = true;
-      }
-    });
-    
-    claimButton.addEventListener('click', claimReward);
-    
-    instagramVideo.addEventListener('ended', () => {
-      clearInterval(timerInterval);
-      videoCompleted();
-    });
-
-    /******** Sauvegarde des données utilisateur ********/
-    async function saveUserData(key = null, value = null) {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = key ? { [key]: value } : userData;
-        await userRef.set(dataToSave, { merge: true });
-        console.log('Données utilisateur enregistrées avec succès.');
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
-    }
-
-    /******** Chargement des données utilisateur ********/
-    async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      if (doc.exists) {
-          const data = doc.data() || {};
-          userData = data;
-          
-          // Vérifier la limite quotidienne
-          checkDailyLimit();
+        playButton.style.display = 'none';
+        claimButton.disabled = true;
+        showNotification('info','Non disponible', 'Les vidéos Instagram sont disponibles uniquement le mardi.');
       } else {
-        userData = {};
-        await saveUserData();
+        startButton.disabled = !canWatchMore;
+        playButton.style.display = 'flex';
+        showNotification('success','Bienvenue','Prêt à gagner avec Instagram!');
       }
+
+      loadByIndex(0);
+
+      document.body.classList.add('loaded');
+      if (loader) loader.classList.add('hidden');
+
+    } catch (error) {
+      console.error('Erreur initialisation:', error);
+      showNotification('error','Erreur critique','Impossible de charger vos données. Veuillez vous reconnecter.');
+      auth.signOut();
+      setTimeout(()=> { window.location.href = 'login.html'; }, 2000);
     }
+  } else {
+    window.location.href = 'login.html';
+  }
+});
 
-    /******** Mise à jour de l'interface utilisateur ********/
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
-
-    /******** Point d'entrée principal ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                await loadUserData();
-
-                // Vérification du paiement - NE PAS rediriger automatiquement
-                if (!userData.paid) {
-                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour accéder à toutes les fonctionnalités.');
-                    // On ne redirige plus automatiquement
-                }
-
-                updateUserInfoUI(user, userData);
-                applyTheme();
-                
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue!', 'Prêt à gagner avec Instagram!');
-
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-
-    /******** Initialisation ********/
-    document.addEventListener('DOMContentLoaded', () => {
-      // Précharger la vidéo
-      instagramVideo.load();
-    });
-  </script>
+/******** Petit preload et setup au DOMContentLoaded ********/
+document.addEventListener('DOMContentLoaded', () => {
+  if (publicIdList.length) {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'video';
+    link.href = cloudinaryUrl(publicIdList[0]);
+    document.head.appendChild(link);
+  }
+  // initial UI timer
+  timerText.textContent = `${REQUIRED_SECONDS}s`;
+  setTimeout(()=> { if (loader) loader.classList.add('hidden'); }, 700);
+});
+</script>
 </body>
 </html>
