@@ -1241,7 +1241,6 @@ themeToggle.addEventListener('click', (event) => {
 /******** Helpers pour jour (Monday) - Timezone Africa/Douala ********/
 function isTodayMonday() {
   try {
-    // Utiliser le timezone Africa/Douala (CEMAC) pour cohérence avec le serveur
     const formatter = new Intl.DateTimeFormat('en-US', { 
       timeZone: 'Africa/Douala',
       weekday: 'long' 
@@ -1249,7 +1248,6 @@ function isTodayMonday() {
     const dayName = formatter.format(new Date());
     return dayName === 'Monday';
   } catch (error) {
-    // Fallback en cas d'erreur de timezone
     console.warn('Timezone Africa/Douala non supporté, utilisation locale');
     const d = new Date();
     return d.getDay() === 1;
@@ -1260,21 +1258,16 @@ function getNextMondayCountdown() {
   try {
     const now = new Date();
     const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
-    
-    // Calculer combien de jours jusqu'au prochain lundi
     let daysUntilMonday = (8 - currentDay) % 7;
-    if (daysUntilMonday === 0) daysUntilMonday = 7; // Si on est lundi, prochain lundi = dans 7 jours
-    
+    if (daysUntilMonday === 0) daysUntilMonday = 7;
     const nextMonday = new Date(now);
     nextMonday.setDate(now.getDate() + daysUntilMonday);
     nextMonday.setHours(0, 0, 0, 0);
-    
     const diff = nextMonday - now;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
     return { days, hours, minutes, seconds };
   } catch (error) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -1289,25 +1282,20 @@ function updateMondayUI() {
   const isMonday = isTodayMonday();
   
   if (ENFORCE_MONDAY && !isMonday) {
-    // Afficher la bannière et l'overlay
     if (mondayAlert) mondayAlert.style.display = 'block';
     if (videoOverlay) videoOverlay.classList.add('active');
     
-    // Démarrer le compte à rebours
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
       const countdown = getNextMondayCountdown();
       if (mondayCountdown) {
         mondayCountdown.textContent = `Prochain lundi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
       }
-      
-      // Recharger la page si on arrive à lundi
       if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
         window.location.reload();
       }
     }, 1000);
   } else {
-    // Masquer la bannière et l'overlay
     if (mondayAlert) mondayAlert.style.display = 'none';
     if (videoOverlay) videoOverlay.classList.remove('active');
     if (countdownInterval) clearInterval(countdownInterval);
@@ -1477,7 +1465,6 @@ claimButton.addEventListener('click', async () => {
   }
 
   try {
-    // Obtenir l'utilisateur actuel
     const user = auth.currentUser;
     
     if (!user) {
@@ -1497,35 +1484,52 @@ claimButton.addEventListener('click', async () => {
       setTimeout(() => { window.location.href = 'login.html'; }, 1500);
       return;
     }
+
+    // Vérifier format JWT simple avant envoi
+    const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+    if (!idToken || !jwtRegex.test(idToken.trim())) {
+      console.error('Token invalide (format) :', idToken ? idToken.slice(0,30) + '...' : 'null');
+      showNotification('error','Token invalide','Le token renvoyé n\'a pas le format attendu. Reconnectez-vous.');
+      await auth.signOut();
+      setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+      return;
+    }
     
-    console.log('🔑 Token Firebase obtenu, envoi requête au serveur...');
+    console.log('🔑 Token Firebase obtenu (format OK), envoi requête au serveur...');
     const response = await fetch('/api/tiktok-claim-reward', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
       },
       body: JSON.stringify({
-        idToken: idToken,
         rewardAmount: REWARD_AMOUNT,
         videoIndex: currentIndex
       })
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || data.message || 'Erreur serveur');
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseErr) {
+      console.error('Réponse non-JSON du serveur:', parseErr);
+      throw new Error('Réponse du serveur invalide. Voir la console serveur.');
     }
 
-    // Mise à jour de l'état local
+    if (!response.ok) {
+      const errMsg = data.error || data.message || 'Erreur serveur';
+      throw new Error(errMsg);
+    }
+
+    // Mise à jour de l'état local (utiliser valeurs renvoyées par le serveur si présentes)
     claimedFlags[currentIndex] = true;
-    videosWatchedToday = data.videosWatchedToday || (videosWatchedToday + 1);
-    earningsToday = data.earningsToday || (earningsToday + REWARD_AMOUNT);
+    videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
+    earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
     
     updateDailyStatsUI();
     updateNextButtonVisibility();
 
-    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance} FCFA`);
+    showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté à votre solde. Nouveau solde: ${data.newBalance ?? 'N/A'} FCFA`);
 
     claimButton.disabled = true;
     startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
