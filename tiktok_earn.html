@@ -1255,7 +1255,7 @@ function isTodayMonday() {
 
 function getNextMondayCountdown() {
   const now = new Date();
-  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday
+  const currentDay = now.getDay();
   let daysUntilMonday = (8 - currentDay) % 7;
   if (daysUntilMonday === 0) daysUntilMonday = 7;
   const nextMonday = new Date(now);
@@ -1430,7 +1430,7 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
 });
 
-/******** 🚀 claimButton : try server, else fallback client (no solde write) ********/
+/******** 🚀 claimButton : try server, else fallback using TRANSACTION ********/
 claimButton.addEventListener('click', async () => {
   if (!currentUser) { 
     showNotification('error','Non connecté','Veuillez vous connecter.'); 
@@ -1457,7 +1457,6 @@ claimButton.addEventListener('click', async () => {
     }
 
     // 1) Try server endpoint
-    let usedServer = false;
     try {
       const idToken = await user.getIdToken(true).catch(()=>null);
       const headers = { 'Content-Type': 'application/json' };
@@ -1474,7 +1473,7 @@ claimButton.addEventListener('click', async () => {
       try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
 
       if (resp.ok && data && data.success) {
-        // server accepted -> update local state with returned values (safest)
+        // server accepted -> update UI
         claimedFlags[currentIndex] = true;
         videosWatchedToday = typeof data.videosWatchedToday === 'number' ? data.videosWatchedToday : (videosWatchedToday + 1);
         earningsToday = typeof data.earningsToday === 'number' ? data.earningsToday : (earningsToday + REWARD_AMOUNT);
@@ -1483,7 +1482,6 @@ claimButton.addEventListener('click', async () => {
         showNotification('success','Récompense ajoutée', `${REWARD_AMOUNT} FCFA ajouté. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
         claimButton.disabled = true;
         startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
-        usedServer = true;
         return;
       } else {
         console.warn('Server claim failed or returned non-json:', resp.status, text);
@@ -1492,44 +1490,79 @@ claimButton.addEventListener('click', async () => {
       console.warn('Erreur fetch serveur (fallback):', serverErr);
     }
 
-    // 2) FALLBACK: Update Firestore client-side (only permitted fields). NO solde write.
-    if (!usedServer) {
-      const uid = user.uid;
-      const userRef = db.collection('users').doc(uid);
-      const todayStr = new Date().toDateString();
+    // 2) FALLBACK: Use transaction to compute and write explicit numbers (instead of transforms)
+    const uid = user.uid;
+    const userRef = db.collection('users').doc(uid);
+    const todayStr = new Date().toDateString();
 
-      // Build update object: increment profit, tiktokGains, tikTokWatchesToday, tikTokEarningsToday and set lastTikTokWatchDate
-      const updateObj = {};
-      updateObj.profit = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
-      updateObj.tiktokGains = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
-      updateObj.tikTokWatchesToday = firebase.firestore.FieldValue.increment(1);
-      updateObj.tikTokEarningsToday = firebase.firestore.FieldValue.increment(REWARD_AMOUNT);
-      updateObj.lastTikTokWatchDate = todayStr;
+    try {
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(userRef);
+        if (!snap.exists) throw new Error('Utilisateur introuvable (transaction).');
 
-      // Attempt update
-      try {
-        await userRef.update(updateObj);
-      } catch (err) {
-        console.error('Erreur update Firestore (fallback):', err);
-        showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.');
-        throw err;
-      }
+        const doc = snap.data() || {};
 
-      // Update local UI state
+        // Current values (safe defaults)
+        const oldProfit = Number(doc.profit || 0);
+        const oldTiktok = Number(doc.tiktokGains || 0);
+        const oldEarningsToday = Number(doc.tikTokEarningsToday || 0);
+        const oldWatchesToday = Number(doc.tikTokWatchesToday || 0);
+
+        // Compute new values
+        const newProfit = oldProfit + REWARD_AMOUNT;
+        const newTiktok = oldTiktok + REWARD_AMOUNT;
+        const newEarningsToday = oldEarningsToday + REWARD_AMOUNT;
+        const newWatchesToday = oldWatchesToday + 1;
+
+        // Enforce same constraints as rules (defensive client-side check)
+        if ((newProfit - oldProfit) > 500) throw new Error('Increment profit > 500 interdit');
+        if ((newTiktok - oldTiktok) > 500) throw new Error('Increment tiktokGains > 500 interdit');
+        if ((newEarningsToday - oldEarningsToday) > 500) throw new Error('Increment tikTokEarningsToday > 500 interdit');
+        if ((newWatchesToday - oldWatchesToday) > 1) throw new Error('Increment tikTokWatchesToday > 1 interdit');
+        if (newWatchesToday > MAX_VIDEOS_PER_DAY) throw new Error('Limite quotidienne dépassée');
+
+        // Prepare explicit object (numbers, not transforms)
+        const updateObj = {
+          profit: newProfit,
+          tiktokGains: newTiktok,
+          tikTokEarningsToday: newEarningsToday,
+          tikTokWatchesToday: newWatchesToday,
+          lastTikTokWatchDate: todayStr
+        };
+
+        // Debug log (helps à diagnostiquer si règles refusent)
+        console.log('Transaction updateObj:', updateObj);
+
+        tx.update(userRef, updateObj);
+      });
+
+      // If transaction succeeds:
       claimedFlags[currentIndex] = true;
       videosWatchedToday = videosWatchedToday + 1;
       earningsToday = earningsToday + REWARD_AMOUNT;
       updateDailyStatsUI();
       updateNextButtonVisibility();
-      showNotification('success','Récompense (fallback)','250 FCFA ajouté localement (mode dépannage).');
-
+      showNotification('success','Récompense (fallback)','250 FCFA ajouté localement via transaction.');
       claimButton.disabled = true;
       startButton.disabled = !(videosWatchedToday < MAX_VIDEOS_PER_DAY);
       return;
+
+    } catch (txErr) {
+      console.error('Transaction failed:', txErr);
+      // If rules denied, we'll show clear error with Firestore details if available
+      if (txErr && txErr.code) {
+        showNotification('error','Erreur','Transaction refusée : ' + txErr.code + ' — ' + (txErr.message || ''));
+      } else {
+        showNotification('error','Erreur','Impossible d\'appliquer la récompense localement. Vérifiez les règles Firestore.');
+      }
+      throw txErr;
     }
   } catch (err) {
     console.error('Erreur lors de la réclamation (global):', err);
-    showNotification('error','Erreur','Impossible d\'enregistrer la récompense. Réessayez.');
+    // Affiche le message précis pour debug
+    let msg = 'Impossible d\'enregistrer la récompense. Réessayez.';
+    if (err && err.message) msg = err.message;
+    showNotification('error','Erreur', msg);
   }
 });
 
