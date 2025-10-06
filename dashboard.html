@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -798,6 +797,17 @@
       100% { box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4); }
     }
     
+    /* NOUVEAU: Style pour Gains Instagram */
+    #instagram-gains {
+      background: linear-gradient(135deg, #f0e6ff 0%, #e0a0f0 100%); /* Couleurs Instagram-esque */
+      animation: glowInstagram 5s infinite alternate;
+    }
+    
+    @keyframes glowInstagram {
+      0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+      100% { box-shadow: 0 4px 20px rgba(225, 48, 108, 0.4); } /* Couleur rose/magenta */
+    }
+    
     #depot-solde {
       background: linear-gradient(135deg, #d4fff0 0%, #a0f0d4 100%);
       animation: waveDepot 5s infinite linear;
@@ -835,6 +845,10 @@
       font-size: 0.9rem;
       z-index: 2;
       transition: transform 0.3s ease;
+    }
+    /* Surcharge couleur icône Instagram */
+    #instagram-gains .gain-stat-icon {
+        color: #E1306C; 
     }
 
     .gain-stat-card:hover .gain-stat-icon {
@@ -1503,7 +1517,6 @@
   </style>
 </head>
 <body>
-  <!-- 🔧 DEBUG BANNER (visible sur iPhone) -->
   <div id="debugBanner" class="show">🔍 DEBUG: Chargement...</div>
 
   <div class="loader-container" id="loader">
@@ -1835,6 +1848,16 @@
           <div class="gain-stat-value">XAF 0</div>
         </div>
         
+        <div class="gain-stat-card" id="instagram-gains">
+          <div class="gain-stat-header">
+            <div class="gain-stat-title">Gains Instagram</div>
+            <div class="gain-stat-icon">
+              <i class="fab fa-instagram"></i>
+            </div>
+          </div>
+          <div class="gain-stat-value">XAF 0</div>
+        </div>
+        
         <div class="gain-stat-card" id="depot-solde">
           <div class="gain-stat-header">
             <div class="gain-stat-title">Solde du dépôt</div>
@@ -2012,7 +2035,7 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-links">
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
+        <a href="https://68e3d79c0f878616002f7423--extraordinary-sawine-a711af.netlify.app/" class="footer-link">Pro Tech Management</a>
         <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
       </div>
       <div class="footer-text">
@@ -2261,6 +2284,8 @@ async function loadUserData() {
       publiciteGains: Number(data.publiciteGains || 0),
       tiktokGains: Number(data.tiktokGains || 0),
       youtubeGains: Number(data.youtubeGains || 0),
+      // NOUVEAU: Ajout du champ pour les gains Instagram
+      instagramGains: Number(data.instagramGains || data.instaGains || 0), 
       depotSolde: Number(data.depotSolde || data.depositBalance || 0),
       phoneNumber: data.phoneNumber || data.phone || "",
       country: data.country || data.pays || "",
@@ -2279,7 +2304,8 @@ async function loadUserData() {
       depense:0, profit:0, solde:0, retire:0,
       parrainage:0, bonusAgent:0, whatsappGains:0,
       triviaGains:0, publiciteGains:0, tiktokGains:0,
-      youtubeGains:0, depotSolde:0, paid:false, theme:'light',
+      youtubeGains:0, instagramGains:0, // NOUVEAU: Initialisation
+      depotSolde:0, paid:false, theme:'light',
       referrer:"Aucun", activeReferrals:0, refEarnings:defaultReferralEarnings,
       displayName:displayName, email:currentUser.email, username:null,
       status: 'pending'  // ✅ Statut par défaut
@@ -2313,6 +2339,8 @@ function updateDashboardUI() {
     if(document.querySelector('#publicite-gains .gain-stat-value')) document.querySelector('#publicite-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.publiciteGains)}`;
     if(document.querySelector('#tiktok-gains .gain-stat-value')) document.querySelector('#tiktok-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.tiktokGains)}`;
     if(document.querySelector('#youtube-gains .gain-stat-value')) document.querySelector('#youtube-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.youtubeGains)}`;
+    // NOUVEAU: Mise à jour du gain Instagram
+    if(document.querySelector('#instagram-gains .gain-stat-value')) document.querySelector('#instagram-gains .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.instagramGains)}`; 
     if(document.querySelector('#depot-solde .gain-stat-value')) document.querySelector('#depot-solde .gain-stat-value').textContent = `XAF ${formatNumberSafe(userData.depotSolde)}`;
   } catch (err) {
     console.error('Erreur updateDashboardUI', err);
