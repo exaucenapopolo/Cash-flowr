@@ -1477,8 +1477,7 @@ claimButton.addEventListener('click', async () => {
   }
 
   try {
-    // Attendre que Firebase Auth soit prêt et obtenir l'utilisateur actuel
-    await auth.authStateReady();
+    // Obtenir l'utilisateur actuel
     const user = auth.currentUser;
     
     if (!user) {
