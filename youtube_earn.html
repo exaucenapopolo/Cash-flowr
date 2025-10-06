@@ -1038,7 +1038,6 @@
         <span>YouTube Earn</span>
       </h1>
       
-      <!-- Bannière d'alerte Tuesday-only (masquée le mardi) -->
       <div class="tuesday-alert" id="tuesdayAlert" style="display: none;">
         <h3>
           <i class="fas fa-calendar-alt"></i>
@@ -1060,7 +1059,6 @@
             <div class="play-button" id="playButton">
               <i class="fas fa-play"></i>
             </div>
-            <!-- Overlay pour les jours non-mardi -->
             <div class="video-overlay" id="videoOverlay">
               <i class="fas fa-lock"></i>
               <h4>Vidéo verrouillée</h4>
@@ -1170,8 +1168,9 @@ function cloudinaryUrl(publicId) {
 const REQUIRED_SECONDS = 10;
 const REWARD_AMOUNT = 250;
 const MAX_VIDEOS_PER_DAY = 2;
-// 🟢 CHANGEMENT: Passage à true pour forcer la restriction
-const ENFORCE_TUESDAY = true;  
+// 🛑 MODIFICATION POUR TEST : Passage à false pour DÉSACTIVER la restriction du mardi.
+// Pour revenir à la normale, remettre à 'true'.
+const ENFORCE_TUESDAY = false;  
 // 🟢 NOUVELLE RÈGLE: max 500 FCFA par transaction (2 vidéos de 250)
 const MAX_INCREMENT_PER_REQUEST = 500; 
 
