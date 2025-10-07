@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MULAFLOWR - Challenge and Rewards</title>
+  <title>MULAFLOWR - Challenge et Avantages</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
@@ -36,6 +36,9 @@
       --primary-dark: #2c75c9;
       --secondary-color: #4c566a;
       --accent-color: #5e81ac;
+      --referral-color: #AF52DE; /* Nouvelle couleur pour le parrainage */
+      --referral-light: #C78BEF;
+      --referral-dark: #8E44AD;
       --background-light: #f5f7fb;
       --background-dark: #e5e9f0;
       --card-bg: #ffffff;
@@ -44,7 +47,7 @@
       --success-color: #4CD964;
       --warning-color: #FF9500;
       --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
+      --purple-color: var(--referral-color); /* Utilisation de la couleur de parrainage */
       --teal-color: #5AC8FA;
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
@@ -64,6 +67,9 @@
       --primary-dark: #4c566a;
       --secondary-color: #d8dee9;
       --accent-color: #88c0d0;
+      --referral-color: #AF52DE;
+      --referral-light: #C78BEF;
+      --referral-dark: #8E44AD;
       --background-light: #2e3440;
       --background-dark: #3b4252;
       --card-bg: #434c5e;
@@ -72,7 +78,7 @@
       --success-color: #4CD964;
       --warning-color: #FF9500;
       --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
+      --purple-color: var(--referral-color);
       --teal-color: #5AC8FA;
       --orange-color: #FF9500;
       --pink-color: #FF2D55;
@@ -84,6 +90,8 @@
       --silver-color: #C0C0C0;
       --bronze-color: #CD7F32;
     }
+
+    /* Le reste du CSS de base reste le même jusqu'à la section challenge-banner */
 
     * {
       margin: 0;
@@ -447,7 +455,8 @@
 
     /* Bannière Challenge */
     .challenge-banner {
-      background: linear-gradient(135deg, var(--purple-color) 0%, #6a3093 100%);
+      /* Utilisation de la nouvelle couleur de parrainage */
+      background: linear-gradient(135deg, var(--referral-color) 0%, var(--referral-dark) 100%); 
       border-radius: 12px;
       padding: 25px;
       box-shadow: var(--shadow);
@@ -511,7 +520,7 @@
     }
 
     .section-title i {
-      color: var(--purple-color);
+      color: var(--referral-color); /* Utilisation de la couleur de parrainage */
     }
 
     .section-subtitle {
@@ -523,8 +532,11 @@
     /* Tableau des meilleurs parrains */
     .leaderboard-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate; /* Changement pour des coins arrondis */
+      border-spacing: 0;
       margin-top: 20px;
+      overflow: hidden; /* Pour contenir les coins arrondis */
+      border-radius: 8px;
     }
 
     .leaderboard-table th, .leaderboard-table td {
@@ -534,11 +546,17 @@
     }
 
     .leaderboard-table th {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: var(--background-dark); /* Utiliser une couleur de fond plus douce */
       font-weight: 600;
       color: var(--text-color);
+      text-transform: uppercase;
+      font-size: 0.9rem;
     }
 
+    .leaderboard-table tr:last-child td {
+        border-bottom: none;
+    }
+    
     .leaderboard-table tr {
       transition: background-color 0.2s ease;
     }
@@ -555,30 +573,32 @@
 
     .rank-1 {
       color: var(--gold-color);
-      font-size: 1.2rem;
+      font-size: 1.3rem;
     }
 
     .rank-2 {
       color: var(--silver-color);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
     }
 
     .rank-3 {
       color: var(--bronze-color);
+      font-size: 1.1rem;
     }
 
-    .reward-cell {
+    .advantage-cell { /* Nouveau nom de classe */
       font-weight: 600;
-      color: var(--success-color);
+      color: var(--referral-color);
     }
 
     .user-rank {
       margin-top: 25px;
       padding: 20px;
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+      background: linear-gradient(135deg, var(--referral-light) 0%, var(--referral-dark) 100%); /* Utilisation de la couleur de parrainage */
       border-radius: 12px;
       color: white;
       text-align: center;
+      box-shadow: var(--shadow);
     }
 
     .user-rank h3 {
@@ -590,11 +610,54 @@
       font-size: 2rem;
       font-weight: 700;
       margin-bottom: 10px;
+      /* Ajout d'un petit effet pour le rang */
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); 
     }
 
     .user-referrals {
       font-size: 1.1rem;
       margin-bottom: 15px;
+    }
+    
+    /* Styles pour la section des avantages */
+    .advantages-list {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 20px;
+    }
+    
+    .advantages-list li {
+        background-color: var(--background-dark);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 500;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .advantages-list li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .advantages-list li strong {
+        color: var(--referral-color);
+        font-weight: 700;
+        min-width: 100px;
+    }
+    
+    .advantages-list li i {
+        color: var(--referral-color);
+        font-size: 1.2rem;
+    }
+    
+    .how-to-participate p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: var(--text-light);
     }
 
     /* Footer */
@@ -761,6 +824,15 @@
         .leaderboard-table th, .leaderboard-table td {
           padding: 10px;
         }
+        
+        .advantages-list li {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .advantages-list li strong {
+            min-width: unset;
+        }
     }
 
     @media (max-width: 576px) {
@@ -818,7 +890,7 @@
   <div class="main-container">
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">Challenge and Rewards >> MULAFLOWR</div>
+        <div class="welcome-text">Challenge et Avantages >> MULAFLOWR</div>
         <div class="username" id="sidebarUsername">Utilisateur</div>
       </div>
       
@@ -862,7 +934,7 @@
       
       <a href="challenge_reward.html" class="menu-item active">
         <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
+        <span>Challenge et Avantages</span>
         <span class="menu-badge active">☑</span>
       </a>
       
@@ -937,19 +1009,19 @@
     <main class="content">
       <h1 class="page-title">
         <i class="fas fa-medal"></i>
-        <span>Challenge and Rewards</span>
+        <span>Challenge et Avantages</span>
       </h1>
       
       <div class="challenge-banner">
-        <h2 class="banner-title">Défiez-vous et gagnez des récompenses!</h2>
+        <h2 class="banner-title">Défiez-vous et obtenez des avantages!</h2>
         <div class="banner-text">
-          Le classement des meilleurs parrains de MULAFLOWR! Ici, nous récompensons les membres les plus actifs qui ont parrainé le plus de personnes. Plus vous parrainez, plus vous grimpez dans le classement et plus vos récompenses sont importantes. Les récompenses sont mises à jour chaque semaine, alors continuez à inviter vos amis!
+          Le classement des meilleurs parrains de MULAFLOWR! Ici, nous mettons en lumière les membres les plus actifs qui ont parrainé le plus de personnes. Plus vous parrainez, plus vous grimpez dans le classement et plus vos avantages sont importants. Les avantages sont mis à jour chaque semaine, alors continuez à inviter vos amis!
         </div>
       </div>
       
       <div class="challenge-section">
-        <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des Meilleurs Parrains</h2>
-        <p class="section-subtitle">Voici le top 20 des parrains les plus actifs cette semaine. Les 5 premiers reçoivent des récompenses spéciales!</p>
+        <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des Parrains d'Élite</h2>
+        <p class="section-subtitle">Voici le top 20 des parrains ayant parrainé **au moins 20 personnes**. Les 5 premiers bénéficient d'avantages spéciaux!</p>
         
         <table class="leaderboard-table">
           <thead>
@@ -957,41 +1029,40 @@
               <th class="rank-cell">Rang</th>
               <th>Nom d'utilisateur</th>
               <th>Personnes parrainées</th>
-              <th>Récompense</th>
+              <th>Avantage</th>
             </tr>
           </thead>
           <tbody id="leaderboardBody">
-            <!-- Les données seront chargées dynamiquement -->
-          </tbody>
+            </tbody>
         </table>
         
         <div class="user-rank" id="userRankSection">
           <h3>Votre classement</h3>
           <div class="user-rank-value" id="userRank">--</div>
           <div class="user-referrals" id="userReferrals">Personnes parrainées: 0</div>
-          <p>Continuez à parrainer pour grimper dans le classement et gagner des récompenses!</p>
+          <p>Continuez à parrainer pour grimper dans le classement et débloquer des avantages!</p>
         </div>
       </div>
       
       <div class="challenge-section">
-        <h2 class="section-title"><i class="fas fa-gift"></i> Système de Récompenses</h2>
-        <p class="section-subtitle">Comment fonctionnent les récompenses et comment en bénéficier?</p>
+        <h2 class="section-title"><i class="fas fa-gift"></i> Système d'Avantages</h2>
+        <p class="section-subtitle">Découvrez les avantages exclusifs que vous pouvez gagner en parrainant vos proches.</p>
         
-        <div style="margin-top: 20px;">
-          <h4>Récompenses hebdomadaires:</h4>
-          <ul style="margin-left: 20px; margin-bottom: 20px;">
-            <li><strong>1ère place:</strong> Multipliez votre solde par 4 + 20 000 FCFA</li>
-            <li><strong>2ème place:</strong> Multipliez votre solde par 3 + 15 000 FCFA</li>
-            <li><strong>3ème place:</strong> Multipliez votre solde par 2 + 10 000 FCFA</li>
-            <li><strong>4ème place:</strong> 5 000 FCFA</li>
-            <li><strong>5ème place:</strong> 1 000 FCFA</li>
+        <div class="how-to-participate">
+          <h4>Avantages hebdomadaires (pour le Top 5):</h4>
+          <ul class="advantages-list">
+            <li><i class="fas fa-star"></i><strong>1ère place:</strong> Multipliez votre solde par 4 + 20 000 FCFA</li>
+            <li><i class="fas fa-star"></i><strong>2ème place:</strong> Multipliez votre solde par 3 + 15 000 FCFA</li>
+            <li><i class="fas fa-star"></i><strong>3ème place:</strong> Multipliez votre solde par 2 + 10 000 FCFA</li>
+            <li><i class="fas fa-check-circle"></i><strong>4ème place:</strong> 5 000 FCFA</li>
+            <li><i class="fas fa-check-circle"></i><strong>5ème place:</strong> 1 000 FCFA</li>
           </ul>
           
           <h4>Comment participer:</h4>
-          <p>Pour participer au challenge, il suffit de parrainer un maximum de personnes en partageant votre lien de parrainage. Chaque personne qui s'inscrit via votre lien augmente votre score dans le classement.</p>
+          <p>Pour participer au challenge, vous devez avoir parrainé **au moins 20 personnes**. Ensuite, il suffit de parrainer un maximum de personnes en partageant votre lien de parrainage. Chaque personne qui s'inscrit via votre lien augmente votre score dans le classement.</p>
           
-          <h4>Quand sont distribuées les récompenses:</h4>
-          <p>Les récompenses sont distribuées chaque dimanche à minuit. Le classement est remis à zéro chaque semaine pour donner à tous une chance de gagner.</p>
+          <h4>Quand sont distribués les avantages:</h4>
+          <p>Les avantages sont distribués chaque dimanche à minuit. Le classement est remis à zéro chaque semaine pour donner à tous une chance de gagner.</p>
         </div>
       </div>
     </main>
@@ -1011,6 +1082,7 @@
 
   <script>
     /******** CONFIG FIREBASE ********/
+    // ATTENTION : Remplacer par ta propre configuration si elle est différente
     const firebaseConfig = {
       apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
       authDomain: "cash-flowr.firebaseapp.com",
@@ -1125,10 +1197,11 @@
               phoneNumber: data.phoneNumber || data.phone || "",
               country: data.country || data.pays || "",
               theme: data.theme || 'light',
-              activeReferrals: data.activeReferrals || data.parrainageCount || 0
+              // Mettre à jour pour utiliser le champ 'totalReferrals'
+              totalReferrals: data.totalReferrals || 0 
           };
       } else {
-        userData = { theme: 'light', activeReferrals: 0 };
+        userData = { theme: 'light', totalReferrals: 0 }; // Mise à jour ici aussi
         await saveUserData();
       }
     }
@@ -1136,9 +1209,10 @@
     async function getTopReferrers() {
       try {
         const usersRef = db.collection('users');
+        // REQUÊTE MISE À JOUR : utilise 'totalReferrals' et filtre >= 20
         const querySnapshot = await usersRef
-          .where('activeReferrals', '>=', 15)
-          .orderBy('activeReferrals', 'desc')
+          .where('totalReferrals', '>=', 20)
+          .orderBy('totalReferrals', 'desc')
           .limit(20)
           .get();
         
@@ -1148,7 +1222,8 @@
           topReferrers.push({
             id: doc.id,
             displayName: data.displayName || 'Utilisateur',
-            activeReferrals: data.activeReferrals || 0
+            // Utilise totalReferrals
+            totalReferrals: data.totalReferrals || 0 
           });
         });
         
@@ -1165,7 +1240,7 @@
         leaderboardBody.innerHTML = `
           <tr>
             <td colspan="4" style="text-align: center; padding: 30px;">
-              Aucun parrain n'a encore atteint le classement. Soyez le premier!
+              Aucun parrain n'a encore atteint 20 parrainages. Soyez le premier!
             </td>
           </tr>
         `;
@@ -1175,22 +1250,23 @@
       let html = '';
       referrers.forEach((referrer, index) => {
         const rank = index + 1;
-        let reward = '';
+        // Remplacement de 'récompense' par 'avantage'
+        let advantage = ''; 
         
-        // Déterminer la récompense en fonction du rang
-        if (rank === 1) reward = 'x4 solde + 20 000 FCFA';
-        else if (rank === 2) reward = 'x3 solde + 15 000 FCFA';
-        else if (rank === 3) reward = 'x2 solde + 10 000 FCFA';
-        else if (rank === 4) reward = '5 000 FCFA';
-        else if (rank === 5) reward = '1 000 FCFA';
-        else reward = '---';
+        // Déterminer l'avantage en fonction du rang
+        if (rank === 1) advantage = 'x4 solde + 20K FCFA';
+        else if (rank === 2) advantage = 'x3 solde + 15K FCFA';
+        else if (rank === 3) advantage = 'x2 solde + 10K FCFA';
+        else if (rank === 4) advantage = '5 000 FCFA';
+        else if (rank === 5) advantage = '1 000 FCFA';
+        else advantage = '---';
         
         html += `
           <tr>
             <td class="rank-cell ${rank <= 3 ? 'rank-' + rank : ''}">${rank}</td>
             <td>${referrer.displayName}</td>
-            <td>${referrer.activeReferrals}</td>
-            <td class="reward-cell">${reward}</td>
+            <td>${referrer.totalReferrals}</td>
+            <td class="advantage-cell">${advantage}</td>
           </tr>
         `;
       });
@@ -1210,7 +1286,8 @@
         userRank.textContent = 'Hors top 20';
       }
       
-      userReferrals.textContent = `Personnes parrainées: ${userData.activeReferrals || 0}`;
+      // Utilisation de totalReferrals
+      userReferrals.textContent = `Personnes parrainées: ${userData.totalReferrals || 0}`; 
     }
 
     /******** Initialisation de l'application ********/
@@ -1251,7 +1328,14 @@
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
-            window.location.href = 'login.html';
+            // Redirection si l'utilisateur n'est pas connecté
+            if (window.location.pathname !== '/login.html') {
+                window.location.href = 'login.html';
+            } else {
+                 // Si on est déjà sur la page de login, on masque juste le loader
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+            }
         }
     });
 
