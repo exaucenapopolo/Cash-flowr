@@ -673,13 +673,19 @@
         border: 1px solid var(--warning-color);
     }
 
-    .status-badge.approuve {
+    .status-badge.en_cours {
+        background-color: rgba(0, 122, 255, 0.2);
+        color: #007AFF;
+        border: 1px solid #007AFF;
+    }
+
+    .status-badge.approuve, .status-badge.succes, .status-badge.termine {
         background-color: rgba(76, 217, 100, 0.2);
         color: var(--success-color);
         border: 1px solid var(--success-color);
     }
 
-    .status-badge.rejete {
+    .status-badge.rejete, .status-badge.refuse {
         background-color: rgba(255, 59, 48, 0.2);
         color: var(--danger-color);
         border: 1px solid var(--danger-color);
@@ -704,48 +710,6 @@
 
     .empty-state p {
         font-size: 1.1rem;
-    }
-
-    /* Style pour le CTA vers les tâches */
-    .cta-taches-card {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: var(--shadow);
-        max-width: 700px;
-        margin: 30px auto;
-        text-align: center;
-        animation: slideInUp 0.6s ease-out forwards;
-    }
-
-    .cta-taches-card p {
-        font-size: 1.1rem;
-        margin-bottom: 20px;
-        line-height: 1.6;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .cta-taches-btn {
-        background-color: var(--success-color);
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .cta-taches-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-        background-color: #4CAF50; /* Vert légèrement plus foncé */
     }
 
     @keyframes slideInUp {
@@ -1109,15 +1073,7 @@
         <p class="success-note">Vérifiez attentivement vos informations avant de soumettre. Le traitement peut prendre 24-48 heures.</p>
       </div>
 
-      <div class="cta-taches-card">
-        <p>
-          Si vous souhaitez retirer de l'argent que vous avez gagné en effectuant des tâches sur **MULAFLOWR**, vous pouvez consulter les tâches disponibles et accumuler des gains.
-        </p>
-        <a href="taches.html" class="cta-taches-btn">
-          <i class="fas fa-tasks"></i> Aller aux Tâches
-        </a>
-      </div>
-
+      <!-- HISTORIQUE DES RETRAITS -->
       <div class="historique-card">
         <h2>
           <i class="fas fa-history"></i>
@@ -1127,7 +1083,7 @@
         <div class="historique-table-container" id="historiqueContainer">
           <div class="empty-state">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Chargement de l'historique en temps réel...</p>
+            <p>Chargement de l'historique...</p>
           </div>
         </div>
       </div>
@@ -1146,399 +1102,545 @@
     </div>
   </footer>
 
-  <script> /********** scripts.js - pour retrait.html (copier-coller) **********/
+  <script>
+    /******** CONFIG FIREBASE ********/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+      authDomain: "cash-flowr.firebaseapp.com",
+      projectId: "cash-flowr",
+      storageBucket: "cash-flowr.appspot.com",
+      messagingSenderId: "1091928501310",
+      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+      measurementId: "G-5SF6VDLZCB"
+    };
 
-/* CONFIG FIREBASE - garde les mêmes clefs que ta page */
-const firebaseConfig = {
-  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-  authDomain: "cash-flowr.firebaseapp.com",
-  projectId: "cash-flowr",
-  storageBucket: "cash-flowr.appspot.com",
-  messagingSenderId: "1091928501310",
-  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-  measurementId: "G-5SF6VDLZCB"
-};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+    // URL du backend
+    const BACKEND_URL = 'https://mulaflowr-exaucenapopolo2.replit.app';
 
-/* BACKEND (inchangé) */
-const BACKEND_URL = 'https://mulaflowr-exaucenapopolo2.replit.app';
+    /******** DOM Elements ********/
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('themeToggle');
+    const userProfile = document.getElementById('userProfile');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const userAvatar = document.getElementById('userAvatar');
+    const loader = document.getElementById('loader');
 
-/* DOM elements (assure-toi que ces IDs existent dans ton HTML) */
-const historiqueContainer = document.getElementById('historiqueContainer');
-const currentBalanceEl = document.getElementById('currentBalance');
-const sidebarUsername = document.getElementById('sidebarUsername');
-const retraitForm = document.getElementById('retraitForm');
-const retraitBtn = document.getElementById('retraitBtn');
+    const currentBalanceEl = document.getElementById('currentBalance');
+    const retraitForm = document.getElementById('retraitForm');
+    const retraitBtn = document.getElementById('retraitBtn');
+    const notificationContainer = document.getElementById('notificationContainer');
+    const historiqueContainer = document.getElementById('historiqueContainer');
+    
+    // Éléments d'information (UID retiré)
+    const infoUsername = document.getElementById('infoUsername');
+    const infoEmail = document.getElementById('infoEmail');
+    const infoPaymentStatus = document.getElementById('infoPaymentStatus');
+    
+    // Éléments du formulaire
+    const paysSelect = document.getElementById('pays');
+    const methodeSelect = document.getElementById('methode');
+    const numeroCompteInput = document.getElementById('numeroCompte');
+    const montantInput = document.getElementById('montant');
+    const descriptionInput = document.getElementById('description');
 
-const paysSelect = document.getElementById('pays');
-const methodeSelect = document.getElementById('methode');
-const numeroCompteInput = document.getElementById('numeroCompte');
-const montantInput = document.getElementById('montant');
-const descriptionInput = document.getElementById('description');
+    /******** Variables d'état ********/
+    let currentUser = null;
+    let userData = {};
 
-const infoUsername = document.getElementById('infoUsername');
-const infoEmail = document.getElementById('infoEmail');
-const infoPaymentStatus = document.getElementById('infoPaymentStatus');
+    // Configuration des méthodes de retrait par pays
+    const methodesParPays = {
+        benin: ['Ancient Mobile Money', 'Move Money'],
+        burkina: ['Orange Money', 'Move Money'],
+        cameroun: ['Orange Money', 'Ancient Mobile Money'],
+        coteivoire: ['Orange Money', 'Ancient Mobile Money', 'Move Money', 'Wave Money'],
+        mali: ['Orange Money', 'Move Money'],
+        senegal: ['Orange Money', 'Wizall Money', 'Free Money', 'Wave Money'],
+        togo: ['Move Money', 'T-Money']
+    };
 
-let currentUser = null;
-let userData = {};
-let unsubscribeRetraits = null;
+    /******** UI helpers ********/
+    function showNotification(type, title, message, duration = 4000) {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+          <span>${message}</span>
+        </div>
+      `;
+      notificationContainer.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+        setTimeout(() => { if (notificationContainer.contains(notification)) notificationContainer.removeChild(notification); }, 300);
+      }, duration);
+    }
+    
+    function formatNumberSafe(n) { 
+        return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; 
+    }
 
-/* ---------- UI / Notifications ---------- */
-function showNotification(type, title, message, duration = 4000) {
-  // type: 'success'|'error'|'info'
-  const container = document.getElementById('notificationContainer');
-  if (!container) return;
-  const el = document.createElement('div');
-  el.className = `notification ${type}`;
-  el.style.background = type === 'error' ? '#c0392b' : (type === 'success' ? '#2AB32A' : '#3a8ee6');
-  el.style.color = 'white';
-  el.style.padding = '10px 12px';
-  el.style.borderRadius = '8px';
-  el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
-  el.innerHTML = `<strong style="display:block">${title}</strong><div>${message}</div>`;
-  container.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(()=>el.remove(), 300); }, duration);
-}
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      let date;
+      if (timestamp.toDate) {
+        date = timestamp.toDate();
+      } else if (timestamp instanceof Date) {
+        date = timestamp;
+      } else {
+        date = new Date(timestamp);
+      }
+      return date.toLocaleDateString('fr-FR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
 
-/* ---------- Helpers ---------- */
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+    function getStatusBadgeClass(statut) {
+      const s = (statut || 'en_cours').toLowerCase().replace(/\s+/g, '_');
+      
+      // Statuts de succès
+      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed' || 
+          s === 'succes' || s === 'succès' || s === 'termine' || s === 'terminé' || s === 'success') {
+        return 'succes';
+      }
+      
+      // Statuts de rejet/refus
+      if (s === 'rejete' || s === 'rejeté' || s === 'rejected' || s === 'refuse' || s === 'refusé') {
+        return 'refuse';
+      }
+      
+      // Statut en cours
+      if (s === 'en_cours' || s === 'encours' || s === 'processing' || s === 'traitement') {
+        return 'en_cours';
+      }
+      
+      // Statut en attente (par défaut ou explicite)
+      return 'en_attente';
+    }
 
-function formatNumberSafe(n) {
-  if (typeof n === 'number' && !isNaN(n)) return n.toLocaleString('fr-FR');
-  const m = Number(n);
-  return !isNaN(m) ? m.toLocaleString('fr-FR') : '0';
-}
+    function getStatusText(statut) {
+      if (!statut) return 'En cours';
+      
+      const s = statut.toLowerCase().replace(/\s+/g, '_');
+      
+      // Statuts de succès
+      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed') return 'Approuvé';
+      if (s === 'succes' || s === 'succès' || s === 'success') return 'Succès';
+      if (s === 'termine' || s === 'terminé') return 'Terminé';
+      
+      // Statuts de rejet/refus
+      if (s === 'rejete' || s === 'rejeté' || s === 'rejected') return 'Rejeté';
+      if (s === 'refuse' || s === 'refusé') return 'Refusé';
+      
+      // Statut en cours
+      if (s === 'en_cours' || s === 'encours' || s === 'processing' || s === 'traitement') return 'En cours';
+      
+      // Statut en attente
+      if (s === 'en_attente' || s === 'enattente' || s === 'pending') return 'En attente';
+      
+      // Si le statut n'est pas reconnu, afficher tel quel (capitaliser la première lettre)
+      return statut.charAt(0).toUpperCase() + statut.slice(1).replace(/_/g, ' ');
+    }
 
-function formatDate(ts) {
-  if (!ts) return 'N/A';
-  try {
-    let d;
-    if (typeof ts.toDate === 'function') d = ts.toDate();
-    else d = new Date(ts);
-    if (isNaN(d.getTime())) return 'N/A';
-    return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
-    return 'N/A';
-  }
-}
+    /******** Gestion des interactions ********/
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        hamburgerBtn.classList.toggle('open');
+    });
+    
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburgerBtn.classList.remove('open');
+    });
 
-/* Accept multiple possible status field names/values and normalize to FR text */
-function getStatusText(st) {
-  if (st === undefined || st === null || st === '') return 'En attente';
-  const s = String(st).trim().toLowerCase();
-  if (s === '1' || s === 'paid' || s === 'payé' || s.includes('appr') || s.includes('complete')) return 'Approuvé';
-  if (s === '-1' || s === 'rejected' || s.includes('rej')) return 'Rejeté';
-  if (s.includes('pend') || s.includes('wait') || s.includes('attente') || s.includes('processing')) return 'En attente';
-  // else return the raw value (but capitalized)
-  return String(st);
-}
+    userProfile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileDropdown.classList.toggle('active');
+    });
+    
+    document.addEventListener('click', (event) => {
+        if (!userProfile.contains(event.target)) {
+            profileDropdown.classList.remove('active');
+        }
+    });
 
-/* ---------- Utilitaires de lecture / écriture utilisateur ---------- */
-async function saveUserData(key = null, value = null) {
-  if (!currentUser) return;
-  try {
-    const ref = db.collection('users').doc(currentUser.uid);
-    const payload = key ? { [key]: value } : userData;
-    await ref.set({ ...payload, lastUpdate: new Date() }, { merge: true });
-    console.log('User data saved.');
-  } catch (e) {
-    console.error('saveUserData error', e);
-    showNotification('error', 'Erreur', 'Impossible de sauvegarder les données utilisateur.');
-  }
-}
+    themeToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+        if(currentUser) saveUserData('theme', isDarkMode ? 'dark' : 'light');
+    });
 
-async function loadUserData() {
-  if (!currentUser) throw new Error('Utilisateur non connecté');
-  try {
-    const userRef = db.collection('users').doc(currentUser.uid);
-    let doc = await userRef.get();
-    let foundViaEmail = false;
+    function applyTheme() {
+        const isDarkMode = userData.theme === 'dark';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        themeToggle.innerHTML = isDarkMode 
+            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+    }
 
-    if (!doc.exists && currentUser.email) {
-      // try find by email
-      const snapshot = await db.collection('users').where('email', '==', currentUser.email).limit(1).get();
-      if (!snapshot.empty) {
-        doc = snapshot.docs[0];
-        foundViaEmail = true;
-        console.log('User found by email:', doc.id);
+    /******** Gestion des méthodes de retrait ********/
+    paysSelect.addEventListener('change', function() {
+        const paysSelectionne = this.value;
+        
+        // Réinitialiser la sélection de méthode
+        methodeSelect.innerHTML = '';
+        methodeSelect.disabled = true;
+        
+        if (paysSelectionne && methodesParPays[paysSelectionne]) {
+            methodeSelect.disabled = false;
+            methodeSelect.innerHTML = '<option value="">Sélectionnez une méthode</option>';
+            
+            methodesParPays[paysSelectionne].forEach(methode => {
+                const option = document.createElement('option');
+                option.value = methode.toLowerCase().replace(/\s+/g, '-');
+                option.textContent = methode;
+                methodeSelect.appendChild(option);
+            });
+        } else {
+            methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
+        }
+    });
+
+    /******** Validation du formulaire ********/
+    function validerFormulaire() {
+        const montant = parseFloat(montantInput.value);
+        const solde = userData.solde || 0;
+        const minMontant = 3000;
+
+        if (montant < minMontant) {
+            showNotification('error', 'Erreur', `Le montant minimum de retrait est de ${minMontant.toLocaleString('fr-FR')} XAF.`);
+            return false;
+        }
+        
+        if (montant > solde) {
+            showNotification('error', 'Solde insuffisant', `Votre solde actuel est de ${formatNumberSafe(solde)} XAF.`);
+            return false;
+        }
+        
+        if (!numeroCompteInput.checkValidity()) {
+            showNotification('error', 'Numéro invalide', 'Veuillez entrer un numéro de compte/téléphone valide.');
+            return false;
+        }
+        
+        return true;
+    }
+
+    /******** Sauvegarde des données utilisateur ********/
+    async function saveUserData(key = null, value = null) {
+      if (!currentUser) return;
+      try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const dataToSave = key ? { [key]: value } : userData;
+        await userRef.set({ ...dataToSave, lastUpdate: new Date() }, { merge: true });
+        console.log('Données utilisateur enregistrées avec succès.');
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde des données :", error);
+        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
       }
     }
 
-    if (doc && doc.exists) {
-      const data = doc.data() || {};
-      userData = {
-        uid: foundViaEmail ? doc.id : currentUser.uid,
-        displayName: data.displayName || currentUser.displayName || currentUser.email,
-        username: data.username || data.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Utilisateur'),
-        email: data.email || currentUser.email || 'N/A',
-        solde: Number(data.solde || data.balance || 0),
-        retire: Number(data.retire || data.withdrawn || 0),
-        paid: !!(data.paid || data.isPaid || data.paiement),
-        theme: data.theme || 'light'
-      };
-    } else {
-      userData = { uid: currentUser.uid, username: currentUser.email ? currentUser.email.split('@')[0] : 'Utilisateur', email: currentUser.email || 'N/A', solde: 0, retire: 0, paid: false, theme: 'light' };
-      await saveUserData();
+    /******** Vérification du statut de paiement ********/
+    function isUserPaidFromDoc(docData) {
+      if (!docData) return false;
+      const candidates = [
+        docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
+        docData.status, docData.statut, docData.payment, docData.paidStatus
+      ];
+      for (const candidate of candidates) {
+        if (candidate !== undefined && candidate !== null) {
+          if (typeof candidate === 'boolean') return candidate;
+          if (typeof candidate === 'string') {
+            const v = candidate.toLowerCase().trim();
+            return ['true', 'yes', 'paid', 'payé', 'complete', 'completed', 'active', '1'].includes(v);
+          }
+          if (typeof candidate === 'number') return candidate === 1;
+        }
+      }
+      return false;
     }
-    updateUI();
-  } catch (e) {
-    console.error('loadUserData error', e);
-    throw e;
-  }
-}
 
-function updateUI() {
-  if (sidebarUsername) sidebarUsername.textContent = userData.username || 'Utilisateur';
-  if (currentBalanceEl) currentBalanceEl.textContent = formatNumberSafe(userData.solde || 0);
-  if (infoUsername) infoUsername.textContent = userData.username || 'N/A';
-  if (infoEmail) infoEmail.textContent = userData.email || 'N/A';
-  if (infoPaymentStatus) {
-    infoPaymentStatus.textContent = userData.paid ? '✅ Payé' : '❌ Non payé';
-    infoPaymentStatus.style.color = userData.paid ? 'var(--success-color)' : 'var(--danger-color)';
-  }
-}
+    /******** Logique de chargement des données ********/
+    async function loadUserData() {
+      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
+      
+      let userRef = db.collection('users').doc(currentUser.uid);
+      let doc = await userRef.get();
+      let foundViaEmail = false;
 
-/* ---------- Rendu et écoute temps réel des retraits ---------- */
+      // Recherche par email si non trouvé par UID
+      if (!doc.exists && currentUser.email) {
+        console.log('⚠️ Utilisateur non trouvé par UID, recherche par email...');
+        const q = db.collection('users').where('email', '==', currentUser.email);
+        const snapshot = await q.get();
+        if (!snapshot.empty) {
+          doc = snapshot.docs[0];
+          userRef = doc.ref;
+          foundViaEmail = true;
+          console.log('✅ Utilisateur trouvé par email:', doc.id);
+        }
+      }
 
-function renderSnapshot(snapshot) {
-  console.log('[DEBUG] Snapshot reçu (size=', snapshot.size, ')');
-  // log changes
-  snapshot.docChanges().forEach(change => {
-    console.log('[CHANGE]', change.type, change.doc.id, change.doc.data());
-  });
-  // log all docs
-  snapshot.forEach(d => console.log('[DOC]', d.id, d.data()));
-
-  if (!snapshot || snapshot.empty) {
-    historiqueContainer.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-inbox"></i>
-        <p>Aucun retrait effectué pour le moment.</p>
-      </div>`;
-    return;
-  }
-
-  let html = `
-    <table class="historique-table" role="table" aria-label="Historique des retraits">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Montant</th>
-          <th>Pays</th>
-          <th>Méthode</th>
-          <th>Numéro</th>
-          <th>Statut</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  snapshot.forEach(doc => {
-    const r = doc.data() || {};
-    const montant = r.montant ?? r.amount ?? 0;
-    const pays = r.pays ?? r.country ?? r.countryName ?? '';
-    const methode = r.methode ?? r.method ?? r.paymentMethod ?? '';
-    const numero = r.numeroCompte ?? r.numero ?? r.phone ?? '';
-    const description = r.description ?? r.note ?? '';
-    const date = r.date ?? r.createdAt ?? r.timestamp ?? null;
-    const rawStat = r.statut ?? r.status ?? r.state ?? r.etat ?? r.resultat ?? '';
-    const statusText = getStatusText(rawStat);
-
-    html += `
-      <tr>
-        <td>${escapeHtml(formatDate(date))}</td>
-        <td class="montant-cell">${escapeHtml(formatNumberSafe(Number(montant)))} XAF</td>
-        <td>${escapeHtml(pays || 'N/A')}</td>
-        <td>${escapeHtml(methode || 'N/A')}</td>
-        <td>${escapeHtml(numero || 'N/A')}</td>
-        <td>${escapeHtml(statusText)}</td>
-        <td>${escapeHtml(description || 'N/A')}</td>
-      </tr>
-    `;
-  });
-
-  html += `</tbody></table>`;
-  historiqueContainer.innerHTML = html;
-}
-
-/* Installe l'écoute sur la collection racine 'retraits' (where userId == uid). Si permission denied, fait fallback sur users/{uid}/retraits */
-function listenToRetraitsRealtime() {
-  if (!currentUser) {
-    console.warn('listenToRetraitsRealtime: pas d\'utilisateur connecté');
-    return;
-  }
-
-  if (unsubscribeRetraits) {
-    try { unsubscribeRetraits(); } catch (e) { console.warn('unsubscribe error', e); }
-    unsubscribeRetraits = null;
-  }
-
-  const uid = currentUser.uid;
-  console.log('Installation listener retraits pour uid=', uid);
-
-  const q = db.collection('retraits').where('userId', '==', uid).orderBy('date', 'desc').limit(200);
-
-  unsubscribeRetraits = q.onSnapshot(snapshot => {
-    console.log('onSnapshot retraits (racine) reçu');
-    renderSnapshot(snapshot);
-  }, error => {
-    console.error('Erreur onSnapshot retraits (racine):', error);
-    // Si permission denied, tenter fallback nested
-    if (error && (error.code === 'permission-denied' || error.message && error.message.includes('Missing or insufficient permissions'))) {
-      console.warn('Permission denied sur retraits (racine) — tentative fallback users/{uid}/retraits');
-      tryFallbackNested(uid);
-    } else {
-      historiqueContainer.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-exclamation-triangle"></i>
-          <p>Erreur lors du chargement de l'historique. Vérifie la console.</p>
-        </div>`;
+      if (doc.exists) {
+          const data = doc.data() || {};
+          userData = {
+              uid: foundViaEmail ? doc.id : currentUser.uid,
+              displayName: data.displayName || currentUser.displayName || currentUser.email,
+              username: data.username || data.displayName || currentUser.email.split('@')[0],
+              email: data.email || currentUser.email,
+              solde: Number(data.solde || data.balance || 0),
+              retire: Number(data.retire || data.withdrawn || 0),
+              paid: isUserPaidFromDoc(data),
+              theme: data.theme || 'light'
+          };
+      } else {
+        userData = { 
+            uid: currentUser.uid,
+            username: currentUser.email.split('@')[0],
+            email: currentUser.email,
+            solde: 0, 
+            retire: 0, 
+            paid: false, 
+            theme: 'light' 
+        };
+        await saveUserData();
+      }
     }
-  });
-}
+    
+    function updateUI() {
+        if (sidebarUsername) sidebarUsername.textContent = userData.username;
+        if (userAvatar) userAvatar.textContent = userData.username.charAt(0).toUpperCase();
+        if (currentBalanceEl) currentBalanceEl.textContent = formatNumberSafe(userData.solde);
+        
+        // Mettre à jour les informations utilisateur (UID RETIRÉ)
+        infoUsername.textContent = userData.username;
+        infoEmail.textContent = userData.email;
+        infoPaymentStatus.textContent = userData.paid ? '✅ Payé' : '❌ Non payé';
+        infoPaymentStatus.style.color = userData.paid ? 'var(--success-color)' : 'var(--danger-color)';
+    }
 
-/* Fallback: écoute users/{uid}/retraits */
-function tryFallbackNested(uid) {
-  try {
-    if (unsubscribeRetraits) { try { unsubscribeRetraits(); } catch(e){} }
-    const nested = db.collection('users').doc(uid).collection('retraits').orderBy('date', 'desc').limit(200);
-    unsubscribeRetraits = nested.onSnapshot(snapshot => {
-      console.log('onSnapshot nested users/{uid}/retraits reçu');
-      renderSnapshot(snapshot);
-    }, err => {
-      console.error('Erreur onSnapshot nested retraits:', err);
-      historiqueContainer.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-exclamation-triangle"></i>
-          <p>Impossible de lire l'historique. Vérifie les règles Firestore et la console.</p>
-        </div>`;
+    /******** CHARGEMENT DE L'HISTORIQUE DES RETRAITS EN TEMPS RÉEL ********/
+    let unsubscribeRetraits = null; // Variable pour stocker la fonction d'annulation
+    
+    function loadHistoriqueRetraits() {
+      if (!currentUser || !userData.uid) {
+        console.warn('Impossible de charger l\'historique: utilisateur non connecté');
+        return;
+      }
+
+      // Si un listener existe déjà, l'annuler
+      if (unsubscribeRetraits) {
+        console.log('🔄 Annulation de l\'ancien listener...');
+        unsubscribeRetraits();
+      }
+
+      console.log('📊 Mise en place du listener temps réel pour l\'historique des retraits:', userData.uid);
+      
+      // Requête Firestore avec listener temps réel (onSnapshot)
+      const retraitsQuery = db.collection('retraits')
+        .where('userId', '==', userData.uid)
+        .orderBy('date', 'desc')
+        .limit(50);
+      
+      // 🔥 LISTENER TEMPS RÉEL - Se met à jour automatiquement quand le statut change dans Firestore
+      unsubscribeRetraits = retraitsQuery.onSnapshot(
+        (snapshot) => {
+          console.log('🔄 Mise à jour en temps réel de l\'historique:', snapshot.size, 'retrait(s)');
+          
+          if (snapshot.empty) {
+            historiqueContainer.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>Aucun retrait effectué pour le moment.</p>
+              </div>
+            `;
+            return;
+          }
+
+          // Créer le tableau avec les données
+          let tableHTML = `
+            <table class="historique-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Pays</th>
+                  <th>Méthode</th>
+                  <th>Numéro</th>
+                  <th>Description</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          snapshot.forEach(doc => {
+            const retrait = doc.data();
+            const statusClass = getStatusBadgeClass(retrait.statut);
+            const statusText = getStatusText(retrait.statut);
+            
+            tableHTML += `
+              <tr>
+                <td>${formatDate(retrait.date)}</td>
+                <td class="montant-cell">${formatNumberSafe(retrait.montant)} XAF</td>
+                <td>${retrait.pays || 'N/A'}</td>
+                <td>${retrait.methode || 'N/A'}</td>
+                <td>${retrait.numeroCompte || 'N/A'}</td>
+                <td>${retrait.description || 'N/A'}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+              </tr>
+            `;
+          });
+
+          tableHTML += `
+              </tbody>
+            </table>
+          `;
+
+          historiqueContainer.innerHTML = tableHTML;
+          console.log('✅ Historique mis à jour en temps réel');
+        },
+        (error) => {
+          console.error('❌ Erreur lors de l\'écoute de l\'historique:', error);
+          historiqueContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Erreur lors du chargement de l'historique.</p>
+            </div>
+          `;
+        }
+      );
+    }
+
+    /******** Logique de retrait - COMMUNICATION AVEC LE SERVEUR ********/
+    retraitForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!currentUser) {
+            showNotification('error', 'Erreur', 'Veuillez vous connecter pour effectuer un retrait.');
+            return;
+        }
+
+        if (!validerFormulaire()) {
+            return;
+        }
+
+        const montant = parseFloat(montantInput.value);
+        const pays = paysSelect.options[paysSelect.selectedIndex].text;
+        const methode = methodeSelect.options[methodeSelect.selectedIndex].text;
+        const numeroCompte = numeroCompteInput.value;
+        const description = descriptionInput.value;
+
+        // Désactiver le bouton pendant le traitement
+        retraitBtn.disabled = true;
+        retraitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        
+        showNotification('info', 'Traitement', 'Votre demande de retrait est en cours de traitement.');
+
+        try {
+            // Obtenir l'idToken pour l'authentification
+            const idToken = await currentUser.getIdToken();
+
+            // Envoyer la demande au serveur
+            const response = await fetch(`${BACKEND_URL}/api/retrait`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    montant: montant,
+                    pays: pays,
+                    methode: methode,
+                    numeroCompte: numeroCompte,
+                    description: description
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Erreur lors du retrait');
+            }
+
+            // Mettre à jour les données locales avec les nouveaux soldes du serveur
+            userData.solde = result.nouveauSolde;
+            userData.retire = result.nouveauRetire;
+            updateUI();
+            
+            showNotification('success', 'Retrait réussi', 
+                `Votre demande de retrait de ${formatNumberSafe(montant)} XAF a été envoyée avec succès. ` +
+                `Méthode: ${methode} (${pays}). Le traitement peut prendre 24-48 heures.`);
+            
+            // Réinitialiser le formulaire
+            retraitForm.reset();
+            methodeSelect.disabled = true;
+            methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
+            
+            // Le listener temps réel se mettra à jour automatiquement
+            // Pas besoin de recharger manuellement
+            
+        } catch (error) {
+            console.error("Erreur lors du retrait :", error);
+            showNotification('error', 'Erreur de retrait', error.message || 'Une erreur est survenue. Veuillez réessayer.');
+        } finally {
+            retraitBtn.disabled = false;
+            retraitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre la demande';
+        }
     });
-  } catch (e) {
-    console.error('tryFallbackNested exception', e);
-  }
-}
 
-/* Arrête l'écoute si besoin */
-function stopListenRetraits() {
-  if (unsubscribeRetraits) {
-    try { unsubscribeRetraits(); } catch (e) { console.warn('unsubscribe error', e); }
-    unsubscribeRetraits = null;
-    console.log('Listener retraits arrêté.');
-  }
-}
-
-/* ---------- Form submit : envoi au backend ---------- */
-retraitForm && retraitForm.addEventListener('submit', async (evt) => {
-  evt.preventDefault();
-  if (!currentUser) { showNotification('error','Erreur','Veuillez vous connecter.'); return; }
-
-  const montant = parseFloat(montantInput.value || 0);
-  const pays = paysSelect.options[paysSelect.selectedIndex] ? paysSelect.options[paysSelect.selectedIndex].text : '';
-  const methode = methodeSelect.options[methodeSelect.selectedIndex] ? methodeSelect.options[methodeSelect.selectedIndex].text : '';
-  const numeroCompte = numeroCompteInput.value;
-  const description = descriptionInput.value || '';
-
-  // validations basiques (tu peux adapter)
-  if (isNaN(montant) || montant < 3000) { showNotification('error','Erreur','Montant invalide (min 3000 XAF).'); return; }
-  if (!numeroCompte || !/^[0-9+\s]{8,15}$/.test(numeroCompte)) { showNotification('error','Erreur','Numéro invalide.'); return; }
-
-  retraitBtn.disabled = true;
-  const originalHtml = retraitBtn.innerHTML;
-  retraitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-  showNotification('info','Traitement','Votre demande est en cours.');
-
-  try {
-    const idToken = await currentUser.getIdToken();
-    const res = await fetch(`${BACKEND_URL}/api/retrait`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-      body: JSON.stringify({ montant, pays, methode, numeroCompte, description })
+    /******** Point d'entrée principal de l'application ********/
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                await loadUserData();
+                
+                // Vérification du statut de paiement
+                if (!userData.paid) {
+                    showNotification('info', 'Action requise', 'Veuillez finaliser votre inscription pour continuer.');
+                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2500);
+                    return;
+                }
+                
+                updateUI();
+                applyTheme();
+                
+                // Charger l'historique des retraits (listener temps réel)
+                loadHistoriqueRetraits();
+                
+                document.body.classList.add('loaded');
+                loader.classList.add('hidden');
+                
+                showNotification('success', 'Bienvenue !', `Solde actuel: ${formatNumberSafe(userData.solde)} XAF`);
+                
+            } catch (error) {
+                console.error("Erreur critique lors de l'initialisation :", error);
+                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
+                auth.signOut();
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
     });
-    const payload = await res.json();
-    if (!res.ok) throw new Error(payload.error || 'Erreur lors du retrait');
-
-    // Si backend renvoie nouveau solde, on met à jour UI
-    if (payload.nouveauSolde !== undefined) {
-      userData.solde = payload.nouveauSolde;
-      updateUI();
-    }
-
-    showNotification('success','Succès', `Retrait ${formatNumberSafe(montant)} XAF envoyé - en attente de traitement.`);
-    retraitForm.reset();
-    methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
-    methodeSelect.disabled = true;
-
-    // le listener temps réel (si en place) mettra à jour l'historique automatiquement
-  } catch (e) {
-    console.error('Erreur submit retrait:', e);
-    showNotification('error','Erreur', e.message || 'Erreur lors de la requête.');
-  } finally {
-    retraitBtn.disabled = false;
-    retraitBtn.innerHTML = originalHtml;
-  }
-});
-
-/* ---------- Auth state & démarrage ---------- */
-auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    console.log('Utilisateur non connecté - redirection si besoin.');
-    // window.location.href = 'login.html'; // optionnel
-    return;
-  }
-  currentUser = user;
-  console.log('Utilisateur connecté:', user.uid, user.email);
-
-  try {
-    await loadUserData();
-
-    // Si l'app exige que l'utilisateur ait 'paid' true pour rester ici :
-    if (!userData.paid) {
-      showNotification('info','Action requise','Veuillez finaliser votre inscription.');
-      // setTimeout(()=> window.location.href = 'paiement.html', 2200);
-      // return; // si tu veux forcer la redirection
-    }
-
-    listenToRetraitsRealtime();
-  } catch (e) {
-    console.error('Init error:', e);
-    showNotification('error','Erreur', 'Impossible de charger vos données initiales.');
-  }
-});
-
-/* ---------- Debug helpers exposés pour console devtools ---------- */
-window.debugListRetraitsRoot = async function(limit = 50) {
-  try {
-    const s = await db.collection('retraits').limit(limit).get();
-    console.log('retraits root count=', s.size);
-    s.forEach(d => console.log(d.id, d.data()));
-  } catch (e) { console.error('debugListRetraitsRoot error', e); }
-};
-
-window.debugListNested = async function(limit = 50) {
-  try {
-    if (!auth.currentUser) { console.error('Not logged'); return; }
-    const s = await db.collection('users').doc(auth.currentUser.uid).collection('retraits').limit(limit).get();
-    console.log('users/{uid}/retraits count=', s.size);
-    s.forEach(d => console.log(d.id, d.data()));
-  } catch (e) { console.error('debugListNested error', e); }
-};
-
-window.stopListenRetraits = stopListenRetraits;
-window.startListenRetraits = listenToRetraitsRealtime;
-
-/* Fin du script - version stable prête à l'usage */
+  </script>
 </body>
 </html>
