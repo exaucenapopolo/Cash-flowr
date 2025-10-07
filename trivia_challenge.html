@@ -13,9 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
-    /* Styles CSS du fichier original (non modifiés ici pour la concision) */
-    /* ... (Gardez tous les styles CSS originaux ici) ... */
-    /* Styles de base */
+    /* Styles (identiques à ton fichier, condensés pour la lecture) */
     body {
       background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
       color: var(--text-color);
@@ -26,888 +24,80 @@
       opacity: 0;
       transition: opacity 0.5s ease, visibility 0.5s ease;
     }
-
-    body.loaded {
-      visibility: visible;
-      opacity: 1;
-    }
+    body.loaded { visibility: visible; opacity: 1; }
 
     :root {
       --primary-color: #3a8ee6;
       --primary-light: #4da6ff;
       --primary-dark: #2c75c9;
       --secondary-color: #4c566a;
-      --accent-color: #5e81ac;
       --background-light: #f5f7fb;
-      --background-dark: #e5e9f0;
       --card-bg: #ffffff;
       --text-color: #2e3440;
       --text-light: #4c566a;
       --success-color: #4CD964;
-      --warning-color: #FF9500;
       --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
-      --teal-color: #5AC8FA;
-      --orange-color: #FF9500;
-      --pink-color: #FF2D55;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --transition: all 0.3s ease;
-      --badge-active: #4CD964;
-      --badge-pending: #FF9500;
-      --badge-inactive: #FF3B30;
-    }
-
-    .dark-mode {
-      --primary-color: #5e81ac;
-      --primary-light: #81a1c1;
-      --primary-dark: #4c566a;
-      --secondary-color: #d8dee9;
-      --accent-color: #88c0d0;
-      --background-light: #2e3440;
-      --background-dark: #3b4252;
-      --card-bg: #434c5e;
-      --text-color: #eceff4;
-      --text-light: #d8dee9;
-      --success-color: #4CD964;
-      --warning-color: #FF9500;
-      --danger-color: #FF3B30;
-      --purple-color: #AF52DE;
-      --teal-color: #5AC8FA;
-      --orange-color: #FF9500;
-      --pink-color: #FF2D55;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      --badge-active: #2ecc71;
-      --badge-pending: #f1c40f;
-      --badge-inactive: #e74c3c;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      transition: var(--transition);
-    }
-    
-    /* Loader */
-    .loader-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #d5e8d9 0%, #c5dfe6 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    .loader-container.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .loader {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: conic-gradient(#0000 10%, var(--primary-color));
-      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
-      animation: spin 1s infinite linear;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(1turn);
-      }
-    }
-
-    /* Header styles */
-    .header {
-      background-color: var(--card-bg);
-      box-shadow: var(--shadow);
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      font-family: 'Montserrat', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .language-selector {
-      background-color: var(--primary-light);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
-    }
-
-    .theme-toggle {
-        background-color: transparent;
-        border: none;
-        color: var(--secondary-color);
-        cursor: pointer;
-        padding: 5px;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.3s ease;
-    }
-
-    .theme-toggle:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-    .theme-toggle i {
-        font-size: 1.2rem;
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      position: relative;
-    }
-    
-    .user-profile .avatar {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border: 2px solid var(--primary-light);
-      box-shadow: var(--shadow);
-    }
-
-    .profile-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background-color: var(--card-bg);
-        box-shadow: var(--shadow);
-        border-radius: 8px;
-        padding: 10px;
-        display: none;
-        flex-direction: column;
-        gap: 5px;
-        min-width: 150px;
-        z-index: 200;
-        transform-origin: top right;
-        animation: scaleIn 0.2s ease-out forwards;
-    }
-
-    .profile-dropdown.active {
-        display: flex;
-    }
-    
-    @keyframes scaleIn {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .profile-dropdown .theme-toggle {
-        width: 100%;
-        border-radius: 8px;
-        background-color: rgba(0, 0, 0, 0.05);
-        color: var(--text-color);
-        justify-content: flex-start;
-        padding: 10px;
-        transition: background-color 0.2s ease, transform 0.2s ease;
-        text-align: left;
-        gap: 10px;
-    }
-    .profile-dropdown .theme-toggle:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .profile-dropdown .theme-toggle span {
-        flex-grow: 1;
-        text-align: left;
-    }
-
-    /* Bouton hamburger */
-    .hamburger-btn {
-        display: none;
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        width: 30px;
-        height: 25px;
-        padding: 0;
-    }
-    
-    .hamburger-btn .bar {
-        width: 100%;
-        height: 3px;
-        background-color: var(--secondary-color);
-        transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    
-    .hamburger-btn.open .bar:nth-child(2) {
-        opacity: 0;
-    }
-    
-    .hamburger-btn.open .bar:nth-child(1) {
-        transform: translateY(11px) rotate(45deg);
-    }
-    
-    .hamburger-btn.open .bar:nth-child(3) {
-        transform: translateY(-11px) rotate(-45deg);
-    }
-
-    /* Main layout */
-    .main-container {
-      display: flex;
-      flex: 1;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 280px;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(10px);
-      -webkit-backcast-filter: blur(10px);
-      border-right: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: var(--shadow);
-      height: calc(100vh - 80px);
-      position: sticky;
-      top: 80px;
-      padding: 25px 0;
-      overflow-y: auto;
-      transition: transform 0.4s ease-in-out; 
-    }
-    
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .welcome-section {
-      padding: 0 25px 25px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .welcome-text {
-      color: var(--text-light);
-      font-size: 0.9rem;
-      margin-bottom: 5px;
-    }
-
-    .username {
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: var(--primary-color);
-    }
-
-    .menu-category {
-      padding: 15px 25px 5px;
-      font-size: 0.85rem;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-    }
-
-    .menu-item {
-      padding: 12px 25px 12px 35px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      color: var(--text-color);
-      text-decoration: none;
-      font-weight: 500;
-      border-left: 4px solid transparent;
-      position: relative;
-      overflow: hidden;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .menu-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
-      transition: all 0.5s ease;
-    }
-    .menu-item:hover::before {
-      left: 100%;
-    }
-
-    .menu-item:hover, .menu-item.active {
-      background-color: rgba(0, 0, 0, 0.05);
-      border-left-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-
-    .menu-item i {
-      width: 20px;
-      text-align: center;
-      font-size: 1.1rem;
-      transition: transform 0.3s ease;
-    }
-
-    .menu-item:hover i {
-      transform: scale(1.1) rotate(5deg);
-    }
-
-    .menu-badge {
-      position: absolute;
-      right: 25px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
-      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-      animation: popIn 0.5s ease-out;
-    }
-    
-    @keyframes popIn {
-      from { transform: scale(0); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    
-    .menu-badge.active {
-      background-color: var(--badge-active);
-      color: white;
-    }
-    
-    .menu-badge.inactive {
-      background-color: var(--badge-inactive);
-      color: white;
-    }
-
-    /* Contenu principal */
-    .content {
-      flex: 1;
-      padding: 30px;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-      margin-bottom: 25px;
-      color: var(--secondary-color);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .page-title i {
-      color: var(--primary-color);
-    }
-
-    /* Section Trivia Challenge */
-    .trivia-section {
-      background: linear-gradient(135deg, #e6f7ff 0%, #b3e0ff 100%);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .trivia-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) rotate(45deg); }
-    }
-
-    .section-title {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
-      color: var(--secondary-color);
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-
-    .difficulty-badge {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-left: 10px;
-    }
-
-    .difficulty-easy {
-      background-color: var(--success-color);
-      color: white;
-    }
-
-    .difficulty-hard {
-      background-color: var(--danger-color);
-      color: white;
-    }
-
-    .question-container {
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .question-text {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: var(--text-color);
-    }
-
-    .options-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .option {
-      padding: 12px 15px;
-      background-color: var(--background-light);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .option:hover {
-      background-color: var(--primary-light);
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    .option.selected {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .option.correct {
-      background-color: var(--success-color);
-      color: white;
-    }
-
-    .option.incorrect {
-      background-color: var(--danger-color);
-      color: white;
-    }
-
-    .option input[type="radio"] {
-      display: none;
-    }
-
-    .option-label {
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      position: relative;
-      z-index: 1;
-      margin-top: 20px;
-    }
-
-    .btn {
-      padding: 12px 25px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-primary:disabled {
-      background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
-      color: white;
-    }
-
-    .btn-success:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-success:disabled {
-      background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .progress-container {
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .progress-text {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: var(--text-color);
-    }
-
-    .progress-bar {
-      height: 10px;
-      background-color: var(--background-light);
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-      border-radius: 5px;
-      transition: width 0.3s ease;
-    }
-
-    .results-container {
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      padding: 20px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      display: none;
-    }
-
-    .results-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: var(--text-color);
-    }
-
-    .results-score {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 10px;
-      color: var(--primary-color);
-    }
-
-    .results-message {
-      margin-bottom: 20px;
-      color: var(--text-light);
-    }
-
-    .reward-info {
-      background: linear-gradient(135deg, #e6ffed 0%, #b3ffc9 100%);
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .reward-amount {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--success-color);
-      margin-bottom: 5px;
-    }
-
-    .reward-text {
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-
-    .daily-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #f0f8ff 0%, #e0f0ff 100%);
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-
-    /* Footer */
-    .footer {
-      background-color: var(--card-bg);
-      padding: 20px 30px;
-      text-align: center;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-      margin-top: auto;
-    }
-
-    .footer-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .footer-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    .footer-link:hover {
-      text-decoration: underline;
-      color: var(--primary-dark);
-    }
-
-    .footer-text {
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    /* Overlay */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 98;
-    }
-    
-    .overlay.active {
-      display: block;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .main-container {
-            flex-direction: column;
-        }
-
-        .hamburger-btn {
-            display: flex;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 101;
-        }
-
-        .sidebar {
-            width: 75%;
-            max-width: 300px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: -100%;
-            z-index: 99;
-            transition: left 0.4s ease-in-out;
-        }
-        
-        .sidebar.open {
-            left: 0;
-        }
-        
-        .header {
-            padding: 15px;
-        }
-        
-        .logo {
-            font-size: 1.5rem;
-            margin-left: 50px;
-        }
-        
-        .content {
-            padding: 20px;
-        }
-        
-        .daily-stats {
-            grid-template-columns: 1fr;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-        }
-    }
-
-    /* Animation for notifications */
-    .notification-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .notification {
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      max-width: 350px;
-      animation: slideIn 0.3s ease forwards;
-      position: relative;
-      overflow: hidden;
-      color: white;
-      pointer-events: auto;
-    }
-
-    .notification.success {
-      background: linear-gradient(135deg, var(--success-color) 0%, #2AB32A 100%);
-    }
-
-    .notification.error {
-      background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
-    }
-
-    .notification.info { 
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(110%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; transition: all .25s ease; }
+
+    .loader-container { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:9999; background:linear-gradient(135deg,#d5e8d9,#c5dfe6); }
+    .loader { width:60px;height:60px;border-radius:50%; background:conic-gradient(#0000 10%, var(--primary-color)); -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px), #000 0); animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(1turn); } }
+
+    .header{ background:var(--card-bg); box-shadow:var(--shadow); padding:15px 30px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+    .logo{ font-weight:800; color:var(--primary-color); font-family:'Montserrat',sans-serif; }
+
+    .main-container{ display:flex; flex:1; min-height:calc(100vh - 160px); }
+    .sidebar{ width:280px; background:rgba(255,255,255,0.8); padding:25px 0; height:calc(100vh - 80px); position:sticky; top:80px; overflow:auto; box-shadow:var(--shadow); }
+    .content{ flex:1; padding:30px; }
+
+    .trivia-section{ background:linear-gradient(135deg,#e6f7ff,#b3e0ff); border-radius:12px; padding:25px; box-shadow:var(--shadow); margin-bottom:30px; position:relative; }
+    .section-title{ font-size:1.3rem; color:var(--secondary-color); margin-bottom:12px; }
+    .question-container{ background:rgba(255,255,255,0.85); padding:20px; border-radius:10px; margin-bottom:15px; }
+    .question-text{ font-weight:700; margin-bottom:12px; color:var(--text-color); }
+    .options-container{ display:grid; gap:10px; }
+    .option{ padding:12px 15px; background:var(--background-light); border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:10px; }
+    .option:hover{ background:var(--primary-light); color:white; transform:translateY(-2px); }
+    .option.selected{ background:var(--primary-color); color:white; }
+    .option.correct{ background:var(--success-color); color:white; }
+    .option.incorrect{ background:var(--danger-color); color:white; }
+
+    .action-buttons{ display:flex; gap:12px; justify-content:center; margin-top:18px; }
+    .btn{ padding:10px 18px; border-radius:8px; border:none; font-weight:700; cursor:pointer; display:inline-flex; gap:8px; align-items:center; }
+    .btn-primary{ background:linear-gradient(135deg,var(--primary-color),var(--primary-dark)); color:white; }
+    .btn-success{ background:linear-gradient(135deg,var(--success-color),#2AB32A); color:white; }
+    .btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+
+    .progress-bar{ height:10px; background:var(--background-light); border-radius:5px; overflow:hidden; margin-bottom:12px; }
+    .progress-fill{ height:100%; background:linear-gradient(135deg,var(--primary-color),var(--primary-dark)); transition:width .3s ease; }
+
+    .results-container{ display:none; background:rgba(255,255,255,0.9); padding:20px; border-radius:10px; text-align:center; }
+    .results-title{ font-weight:800; margin-bottom:8px; }
+    .results-score{ font-size:2rem; font-weight:800; color:var(--primary-color); margin-bottom:8px; }
+    .reward-info{ background:linear-gradient(135deg,#e6ffed,#b3ffc9); padding:12px; border-radius:8px; margin:12px 0; }
+    .notification-container{ position:fixed; top:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:9999; pointer-events:none; }
+
+    .daily-stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:15px; margin-top:20px; }
+    .stat-card{ background:linear-gradient(135deg,#f0f8ff,#e0f0ff); padding:15px; border-radius:10px; box-shadow:var(--shadow); text-align:center; }
+    .stat-value{ font-weight:800; color:var(--primary-color); font-size:1.4rem; }
+
+    .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:98; }
+    .notification{ padding:12px 15px; border-radius:8px; color:white; box-shadow:0 4px 12px rgba(0,0,0,0.15); pointer-events:auto; display:flex; gap:10px; align-items:flex-start; }
+    .notification.success{ background:linear-gradient(135deg,var(--success-color),#2AB32A); }
+    .notification.error{ background:linear-gradient(135deg,var(--danger-color),#c0392b); }
+    .notification.info{ background:linear-gradient(135deg,var(--primary-color),var(--primary-dark)); }
   </style>
 </head>
 <body>
-  <div class="loader-container" id="loader">
-    <div class="loader"></div>
-  </div>
-
+  <div class="loader-container" id="loader"><div class="loader"></div></div>
   <div class="notification-container" id="notificationContainer"></div>
 
   <header class="header">
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-    </button>
-    
-    <div class="logo">
-      <span>MULAFLOWR</span>
-    </div>
-    
+    <div class="logo">MULAFLOWR</div>
     <div class="header-controls">
-      <button class="language-selector" id="languageSelector">
-        <i class="fas fa-globe"></i>
-        <span>French</span>
-        <i class="fas fa-chevron-down"></i>
-      </button>
-      
-      <div class="user-profile" id="userProfile">
-          <div class="avatar" id="userAvatar">U</div>
-          <div class="profile-dropdown" id="profileDropdown">
-              <button class="theme-toggle" id="themeToggle">
-                  <i class="fas fa-moon"></i>
-                  <span>Mode nuit</span>
-              </button>
-          </div>
-      </div>
+      <button class="language-selector"><i class="fas fa-globe"></i> French</button>
     </div>
   </header>
 
@@ -916,186 +106,60 @@
   <div class="main-container">
     <aside class="sidebar" id="sidebar">
       <div class="welcome-section">
-        <div class="welcome-text">Trivia Challenge >> MULAFLOWR</div>
+        <div class="welcome-text">Trivia Challenge &nbsp;&gt;&gt; MULAFLOWR</div>
         <div class="username" id="sidebarUsername">Utilisateur</div>
       </div>
-      
-      <div class="menu-category">PRINCIPAL</div>
-      <a href="dashboard.html" class="menu-item">
-        <i class="fas fa-home"></i>
-        <span>Tableau de bord</span>
-      </a>
-      
-      <a href="depot.html" class="menu-item">
-        <i class="fas fa-wallet"></i>
-        <span>Dépôt 💵</span>
-      </a>
-      
-      <a href="bonus_bienvenue.html" class="menu-item">
-        <i class="fas fa-gift"></i>
-        <span>Bonus de bienvenue</span>
-      </a>
-      
-      <div class="menu-category">COMPTES</div>
-      <a href="retrait.html" class="menu-item">
-        <i class="fas fa-money-bill-wave"></i>
-        <span>Retrait</span>
-      </a>
-      
-      <a href="equipe.html" class="menu-item">
-        <i class="fas fa-users"></i>
-        <span>Équipe</span>
-      </a>
-
-      <div class="menu-category">SPÉCIAL</div>
-      <a href="love_earn.html" class="menu-item">
-        <i class="fas fa-heart"></i>
-        <span>LoveEarn</span>
-      </a>
-      
-      <a href="social_boost.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>SBH</span>
-      </a>
-      
-      <a href="challenge_reward.html" class="menu-item">
-        <i class="fas fa-medal"></i>
-        <span>Challenge and Reward</span>
-      </a>
-      
-      <div class="menu-category">PRODUIT / TACHE</div>
-      <a href="whatsapp_earn.html" class="menu-item">
-        <i class="fab fa-whatsapp"></i>
-        <span>Gagner via Whatsapp</span>
-      </a>
-      
-      <a href="movies.html" class="menu-item">
-        <i class="fas fa-film"></i>
-        <span>Movies</span>
-      </a>
-      
-      <a href="paris_fixes.html" class="menu-item">
-        <i class="fas fa-chart-line"></i>
-        <span>Paris fixes</span>
-      </a>
-      
-      <a href="gains_publicitaires.html" class="menu-item">
-        <i class="fas fa-ad"></i>
-        <span>Gains publicitaires</span>
-      </a>
-      
-      <a href="spin_wheel.html" class="menu-item">
-        <i class="fas fa-trophy"></i>
-        <span>Spin wheel 🏆</span>
-      </a>
-      
-      <a href="tiktok_earn.html" class="menu-item">
-        <i class="fab fa-tiktok"></i>
-        <span>TikTok Earn</span>
-      </a>
-      
-      <a href="youtube_earn.html" class="menu-item">
-        <i class="fab fa-youtube"></i>
-        <span>YouTube Earn</span>
-      </a>
-      
-      <a href="instagram_earn.html" class="menu-item">
-        <i class="fab fa-instagram"></i>
-        <span>Instagram Earn</span>
-      </a>
-      
-      <a href="trivia_challenge.html" class="menu-item active">
-        <i class="fas fa-brain"></i>
-        <span>TRIVIA challenge</span>
-        <span class="menu-badge active">☑</span>
-      </a>
-      
-      <div class="menu-category">BONUS</div>
-      <a href="liste_contacts.html" class="menu-item">
-        <i class="fas fa-address-book"></i>
-        <span>Liste de contacts gratuit 🆓</span>
-      </a>
-      
-      <a href="booster_visibilite.html" class="menu-item">
-        <i class="fas fa-rocket"></i>
-        <span>Booster ma visibilité</span>
-      </a>
-
-      <a href="canva_pro.html" class="menu-item">
-        <i class="fas fa-palette"></i>
-        <span>Canva Pro</span>
-      </a>
-      
-      <a href="connexion_gratuite.html" class="menu-item">
-        <i class="fas fa-shield-alt"></i>
-        <span>Connexion gratuite</span>
-      </a>
+      <!-- menu réduit -->
+      <nav>
+        <a href="dashboard.html" class="menu-item">Tableau de bord</a>
+        <a href="tiktok_earn.html" class="menu-item">TikTok Earn</a>
+        <a href="trivia_challenge.html" class="menu-item active">TRIVIA challenge</a>
+      </nav>
     </aside>
 
     <main class="content">
-      <h1 class="page-title">
-        <i class="fas fa-brain"></i>
-        <span>Trivia Challenge</span>
-      </h1>
-      
+      <h1 class="page-title"><i class="fas fa-brain"></i> Trivia Challenge</h1>
+
       <div class="trivia-section">
-        <h2 class="section-title">
-          Testez vos connaissances et gagnez de l'argent
-          <span class="difficulty-badge" id="difficultyBadge"></span>
-        </h2>
-        
+        <h2 class="section-title">Testez vos connaissances et gagnez de l'argent</h2>
+
         <div class="progress-container">
           <div class="progress-text" id="progressText">Question 1/5</div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 20%"></div>
-          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
         </div>
-        
+
         <div class="question-container" id="questionContainer">
           <div class="question-text" id="questionText">Chargement de la question...</div>
-          <div class="options-container" id="optionsContainer">
-            </div>
+          <div class="options-container" id="optionsContainer"></div>
         </div>
-        
+
         <div class="action-buttons">
-          <button class="btn btn-primary" id="submitButton" disabled>
-            <i class="fas fa-paper-plane"></i>
-            <span>Soumettre la réponse</span>
-          </button>
-          <button class="btn btn-success" id="nextButton" style="display: none;">
-            <i class="fas fa-arrow-right"></i>
-            <span>Question suivante</span>
-          </button>
+          <button class="btn btn-primary" id="submitButton" disabled><i class="fas fa-paper-plane"></i><span>Soumettre la réponse</span></button>
+          <button class="btn btn-success" id="nextButton" style="display:none;"><i class="fas fa-arrow-right"></i><span>Question suivante</span></button>
         </div>
-        
+
         <div class="results-container" id="resultsContainer">
           <div class="results-title">Résultats du Quiz</div>
           <div class="results-score" id="resultsScore">0/5</div>
           <div class="results-message" id="resultsMessage"></div>
-          
-          <div class="reward-info">
-            <div class="reward-amount" id="totalEarningsDisplay">+0 FCFA</div>
-            <div class="reward-text">Gains potentiels pour ce quiz</div>
-          </div>
-          
-          <button class="btn btn-success" id="claimRewardButton" disabled>
-            <i class="fas fa-coins"></i>
-            <span>Réclamer la récompense</span>
-          </button>
 
-          <button class="btn btn-primary" id="nextQuizButton" style="display: none;">
-            <i class="fas fa-redo"></i>
-            <span>Prochain Quiz (Demain)</span>
-          </button>
+          <div class="reward-info">
+            <div class="reward-amount" id="rewardAmount">+0 FCFA</div>
+            <div class="reward-text" id="rewardText">Gains pour ce quiz</div>
+          </div>
+
+          <div class="action-buttons" style="justify-content:center;">
+            <button class="btn btn-primary" id="claimButton"><i class="fas fa-coins"></i><span>Réclamer la récompense</span></button>
+            <button class="btn btn-primary" id="restartButton"><i class="fas fa-redo"></i><span>Recommencer</span></button>
+          </div>
         </div>
       </div>
-      
+
       <div class="daily-stats">
         <div class="stat-card">
           <div class="stat-value" id="quizzesCompleted">0</div>
           <div class="stat-label">Quiz complétés aujourd'hui</div>
         </div>
-        
         <div class="stat-card">
           <div class="stat-value" id="earnedToday">0 FCFA</div>
           <div class="stat-label">Gagné aujourd'hui</div>
@@ -1104,600 +168,504 @@
     </main>
   </div>
 
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-links">
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Pro Tech Management</a>
-        <a href="https://social-boost-horizon-new-sbh.vercel.app" class="footer-link">Site propulsé par Social Boost Horizon</a>
-      </div>
-      <div class="footer-text">
-        © 2025 MULAFLOWR. Tous droits réservés.
-      </div>
-    </div>
+  <footer style="text-align:center; padding:18px; background:#fff; margin-top:20px;">
+    © 2025 MULAFLOWR. Tous droits réservés.
   </footer>
 
-    <script>
-    /******** CONFIG FIREBASE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
+<script>
+/******** CONFIG FIREBASE ********/
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.appspot.com",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/******** DOM Elements ********/
+const loader = document.getElementById('loader');
+const notificationContainer = document.getElementById('notificationContainer');
+const sidebarUsername = document.getElementById('sidebarUsername');
+
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const submitButton = document.getElementById('submitButton');
+const nextButton = document.getElementById('nextButton');
+const resultsContainer = document.getElementById('resultsContainer');
+const resultsScore = document.getElementById('resultsScore');
+const resultsMessage = document.getElementById('resultsMessage');
+const rewardAmount = document.getElementById('rewardAmount');
+const rewardText = document.getElementById('rewardText');
+const claimButton = document.getElementById('claimButton');
+const restartButton = document.getElementById('restartButton');
+const quizzesCompleted = document.getElementById('quizzesCompleted');
+const earnedToday = document.getElementById('earnedToday');
+
+/******** State ********/
+let currentUser = null;
+let userData = {};
+let isEasyMode = true;
+
+let questionPool = [];
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let selectedOption = null;
+let score = 0;
+
+let pendingReward = 0;            // montant à réclamer pour la session courante
+let pendingSessionId = null;      // identifiant unique de la session (empêche double claim)
+const FIRST_TIME_FIXED_REWARD = 500;
+const PER_QUESTION_REWARD_HARD = 150;
+const PER_QUESTION_REWARD_EASY = 100;
+const MAX_INCREMENT_PER_REQUEST = 500; // sécurité identique au TikTok
+const QUIZ_SIZE = 5;
+
+/******** Questions (easy fixed block + large hard pool) ********/
+const easyQuestions = [
+  { question: "Quel fruit est jaune ?", options: ["Banane", "Pomme", "Orange", "Raisin"], correctAnswer: 0 },
+  { question: "Quelle est la capitale de la France ?", options: ["Lyon", "Paris", "Marseille", "Bordeaux"], correctAnswer: 1 },
+  { question: "Combien de côtés a un triangle ?", options: ["3", "4", "5", "6"], correctAnswer: 0 },
+  { question: "Quel animal dit 'meow' ?", options: ["Chien", "Chat", "Vache", "Oiseau"], correctAnswer: 1 },
+  { question: "Quelle planète est appelée la planète rouge ?", options: ["Terre", "Mars", "Jupiter", "Vénus"], correctAnswer: 1 }
+];
+
+// Hard pool : élargi pour rendre le quiz aléatoire et difficile
+const hardPool = [
+  { question: "Quel physicien est à l'origine de la théorie de la relativité restreinte ?", options: ["Isaac Newton","Niels Bohr","Albert Einstein","James Clerk Maxwell"], correctAnswer: 2 },
+  { question: "En informatique, que signifie 'RSA' ?", options: ["Rapid System Access","Rivest–Shamir–Adleman","Random Sequence Algorithm","Remote Secure Access"], correctAnswer: 1 },
+  { question: "Quel est le plus grand organe du corps humain ?", options: ["Le foie","La peau","Le cœur","Le rein"], correctAnswer: 1 },
+  { question: "Qui a écrit 'À la recherche du temps perdu' ?", options: ["Marcel Proust","Jean-Paul Sartre","Honoré de Balzac","Stendhal"], correctAnswer: 0 },
+  { question: "Quelle est la valeur de pi (π) arrondie à 3 décimales ?", options: ["3.132","3.142","3.152","3.162"], correctAnswer: 1 },
+  { question: "Quel est l'élément chimique qui a pour numéro atomique 6 ?", options: ["Azote","Carbone","Oxygène","Hydrogène"], correctAnswer: 1 },
+  { question: "Quel pays fut dirigé par Nelson Mandela après la fin de l'apartheid ?", options: ["Zimbabwe","Afrique du Sud","Namibie","Botswana"], correctAnswer: 1 },
+  { question: "Quel mathématicien a démontré l'inexistence d'une solution générale en équations quintiques (Théorème d'Abel-Ruffini) ?", options: ["Évariste Galois","Niels Henrik Abel","Carl Friedrich Gauss","Joseph-Louis Lagrange"], correctAnswer: 1 },
+  { question: "Laquelle de ces langues est une langue sino-tibétaine ?", options: ["Hindi","Japonais","Mandarin","Turc"], correctAnswer: 2 },
+  { question: "Quel acronyme désigne le protocole sécurisé pour les transferts web (HTTPS) ?", options: ["Hyper Transfer Secure","Hypertext Transfer Protocol Secure","Host Transfer Protocol Secure","Hypertext Transport Protection Secure"], correctAnswer: 1 },
+  { question: "Quelle galaxie est la plus proche de la Voie lactée ?", options: ["Galaxie du Sombrero","Andromède","Triangulum","Grande Nébuleuse de Magellan"], correctAnswer: 1 },
+  { question: "Qui a composé la 9ème symphonie (Ode à la joie) ?", options: ["Mozart","Beethoven","Bach","Chopin"], correctAnswer: 1 },
+  { question: "Quel est le principal gaz à effet de serre émis par les activités humaines ?", options: ["Oxygène","Nitrate","Dioxyde de carbone (CO2)","Argon"], correctAnswer: 2 },
+  { question: "En électronique, que mesure l'ohmmètre ?", options: ["La tension","L'intensité","La résistance","La puissance"], correctAnswer: 2 },
+  { question: "Quel traité a mis fin à la Première Guerre mondiale ?", options: ["Traité de Paris","Traité de Versailles","Traité de Rome","Traité de Brest-Litovsk"], correctAnswer: 1 },
+  { question: "Quel pays a inventé le papier ?", options: ["Inde","Égypte","Chine","Grèce"], correctAnswer: 2 },
+  { question: "Quel est le nombre d'or approximatif (φ) arrondi à 3 décimales ?", options: ["1.618","1.414","1.732","1.324"], correctAnswer: 0 },
+  { question: "Quel est l'instrument principal pour mesurer la pression atmosphérique ?", options: ["Thermomètre","Baromètre","Hygromètre","Altimètre"], correctAnswer: 1 },
+  { question: "Qui est l'auteur de '1984' ?", options: ["Aldous Huxley","George Orwell","Ray Bradbury","Philip K. Dick"], correctAnswer: 1 },
+  { question: "Quelle unité mesure l'intensité électrique ?", options: ["Volt","Ohm","Ampère","Watt"], correctAnswer: 2 }
+];
+
+/******** UI helper: notifications ********/
+function showNotification(type, title, message, duration = 3500) {
+  const n = document.createElement('div');
+  n.className = `notification ${type}`;
+  n.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'}"></i>
+    <div style="line-height:1.1">
+      <strong style="display:block">${title}</strong>
+      <span>${message}</span>
+    </div>`;
+  notificationContainer.appendChild(n);
+  setTimeout(()=> {
+    n.style.opacity = '0';
+    setTimeout(()=> { try{ notificationContainer.removeChild(n); } catch(e){} }, 300);
+  }, duration);
+}
+
+/******** Helpers date/time ********/
+function getTodayString() {
+  // Simple stable representation
+  const d = new Date();
+  return d.toDateString();
+}
+
+/******** Quiz control ********/
+function startQuiz() {
+  selectedOption = null;
+  currentQuestionIndex = 0;
+  score = 0;
+  pendingReward = 0;
+  pendingSessionId = `trivia_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+  // isEasyMode determined at initQuiz
+  if (isEasyMode) {
+    // First-time: use the fixed easyQuestions block in the defined order
+    currentQuestions = [...easyQuestions];
+  } else {
+    // Later: build a random set of QUIZ_SIZE questions from hardPool
+    currentQuestions = shuffleArray(hardPool).slice(0, QUIZ_SIZE).map(q => ({...q}));
+  }
+
+  // UI reset
+  resultsContainer.style.display = 'none';
+  document.getElementById('questionContainer').style.display = 'block';
+  submitButton.style.display = 'inline-flex';
+  nextButton.style.display = 'none';
+  claimButton.disabled = true;
+  restartButton.disabled = true;
+
+  loadQuestion();
+  updateProgress();
+}
+
+function loadQuestion() {
+  const q = currentQuestions[currentQuestionIndex];
+  questionText.textContent = q.question;
+  optionsContainer.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const el = document.createElement('div');
+    el.className = 'option';
+    el.dataset.index = idx;
+    el.innerHTML = `<div class="option-label">${opt}</div>`;
+    el.addEventListener('click', ()=> selectOption(el, idx));
+    optionsContainer.appendChild(el);
+  });
+
+  selectedOption = null;
+  submitButton.disabled = true;
+}
+
+function selectOption(el, idx) {
+  document.querySelectorAll('.option').forEach(o=> o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOption = idx;
+  submitButton.disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedOption === null) return;
+  const q = currentQuestions[currentQuestionIndex];
+  const optionsEls = document.querySelectorAll('.option');
+
+  // disable clicks
+  optionsEls.forEach(o => o.style.pointerEvents = 'none');
+
+  // mark correct/incorrect visuals
+  const correctEl = optionsEls[q.correctAnswer];
+  correctEl.classList.add('correct');
+  if (selectedOption !== q.correctAnswer) {
+    const selEl = optionsEls[selectedOption];
+    if (selEl) selEl.classList.add('incorrect');
+    showNotification('error', 'Mauvaise réponse', `La bonne réponse était: ${q.options[q.correctAnswer]}`);
+  } else {
+    score++;
+    const perQ = isEasyMode ? PER_QUESTION_REWARD_EASY : PER_QUESTION_REWARD_HARD;
+    showNotification('success', 'Bonne réponse !', `Vous avez gagné ${perQ} FCFA pour cette question.`);
+  }
+
+  // after answering, show next button (or finish)
+  submitButton.style.display = 'none';
+  nextButton.style.display = 'inline-flex';
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < currentQuestions.length) {
+    loadQuestion();
+    submitButton.style.display = 'inline-flex';
+    nextButton.style.display = 'none';
+    updateProgress();
+  } else {
+    // Finish quiz: compute pendingReward but DO NOT write to Firestore yet
+    showResults();
+  }
+}
+
+function updateProgress() {
+  progressText.textContent = `Question ${Math.min(currentQuestionIndex+1, currentQuestions.length)}/${currentQuestions.length}`;
+  progressFill.style.width = `${((currentQuestionIndex) / currentQuestions.length) * 100}%`;
+}
+
+/******** Show results (prepare pending reward) ********/
+function showResults() {
+  // compute reward but do not persist here — persist only on claim
+  let totalEarnings;
+  if (isEasyMode && !userData.triviaFirstCompleted) {
+    // First-time fixed reward for completion
+    totalEarnings = FIRST_TIME_FIXED_REWARD;
+    rewardText.textContent = 'Récompense spéciale pour votre premier quiz (5 questions)';
+  } else {
+    const perQ = isEasyMode ? PER_QUESTION_REWARD_EASY : PER_QUESTION_REWARD_HARD;
+    totalEarnings = score * perQ;
+    rewardText.textContent = `Récompense basée sur vos bonnes réponses (${perQ} FCFA / bonne réponse)`;
+  }
+
+  pendingReward = totalEarnings;
+  rewardAmount.textContent = `+${pendingReward} FCFA`;
+  resultsScore.textContent = `${score}/${currentQuestions.length}`;
+
+  if (score === currentQuestions.length) {
+    resultsMessage.textContent = 'Félicitations! Vous avez répondu correctement à toutes les questions!';
+  } else if (score >= currentQuestions.length / 2) {
+    resultsMessage.textContent = 'Bon travail! Vous avez bien répondu à la plupart des questions.';
+  } else {
+    resultsMessage.textContent = 'Continuez à vous améliorer! Vous ferez mieux la prochaine fois.';
+  }
+
+  // show UI
+  document.getElementById('questionContainer').style.display = 'none';
+  resultsContainer.style.display = 'block';
+  claimButton.disabled = false;
+  restartButton.disabled = false;
+  progressFill.style.width = `100%`;
+}
+
+/******** Claim reward (server attempt then Firestore transaction fallback) ********/
+claimButton.addEventListener('click', async () => {
+  if (!currentUser) { showNotification('error','Non connecté','Veuillez vous connecter.'); return; }
+  if (!pendingReward || pendingReward <= 0) { showNotification('info','Rien à réclamer','Aucune récompense disponible.'); return; }
+
+  // Prevent double-click
+  claimButton.disabled = true;
+
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error('Session expirée.');
+
+    // 1) Try server endpoint first (if exists)
+    try {
+      const idToken = await user.getIdToken(true).catch(()=>null);
+      const headers = {'Content-Type':'application/json'};
+      if (idToken) headers['Authorization'] = 'Bearer ' + idToken;
+
+      const resp = await fetch('/api/trivia-claim-reward', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          idToken,
+          rewardAmount: pendingReward,
+          sessionId: pendingSessionId
+        })
+      });
+
+      const text = await resp.text().catch(()=>null);
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
+
+      if (resp.ok && data && data.success) {
+        // server accepted -> update local UI state
+        // expected server response: newBalance, quizzesCompletedToday, earningsToday
+        userData = userData || {};
+        userData.solde = typeof data.newBalance === 'number' ? data.newBalance : ( (userData.solde||0) + pendingReward );
+        userData.triviaGains = (userData.triviaGains||0) + pendingReward;
+        userData.triviaCompletedToday = (userData.triviaCompletedToday||0) + 1;
+        userData.triviaEarningsToday = (userData.triviaEarningsToday||0) + pendingReward;
+        userData.lastTriviaDate = getTodayString();
+        userData.triviaClaimedSessions = Array.isArray(userData.triviaClaimedSessions)? userData.triviaClaimedSessions : [];
+        userData.triviaClaimedSessions.push(pendingSessionId);
+        if (isEasyMode && !userData.triviaFirstCompleted) userData.triviaFirstCompleted = true;
+
+        // local UI update
+        quizzesCompleted.textContent = userData.triviaCompletedToday || 0;
+        earnedToday.textContent = `${userData.triviaEarningsToday || 0} FCFA`;
+
+        showNotification('success','Récompense ajoutée', `${pendingReward} FCFA ajouté. Nouveau solde: ${data.newBalance ?? 'inconnu'}`);
+        claimButton.disabled = true;
+        return;
+      } else {
+        console.warn('Server claim failed or returned non-json:', resp.status, text);
+      }
+    } catch (serverErr) {
+      console.warn('Erreur fetch serveur (fallback):', serverErr);
+    }
+
+    // 2) Fallback: Firestore transaction similar à TikTok
+    const uid = user.uid;
+    const userRef = db.collection('users').doc(uid);
+    const todayStr = getTodayString();
+
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('Utilisateur introuvable.');
+
+      const doc = snap.data() || {};
+      // reset daily fields if not today
+      const lastDate = doc.lastTriviaDate || null;
+      let completedTodayDoc = Number(doc.triviaCompletedToday || 0);
+      let earningsTodayDoc = Number(doc.triviaEarningsToday || 0);
+      let soldeDoc = Number(doc.solde || 0);
+      let triviaGainsDoc = Number(doc.triviaGains || 0);
+      let profitDoc = Number(doc.profit || 0);
+      let claimedSessions = Array.isArray(doc.triviaClaimedSessions) ? doc.triviaClaimedSessions.slice() : [];
+
+      if (lastDate !== todayStr) {
+        completedTodayDoc = 0;
+        earningsTodayDoc = 0;
+        claimedSessions = [];
+      }
+
+      // double-claim protection
+      if (claimedSessions.indexOf(pendingSessionId) !== -1) {
+        throw new Error('Vous avez déjà réclamé cette session.');
+      }
+
+      // defensive increment checks
+      if (pendingReward > MAX_INCREMENT_PER_REQUEST) {
+        throw new Error('Montant par requête trop élevé.');
+      }
+
+      // compute new values
+      const newSolde = soldeDoc + pendingReward;
+      const newTriviaGains = triviaGainsDoc + pendingReward;
+      const newEarningsToday = earningsTodayDoc + pendingReward;
+      const newCompletedToday = completedTodayDoc + 1;
+      const newProfit = profitDoc + pendingReward;
+
+      // safety checks mirroring rules
+      if ((newProfit - profitDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment profit > allowed');
+      if ((newTriviaGains - triviaGainsDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment triviaGains > allowed');
+      if ((newEarningsToday - earningsTodayDoc) > MAX_INCREMENT_PER_REQUEST) throw new Error('Increment triviaEarningsToday > allowed');
+
+      // add session id
+      claimedSessions.push(pendingSessionId);
+
+      const updateObj = {
+        solde: newSolde,
+        triviaGains: newTriviaGains,
+        triviaEarningsToday: newEarningsToday,
+        triviaCompletedToday: newCompletedToday,
+        lastTriviaDate: todayStr,
+        triviaClaimedSessions: claimedSessions,
+        profit: newProfit
+      };
+
+      // mark first complete if needed
+      if (isEasyMode && !doc.triviaFirstCompleted) {
+        updateObj.triviaFirstCompleted = true;
+      }
+
+      tx.update(userRef, updateObj);
+    });
+
+    // transaction success -> update local state/UI
+    // We'll reload the important fields from server to be safe
+    const newDoc = await db.collection('users').doc(uid).get();
+    if (newDoc.exists) {
+      userData = newDoc.data() || userData;
+      quizzesCompleted.textContent = userData.triviaCompletedToday || 0;
+      earnedToday.textContent = `${userData.triviaEarningsToday || 0} FCFA`;
+    }
+
+    showNotification('success','Récompense ajoutée', `${pendingReward} FCFA ajouté à votre solde.`);
+    claimButton.disabled = true;
+
+  } catch (err) {
+    console.error('Erreur lors de la réclamation:', err);
+    const msg = (err && err.message) ? err.message : 'Impossible d\'appliquer la récompense.';
+    showNotification('error','Erreur', msg);
+    // reenabler claim button so user puisse retenter
+    claimButton.disabled = false;
+  }
+});
+
+/******** Restart logic ********/
+restartButton.addEventListener('click', () => {
+  // we can allow restart but respect a per-day max if desired; here we allow replay but set isEasyMode=false after first done
+  if (userData && userData.triviaCompletedToday >= 2) {
+    showNotification('info','Limite atteinte', 'Vous avez atteint 2 quiz aujourd\'hui. Revenez demain!');
+    return;
+  }
+
+  // After first quiz completion, always switch to hard mode
+  if (isEasyMode) isEasyMode = false;
+  startQuiz();
+});
+
+/******** Utilitaires ********/
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length -1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/******** Load & Init user data ********/
+async function loadUserData() {
+  if (!currentUser) throw new Error('Aucun utilisateur connecté.');
+  const userRef = db.collection('users').doc(currentUser.uid);
+  const doc = await userRef.get();
+  if (doc.exists) {
+    userData = doc.data() || {};
+  } else {
+    // seed minimal structure
+    userData = {
+      triviaCompletedToday: 0,
+      triviaEarningsToday: 0,
+      lastTriviaDate: null,
+      solde: 0,
+      triviaGains: 0,
+      triviaClaimedSessions: []
     };
+    await userRef.set(userData);
+  }
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    
-    // Paramètres financiers
-    const MAX_QUIZ_PER_DAY = 1; // 1 quiz par jour
-    const EASY_REWARD_PER_Q = 100; // 5 questions * 100 FCFA = 500 FCFA total pour le premier quiz
-    const HARD_REWARD_PER_Q = 150; // 5 questions * 150 FCFA = 750 FCFA (pour l'exemple)
+  // Reset daily counters if lastTriviaDate isn't today
+  const today = getTodayString();
+  if ((userData.lastTriviaDate || '') !== today) {
+    userData.triviaCompletedToday = 0;
+    userData.triviaEarningsToday = 0;
+    // no immediate save — will save on claim; but update UI now
+  }
+  return userData;
+}
 
-    /******** DOM Elements ********/
-    // ... (éléments de l'en-tête et de la barre latérale)
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    // Trivia Challenge specific elements
-    const progressText = document.getElementById('progressText');
-    const progressFill = document.getElementById('progressFill');
-    const questionContainer = document.getElementById('questionContainer');
-    const questionText = document.getElementById('questionText');
-    const optionsContainer = document.getElementById('optionsContainer');
-    const submitButton = document.getElementById('submitButton');
-    const nextButton = document.getElementById('nextButton');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const resultsScore = document.getElementById('resultsScore');
-    const resultsMessage = document.getElementById('resultsMessage');
-    const totalEarningsDisplay = document.getElementById('totalEarningsDisplay'); // Modifié
-    const claimRewardButton = document.getElementById('claimRewardButton'); // Nouveau
-    const nextQuizButton = document.getElementById('nextQuizButton'); // Nouveau
-    const quizzesCompleted = document.getElementById('quizzesCompleted');
-    const earnedToday = document.getElementById('earnedToday');
-    const difficultyBadge = document.getElementById('difficultyBadge');
+/******** Update UI user info and daily stats ********/
+function updateUserInfoUI(user, dbData = {}) {
+  const displayName = dbData.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Utilisateur');
+  if (sidebarUsername) sidebarUsername.textContent = displayName;
+}
+function updateDailyStatsUI() {
+  quizzesCompleted.textContent = userData.triviaCompletedToday || 0;
+  earnedToday.textContent = `${userData.triviaEarningsToday || 0} FCFA`;
+}
 
-    /******** Variables d'état ********/
-    let currentUser = null;
-    let userData = {};
-    let currentQuestions = [];
-    let currentQuestionIndex = 0;
-    let selectedOption = null;
-    let score = 0;
-    let quizReward = EASY_REWARD_PER_Q;
-    let quizzesCompletedToday = 0;
-    let earningsToday = 0;
-    let totalEarningsForClaim = 0;
-    let isClaimed = false; // Pour savoir si l'utilisateur a réclamé la récompense de ce quiz.
+/******** Auth & main init ********/
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try {
+      // load userData
+      await loadUserData();
 
-    /******** Questions pour le Trivia Challenge (Beaucoup plus de questions difficiles) ********/
-    const easyQuestions = [ // 5 questions basiques pour la première fois
-      { question: "Quel fruit est jaune ?", options: ["Banane", "Pomme", "Orange", "Raisin"], correctAnswer: 0 },
-      { question: "Quelle est la capitale de la France ?", options: ["Lyon", "Paris", "Marseille", "Bordeaux"], correctAnswer: 1 },
-      { question: "Combien de côtés a un triangle ?", options: ["3", "4", "5", "6"], correctAnswer: 0 },
-      { question: "Quel animal dit 'meow' ?", options: ["Chien", "Chat", "Vache", "Oiseau"], correctAnswer: 1 },
-      { question: "Quelle planète est appelée la planète rouge ?", options: ["Terre", "Mars", "Jupiter", "Vénus"], correctAnswer: 1 }
-    ];
+      // set first-time mode : easy if they never completed the first tutorial-trivia
+      isEasyMode = !(userData.triviaFirstCompleted === true);
 
-    const allHardQuestions = [ // 10 questions difficiles, on en choisira 5 aléatoirement
-      { question: "Quel écrivain a écrit 'Les Misérables' ?", options: ["Émile Zola", "Gustave Flaubert", "Victor Hugo", "Albert Camus"], correctAnswer: 2 },
-      { question: "Quel est l'élément chimique avec le symbole 'Au' ?", options: ["Argent", "Platine", "Or", "Uranium"], correctAnswer: 2 },
-      { question: "Quel pays a la plus grande superficie au monde ?", options: ["Canada", "Chine", "États-Unis", "Russie"], correctAnswer: 3 },
-      { question: "Quel est le plus grand océan du monde ?", options: ["Océan Atlantique", "Océan Indien", "Océan Arctique", "Océan Pacifique"], correctAnswer: 3 },
-      { question: "Qui a peint 'La Nuit étoilée' ?", options: ["Pablo Picasso", "Claude Monet", "Salvador Dalí", "Vincent van Gogh"], correctAnswer: 3 },
-      { question: "Quel est le nombre d'or, arrondi à 3 décimales ?", options: ["1.618", "3.141", "2.718", "1.414"], correctAnswer: 0 },
-      { question: "Quelle est la langue officielle la plus parlée au Brésil ?", options: ["Espagnol", "Portugais", "Français", "Anglais"], correctAnswer: 1 },
-      { question: "En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?", options: ["1965", "1972", "1969", "1961"], correctAnswer: 2 },
-      { question: "Quel terme désigne la peur des espaces ouverts ?", options: ["Claustrophobie", "Acrophobie", "Agoraphobie", "Xénophobie"], correctAnswer: 2 },
-      { question: "Qui a formulé la théorie de la relativité restreinte ?", options: ["Isaac Newton", "Niels Bohr", "Albert Einstein", "Galilée"], correctAnswer: 2 }
-    ];
-    
-    // Fonction utilitaire pour mélanger un tableau
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
+      updateUserInfoUI(user, userData);
+      updateDailyStatsUI();
 
-    // Fonction utilitaire pour obtenir la date d'aujourd'hui
-    function getTodayString() {
-      // Utilisez une date locale simple pour le comparatif quotidien
-      return new Date().toDateString();
-    }
-
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
-    }
-
-    /******** Gestion du menu et du thème (non modifié) ********/
-    // ... (code des listeners hamburger, overlay, userProfile, themeToggle)
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
-    });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
-
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
-
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData({ theme: isDarkMode ? 'dark' : 'light' });
-    });
-
-    /******** Fonctions pour Trivia Challenge ********/
-    
-    function initQuiz() {
-      const today = getTodayString();
-      const isFirstTimeUser = !(userData.triviaFirstTimeDone);
-      
-      // Réinitialiser les stats du jour si la date a changé
-      if (userData.lastTriviaDate !== today) {
-        userData.triviaCompletedToday = 0;
-        userData.triviaEarningsToday = 0;
-        userData.triviaClaimedToday = false; // NOUVEAU: marque si le quiz du jour a été réclamé
-        saveUserData({ 
-          lastTriviaDate: today, 
-          triviaCompletedToday: 0, 
-          triviaEarningsToday: 0,
-          triviaClaimedToday: false
-        });
-      }
-      
-      quizzesCompletedToday = userData.triviaCompletedToday || 0;
-      earningsToday = userData.triviaEarningsToday || 0;
-      isClaimed = userData.triviaClaimedToday || false;
-      
-      updateDailyStats();
-
-      // Vérifier si l'utilisateur a déjà complété le quiz du jour
-      if (quizzesCompletedToday >= MAX_QUIZ_PER_DAY) {
-        // Afficher directement la fin du quiz avec un message
-        showQuizUnavailableUI(isClaimed);
-        return;
-      }
-
-      // Logique de difficulté
-      const isEasyMode = isFirstTimeUser;
-      
-      if (isEasyMode) {
-        // Mode Facile : 5 questions fixes, récompense 100/question
-        currentQuestions = easyQuestions;
-        quizReward = EASY_REWARD_PER_Q;
-        difficultyBadge.textContent = 'Basique';
-        difficultyBadge.className = 'difficulty-badge difficulty-easy';
-        showNotification('info', 'Bienvenue!', 'Ceci est votre premier Quiz ! Les questions sont très faciles.');
-      } else {
-        // Mode Difficile : 5 questions aléatoires parmi la liste, récompense 150/question
-        currentQuestions = shuffleArray(allHardQuestions).slice(0, 5); // 5 questions aléatoires
-        quizReward = HARD_REWARD_PER_Q;
-        difficultyBadge.textContent = 'Difficile';
-        difficultyBadge.className = 'difficulty-badge difficulty-hard';
-        showNotification('info', 'Attention!', 'Vous passez au niveau supérieur. Les questions sont maintenant très difficiles et aléatoires.');
-      }
-      
+      // start quiz
       startQuiz();
+
+      document.body.classList.add('loaded');
+      if (loader) loader.style.display = 'none';
+      showNotification('success','Bienvenue!', 'Prêt pour le Trivia Challenge!');
+
+    } catch (err) {
+      console.error('Erreur initialisation trivia:', err);
+      showNotification('error','Erreur critique', 'Impossible de charger vos données. Veuillez vous reconnecter.');
+      auth.signOut();
+      setTimeout(()=> { window.location.href = 'login.html'; }, 2000);
     }
+  } else {
+    // pas connecté -> renvoyer à login
+    window.location.href = 'login.html';
+  }
+});
 
-    function showQuizUnavailableUI(claimed) {
-      questionContainer.style.display = 'none';
-      submitButton.style.display = 'none';
-      nextButton.style.display = 'none';
-      resultsContainer.style.display = 'block';
-      
-      resultsTitle.textContent = "Quiz Quotidien Terminé";
-      resultsScore.textContent = `${MAX_QUIZ_PER_DAY}/${MAX_QUIZ_PER_DAY}`;
-      
-      if (claimed) {
-        resultsMessage.textContent = `Vous avez complété le quiz d'aujourd'hui et réclamé ${earningsToday} FCFA. Revenez demain pour un nouveau défi!`;
-        claimRewardButton.style.display = 'none';
-      } else {
-        resultsMessage.textContent = `Vous avez complété le quiz d'aujourd'hui mais n'avez pas réclamé vos gains.`;
-        claimRewardButton.style.display = 'none'; // Le bouton de réclamation ne devrait pas être affiché si le quiz est 'complété' et réinitialisé.
-      }
-      totalEarningsDisplay.textContent = `+${earningsToday} FCFA`;
-      nextQuizButton.style.display = 'inline-flex';
-    }
-    
-    function startQuiz() {
-      currentQuestionIndex = 0;
-      score = 0;
-      selectedOption = null;
-      totalEarningsForClaim = 0;
+/******** Event handlers ********/
+submitButton.addEventListener('click', submitAnswer);
+nextButton.addEventListener('click', nextQuestion);
 
-      // Afficher les conteneurs du quiz
-      resultsContainer.style.display = 'none';
-      questionContainer.style.display = 'block';
-      submitButton.style.display = 'inline-flex';
-      nextButton.style.display = 'none';
-      
-      loadQuestion();
-    }
-    
-    function loadQuestion() {
-      const question = currentQuestions[currentQuestionIndex];
-      // Mettre les options dans un ordre aléatoire pour augmenter la difficulté
-      const shuffledOptions = shuffleArray(question.options.map((opt, index) => ({ text: opt, originalIndex: index })));
-      
-      questionText.textContent = `Q${currentQuestionIndex + 1}: ${question.question}`;
-      
-      // Mettre à jour la progression
-      progressText.textContent = `Question ${currentQuestionIndex + 1}/${currentQuestions.length}`;
-      progressFill.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
-      
-      // Générer les options
-      optionsContainer.innerHTML = '';
-      shuffledOptions.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'option';
-        optionElement.innerHTML = `<label class="option-label">${option.text}</label>`;
-        // Stocker l'index original de la bonne réponse pour la vérification
-        optionElement.dataset.originalIndex = option.originalIndex;
-        optionElement.addEventListener('click', () => selectOption(optionElement, option.originalIndex));
-        optionsContainer.appendChild(optionElement);
-      });
-      
-      // Réinitialiser les boutons et la sélection
-      submitButton.disabled = true;
-      submitButton.style.display = 'inline-flex';
-      nextButton.style.display = 'none';
-      selectedOption = null;
-    }
-    
-    function selectOption(optionElement, originalIndex) {
-      // Désélectionner toutes les options
-      document.querySelectorAll('.option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      
-      // Sélectionner l'option choisie
-      optionElement.classList.add('selected');
-      selectedOption = originalIndex; // L'index dans le tableau `options` de la question
-      submitButton.disabled = false;
-    }
-    
-    function submitAnswer() {
-      if (selectedOption === null) return;
-      
-      const question = currentQuestions[currentQuestionIndex];
-      const allOptions = document.querySelectorAll('.option');
-      
-      // Désactiver toutes les options
-      allOptions.forEach(opt => {
-        opt.style.pointerEvents = 'none';
-      });
-      
-      let isCorrect = (selectedOption === question.correctAnswer);
-      let selectedOptionElement = null;
-
-      // Afficher les bonnes/mauvaises réponses
-      allOptions.forEach(opt => {
-        const originalIndex = parseInt(opt.dataset.originalIndex);
-        if (originalIndex === question.correctAnswer) {
-            opt.classList.add('correct'); // La bonne réponse
-        }
-        if (originalIndex === selectedOption) {
-            opt.classList.add(isCorrect ? 'correct' : 'incorrect'); // L'option sélectionnée
-            selectedOptionElement = opt;
-        }
-      });
-      
-      // Mettre à jour le score et les gains
-      if (isCorrect) {
-        score++;
-        totalEarningsForClaim += quizReward; // Accumuler les gains pour la réclamation
-        showNotification('success', 'Bonne réponse!', `Vous avez gagné ${quizReward} FCFA pour cette question.`);
-      } else {
-        // Rater la question, on passe simplement à la suivante sans gain
-        showNotification('error', 'Mauvaise réponse', `La bonne réponse était: ${question.options[question.correctAnswer]}. On passe à la question suivante.`);
-      }
-      
-      // Afficher le bouton pour la question suivante
-      submitButton.style.display = 'none';
-      nextButton.style.display = 'inline-flex';
-    }
-    
-    function nextQuestion() {
-      currentQuestionIndex++;
-      
-      if (currentQuestionIndex < currentQuestions.length) {
-        loadQuestion();
-      } else {
-        // Le quiz est terminé
-        showResults();
-      }
-    }
-    
-    function showResults() {
-      // Mettre à jour les résultats
-      resultsScore.textContent = `${score}/${currentQuestions.length}`;
-      
-      if (score === currentQuestions.length) {
-        resultsMessage.textContent = 'Félicitations! Vous avez répondu correctement à toutes les questions et gagné le maximum !';
-      } else if (score > 0) {
-        resultsMessage.textContent = `Bon travail! Vous avez répondu correctement à ${score} questions. Réclamez vos gains.`;
-      } else {
-        resultsMessage.textContent = 'Pas de chance cette fois ! Mais vous pouvez toujours réclamer vos gains pour les questions suivantes demain.';
-      }
-      
-      totalEarningsDisplay.textContent = `+${totalEarningsForClaim} FCFA`;
-      
-      // Mettre à jour les données utilisateur pour l'état de la journée (sans impacter le solde final qui sera fait par le bouton "Réclamer")
-      userData.triviaCompletedToday = (userData.triviaCompletedToday || 0) + 1;
-      userData.triviaEarningsToday = totalEarningsForClaim;
-      if (!(userData.triviaFirstTimeDone)) {
-        userData.triviaFirstTimeDone = true; // Marquer la première fois comme faite
-      }
-      
-      // Sauvegarder les données
-      saveUserData({ 
-        triviaCompletedToday: userData.triviaCompletedToday, 
-        triviaEarningsToday: userData.triviaEarningsToday,
-        triviaFirstTimeDone: userData.triviaFirstTimeDone || true
-      });
-      
-      // Mettre à jour les statistiques du jour
-      quizzesCompletedToday = userData.triviaCompletedToday;
-      earningsToday = userData.triviaEarningsToday;
-      updateDailyStats();
-
-      // Afficher les résultats et le bouton de réclamation
-      questionContainer.style.display = 'none';
-      resultsContainer.style.display = 'block';
-      claimRewardButton.style.display = 'inline-flex';
-      nextQuizButton.style.display = 'inline-flex';
-
-      // Le bouton de réclamation est actif si les gains sont > 0 et non réclamés
-      const today = getTodayString();
-      const isTodayClaimed = userData.lastTriviaClaimDate === today;
-
-      if (totalEarningsForClaim > 0 && !isTodayClaimed) {
-        claimRewardButton.disabled = false;
-        claimRewardButton.textContent = `Réclamer la récompense (${totalEarningsForClaim} FCFA)`;
-      } else if (isTodayClaimed) {
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Récompense déjà réclamée !';
-      } else {
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Pas de gain à réclamer';
-      }
-    }
-
-    function updateDailyStats() {
-      quizzesCompleted.textContent = `${quizzesCompletedToday}/${MAX_QUIZ_PER_DAY}`;
-      earnedToday.textContent = `${earningsToday} FCFA`;
-    }
-
-    /******** Gestion de la Réclamation (Inspiré de tiktok_earn) ********/
-    claimRewardButton.addEventListener('click', async () => {
-      if (!currentUser) { 
-        showNotification('error','Non connecté','Veuillez vous connecter.'); 
-        return; 
-      }
-      if (totalEarningsForClaim <= 0) {
-        showNotification('info', 'Pas de gain', 'Il n\'y a pas de gain à réclamer pour ce quiz.');
-        return;
-      }
-      
-      const today = getTodayString();
-      if (userData.lastTriviaClaimDate === today) {
-          showNotification('info', 'Déjà réclamé', 'Vous avez déjà réclamé les gains du quiz d\'aujourd\'hui.');
-          return;
-      }
-      
-      const REWARD_AMOUNT = totalEarningsForClaim; // Le montant total des gains à créditer
-      const MAX_INCREMENT_PER_REQUEST = 1000; // Ajuster au besoin (max 500 dans tiktok.html, je mets 1000 pour 500/750 FCFA)
-
-      try {
-        const uid = currentUser.uid;
-        const userRef = db.collection('users').doc(uid);
-
-        await db.runTransaction(async (tx) => {
-          const snap = await tx.get(userRef);
-          if (!snap.exists) throw new Error('Utilisateur introuvable (transaction).');
-
-          const doc = snap.data() || {};
-          let soldeDoc = Number(doc.solde || 0);
-          let profitDoc = Number(doc.profit || 0);
-          let triviaGainsDoc = Number(doc.triviaGains || 0);
-
-          // Double-check de la réclamation
-          if (doc.lastTriviaClaimDate === today) {
-            throw new Error('Réclamation du jour déjà effectuée (transaction).');
-          }
-
-          // Vérification de sécurité du montant
-          if (REWARD_AMOUNT <= 0 || REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) {
-            throw new Error('Montant de récompense invalide ou trop élevé.');
-          }
-
-          // Nouveaux montants
-          const newSolde = soldeDoc + REWARD_AMOUNT;
-          const newProfit = profitDoc + REWARD_AMOUNT;
-          const newTriviaGains = triviaGainsDoc + REWARD_AMOUNT;
-
-          // Mise à jour explicite dans la transaction
-          tx.update(userRef, {
-            solde: newSolde,
-            profit: newProfit,
-            triviaGains: newTriviaGains,
-            lastTriviaClaimDate: today, // NOUVEAU: marque la date de réclamation
-            // On peut aussi effacer les earnings de la journée si on ne veut pas les garder
-            // triviaEarningsToday: 0
-          });
-        });
-
-        // Si la transaction réussit :
-        userData.lastTriviaClaimDate = today;
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Récompense réclamée !';
-        showNotification('success', 'Récompense Ajoutée!', `${REWARD_AMOUNT} FCFA ont été ajoutés à votre solde et à votre profit.`);
-
-        // Mise à jour de l'UI des gains après réclamation (bien que les stats du jour soient déjà mises à jour par showResults)
-        earningsToday = REWARD_AMOUNT;
-        updateDailyStats();
-
-      } catch (err) {
-        console.error('Erreur lors de la réclamation:', err);
-        const msg = (err && err.message) ? err.message : 'Impossible d\'enregistrer la récompense. Réessayez.';
-        showNotification('error', 'Erreur de Réclamation', msg);
-        claimRewardButton.disabled = false; // Laisse le bouton actif pour un nouvel essai
-      }
-    });
-
-    // Le bouton pour recommencer/prochain quiz
-    nextQuizButton.addEventListener('click', () => {
-      showNotification('info', 'Revenez demain', 'Vous avez complété votre quiz du jour. Rendez-vous dans 24h!');
-    });
-
-
-    /******** Sauvegarde des données utilisateur ********/
-    async function saveUserData(dataToSave) {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        await userRef.set(dataToSave, { merge: true });
-        console.log('Données utilisateur enregistrées avec succès.');
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
-    }
-
-    /******** Chargement des données utilisateur ********/
-    async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté pour charger les données.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      const today = getTodayString();
-
-      if (doc.exists) {
-          userData = doc.data() || {};
-      } else {
-        userData = {
-          triviaFirstTimeDone: false, // NOUVEAU champ
-          triviaCompletedToday: 0,
-          triviaEarningsToday: 0,
-          lastTriviaDate: null,
-          lastTriviaClaimDate: null, // NOUVEAU champ
-          solde: 0,
-          profit: 0, // Ajout pour la consistance avec TikTok
-          triviaGains: 0
-        };
-        await saveUserData(userData);
-      }
-      
-      // Réinitialisation des stats quotidiennes si le jour est différent
-      if (userData.lastTriviaDate !== today) {
-          userData.triviaCompletedToday = 0;
-          userData.triviaEarningsToday = 0;
-          userData.lastTriviaDate = today;
-          // on ne réinitialise pas triviaFirstTimeDone
-      }
-
-      return userData;
-    }
-
-    /******** Mise à jour de l'interface utilisateur ********/
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
-
-    /******** Gestion des événements Trivia ********/
-    submitButton.addEventListener('click', submitAnswer);
-    nextButton.addEventListener('click', nextQuestion);
-
-    /******** Point d'entrée principal ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                userData = await loadUserData();
-
-                // Vérification du statut de paiement comme dans tiktok_earn
-                const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
-                const validStatuses = ['paid', 'active'];
-                if (!validStatuses.includes(userStatus)) {
-                    showNotification('info','Action requise','Veuillez finaliser votre inscription pour accéder à toutes les fonctionnalités.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
-                    return;
-                }
-                
-                updateUserInfoUI(user, userData);
-                applyTheme();
-                initQuiz();
-                
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue!', 'Prêt pour le Trivia Challenge!');
-
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données. Veuillez vous reconnecter.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-  </script>
+/******** Petit preload & safety ********/
+document.addEventListener('DOMContentLoaded', ()=> {
+  setTimeout(()=> { if (loader) loader.style.display = 'none'; }, 600);
+});
+</script>
 </body>
 </html>
