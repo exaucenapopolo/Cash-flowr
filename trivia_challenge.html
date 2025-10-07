@@ -1219,671 +1219,689 @@
       </div>
     </div>
   </footer>
+<script>
+/******** CONFIG FIREBASE ********/
+const firebaseConfig = {
+  apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
+  authDomain: "cash-flowr.firebaseapp.com",
+  projectId: "cash-flowr",
+  storageBucket: "cash-flowr.appspot.com",
+  messagingSenderId: "1091928501310",
+  appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
+  measurementId: "G-5SF6VDLZCB"
+};
 
-  <script>
-    /******** CONFIG FIREBASE ********/
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjGisjgbFc2ZE0BFgdhlUao8bCCeuKP1k",
-      authDomain: "cash-flowr.firebaseapp.com",
-      projectId: "cash-flowr",
-      storageBucket: "cash-flowr.appspot.com",
-      messagingSenderId: "1091928501310",
-      appId: "1:1091928501310:web:4f4de306cde36f378ff56f",
-      measurementId: "G-5SF6VDLZCB"
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/******** NEW: Thursday-only enforcement ********/
+const ENFORCE_THURSDAY = false;
+
+/******** Financial settings with 500 FCFA limit ********/
+const MAX_QUIZ_PER_DAY = 5; // 5 questions per day
+const REWARD_PER_QUESTION = 100; // 100 FCFA per question = 500 FCFA max per day
+const MAX_CLAIM_PER_DAY = 500; // 500 FCFA limit
+
+/******** DOM Elements ********/
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const themeToggle = document.getElementById('themeToggle');
+const userProfile = document.getElementById('userProfile');
+const profileDropdown = document.getElementById('profileDropdown');
+const languageSelector = document.getElementById('languageSelector');
+const loader = document.getElementById('loader');
+const sidebarUsername = document.getElementById('sidebarUsername');
+const userAvatar = document.getElementById('userAvatar');
+
+// Trivia Challenge specific elements
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
+const questionContainer = document.getElementById('questionContainer');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const nextButton = document.getElementById('nextButton');
+const resultsContainer = document.getElementById('resultsContainer');
+const resultsScore = document.getElementById('resultsScore');
+const resultsMessage = document.getElementById('resultsMessage');
+const totalEarningsDisplay = document.getElementById('totalEarningsDisplay');
+const claimRewardButton = document.getElementById('claimRewardButton');
+const nextQuizButton = document.getElementById('nextQuizButton');
+const quizzesCompleted = document.getElementById('quizzesCompleted');
+const earnedToday = document.getElementById('earnedToday');
+const difficultyBadge = document.getElementById('difficultyBadge');
+
+// NEW: Timer elements
+const timerProgress = document.getElementById('timerProgress');
+const timerText = document.getElementById('timerText');
+
+// NEW: Thursday alert elements
+const thursdayAlert = document.getElementById('thursdayAlert');
+const thursdayCountdown = document.getElementById('thursdayCountdown');
+
+/******** State variables ********/
+let currentUser = null;
+let userData = {};
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let selectedOption = null;
+let score = 0;
+let quizzesCompletedToday = 0;
+let earningsToday = 0;
+let totalEarningsForClaim = 0;
+let isClaimed = false;
+
+// NEW: Timer variables
+let countdownInterval = null;
+let timeLeft = 7;
+
+// NEW: Answer validation tracking
+let questionAnswered = false;
+
+/******** Questions for Trivia Challenge ********/
+const allQuestions = [
+  { question: "Quel fruit est jaune ?", options: ["Banane", "Pomme", "Orange", "Raisin"], correctAnswer: 0 },
+  { question: "Quelle est la capitale de la France ?", options: ["Lyon", "Paris", "Marseille", "Bordeaux"], correctAnswer: 1 },
+  { question: "Combien de côtés a un triangle ?", options: ["3", "4", "5", "6"], correctAnswer: 0 },
+  { question: "Quel animal dit 'meow' ?", options: ["Chien", "Chat", "Vache", "Oiseau"], correctAnswer: 1 },
+  { question: "Quelle planète est appelée la planète rouge ?", options: ["Terre", "Mars", "Jupiter", "Vénus"], correctAnswer: 1 },
+  { question: "Quel écrivain a écrit 'Les Misérables' ?", options: ["Émile Zola", "Gustave Flaubert", "Victor Hugo", "Albert Camus"], correctAnswer: 2 },
+  { question: "Quel est l'élément chimique avec le symbole 'Au' ?", options: ["Argent", "Platine", "Or", "Uranium"], correctAnswer: 2 },
+  { question: "Quel pays a la plus grande superficie au monde ?", options: ["Canada", "Chine", "États-Unis", "Russie"], correctAnswer: 3 },
+  { question: "Quel est le plus grand océan du monde ?", options: ["Océan Atlantique", "Océan Indien", "Océan Arctique", "Océan Pacifique"], correctAnswer: 3 },
+  { question: "Qui a peint 'La Nuit étoilée' ?", options: ["Pablo Picasso", "Claude Monet", "Salvador Dalí", "Vincent van Gogh"], correctAnswer: 3 }
+];
+
+/******** NEW: Thursday availability functions ********/
+function isTodayThursday() {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', { 
+      timeZone: 'Africa/Douala',
+      weekday: 'long' 
+    });
+    const dayName = formatter.format(new Date());
+    return dayName === 'Thursday';
+  } catch (error) {
+    console.warn('Timezone Africa/Douala non supporté, fallback local');
+    const d = new Date();
+    return d.getDay() === 4; // 4 = Thursday
+  }
+}
+
+function getNextThursdayCountdown() {
+  const now = new Date();
+  const currentDay = now.getDay();
+  let daysUntilThursday = (4 - currentDay + 7) % 7;
+  if (daysUntilThursday === 0) daysUntilThursday = 7;
+  const nextThursday = new Date(now);
+  nextThursday.setDate(now.getDate() + daysUntilThursday);
+  nextThursday.setHours(0, 0, 0, 0);
+  const diff = nextThursday - now;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { days, hours, minutes, seconds };
+}
+
+function updateThursdayUI() {
+  const isThursday = isTodayThursday();
+  if (ENFORCE_THURSDAY && !isThursday) {
+    if (thursdayAlert) thursdayAlert.style.display = 'block';
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      const countdown = getNextThursdayCountdown();
+      if (thursdayCountdown) thursdayCountdown.textContent = `Prochain jeudi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
+      if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
+        window.location.reload();
+      }
+    }, 1000);
+  } else {
+    if (thursdayAlert) thursdayAlert.style.display = 'none';
+    if (countdownInterval) clearInterval(countdownInterval);
+  }
+  return isThursday;
+}
+
+/******** Utility functions ********/
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function getTodayString() {
+  return new Date().toDateString();
+}
+
+/******** UI helpers ********/
+function showNotification(type, title, message, duration = 4000) {
+  const container = document.getElementById('notificationContainer');
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+  notification.innerHTML = `
+    <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
+    <div>
+      <strong style="display: block; margin-bottom: 5px;">${title}</strong>
+      <span>${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease reverse forwards';
+    setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
+  }, duration);
+}
+
+/******** NEW: Countdown timer functions ********/
+function startCountdown() {
+  timeLeft = 7;
+  updateTimerUI();
+  
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  countdownInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    
+    if (timeLeft <= 0) {
+      clearInterval(countdownInterval);
+      if (!questionAnswered) {
+        handleTimeUp();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  timerText.textContent = `${timeLeft}s`;
+  const progress = ((7 - timeLeft) / 7) * 360;
+  timerProgress.style.transform = `rotate(${progress}deg)`;
+}
+
+function handleTimeUp() {
+  questionAnswered = true;
+  const question = currentQuestions[currentQuestionIndex];
+  
+  // Show correct answer
+  document.querySelectorAll('.option').forEach(opt => {
+    const originalIndex = parseInt(opt.dataset.originalIndex);
+    if (originalIndex === question.correctAnswer) {
+      opt.classList.add('correct');
+    }
+  });
+  
+  showNotification('error', 'Temps écoulé!', `La bonne réponse était: ${question.options[question.correctAnswer]}`);
+  
+  // Disable all options
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.style.pointerEvents = 'none';
+  });
+  
+  // Automatically move to next question after 2 seconds
+  setTimeout(() => {
+    nextQuestion();
+  }, 2000);
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+/******** Menu and theme management ********/
+hamburgerBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    hamburgerBtn.classList.toggle('open');
+});
+
+overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    hamburgerBtn.classList.remove('open');
+});
+
+userProfile.addEventListener('click', (event) => {
+    event.stopPropagation();
+    profileDropdown.classList.toggle('active');
+});
+
+document.addEventListener('click', (event) => {
+    if (!userProfile.contains(event.target)) {
+        profileDropdown.classList.remove('active');
+    }
+});
+
+themeToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    themeToggle.innerHTML = isDarkMode 
+        ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+        : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+    if(currentUser) saveUserData({ theme: isDarkMode ? 'dark' : 'light' });
+});
+
+/******** Quiz functions ********/
+function initQuiz() {
+  const today = getTodayString();
+  const isThursday = updateThursdayUI();
+  
+  // Check if it's Thursday
+  if (ENFORCE_THURSDAY && !isThursday) {
+    showNotification('info', 'Non disponible', 'Le Trivia Challenge n\'est disponible que le jeudi.');
+    questionContainer.style.display = 'none';
+    resultsContainer.style.display = 'none';
+    return;
+  }
+
+  // Reset daily stats if date changed
+  if (userData.lastTriviaDate !== today) {
+    userData.triviaCompletedToday = 0;
+    userData.triviaEarningsToday = 0;
+    userData.triviaClaimedToday = false;
+    saveUserData({ 
+      lastTriviaDate: today, 
+      triviaCompletedToday: 0, 
+      triviaEarningsToday: 0,
+      triviaClaimedToday: false
+    });
+  }
+  
+  quizzesCompletedToday = userData.triviaCompletedToday || 0;
+  earningsToday = userData.triviaEarningsToday || 0;
+  isClaimed = userData.triviaClaimedToday || false;
+  
+  updateDailyStats();
+
+  // Check if user has completed today's quota
+  if (quizzesCompletedToday >= MAX_QUIZ_PER_DAY) {
+    showQuizUnavailableUI(isClaimed);
+    return;
+  }
+
+  // Select 5 random questions
+  currentQuestions = shuffleArray([...allQuestions]).slice(0, 5);
+  
+  startQuiz();
+}
+
+function showQuizUnavailableUI(claimed) {
+  questionContainer.style.display = 'none';
+  resultsContainer.style.display = 'block';
+  
+  resultsScore.textContent = `${MAX_QUIZ_PER_DAY}/${MAX_QUIZ_PER_DAY}`;
+  
+  if (claimed) {
+    resultsMessage.textContent = `Vous avez complété vos ${MAX_QUIZ_PER_DAY} questions d'aujourd'hui et réclamé ${earningsToday} FCFA. Revenez demain!`;
+    claimRewardButton.style.display = 'none';
+  } else {
+    resultsMessage.textContent = `Vous avez complété vos ${MAX_QUIZ_PER_DAY} questions d'aujourd'hui.`;
+    claimRewardButton.style.display = 'none';
+  }
+  totalEarningsDisplay.textContent = `+${earningsToday} FCFA`;
+  nextQuizButton.style.display = 'inline-flex';
+}
+
+function startQuiz() {
+  currentQuestionIndex = 0;
+  score = 0;
+  selectedOption = null;
+  totalEarningsForClaim = 0;
+  questionAnswered = false;
+
+  resultsContainer.style.display = 'none';
+  questionContainer.style.display = 'block';
+  nextButton.style.display = 'none';
+  
+  loadQuestion();
+}
+
+function loadQuestion() {
+  questionAnswered = false;
+  const question = currentQuestions[currentQuestionIndex];
+  const shuffledOptions = shuffleArray(question.options.map((opt, index) => ({ text: opt, originalIndex: index })));
+  
+  questionText.textContent = `Q${currentQuestionIndex + 1}: ${question.question}`;
+  
+  // Update progress
+  progressText.textContent = `Question ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+  progressFill.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
+  
+  // Generate options
+  optionsContainer.innerHTML = '';
+  shuffledOptions.forEach((option, index) => {
+    const optionElement = document.createElement('div');
+    optionElement.className = 'option';
+    optionElement.innerHTML = `<label class="option-label">${option.text}</label>`;
+    optionElement.dataset.originalIndex = option.originalIndex;
+    optionElement.addEventListener('click', () => selectOption(optionElement, option.originalIndex));
+    optionsContainer.appendChild(optionElement);
+  });
+  
+  // Start countdown timer
+  startCountdown();
+  
+  // Reset button states
+  nextButton.style.display = 'none';
+}
+
+function selectOption(optionElement, originalIndex) {
+  if (questionAnswered) return;
+  
+  questionAnswered = true;
+  stopCountdown();
+  
+  // Deselect all options
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  
+  // Select clicked option
+  optionElement.classList.add('selected');
+  selectedOption = originalIndex;
+
+  const question = currentQuestions[currentQuestionIndex];
+  const allOptions = document.querySelectorAll('.option');
+  
+  // Disable all options
+  allOptions.forEach(opt => {
+    opt.style.pointerEvents = 'none';
+  });
+  
+  let isCorrect = (selectedOption === question.correctAnswer);
+
+  // Show correct/incorrect answers
+  allOptions.forEach(opt => {
+    const optOriginalIndex = parseInt(opt.dataset.originalIndex);
+    if (optOriginalIndex === question.correctAnswer) {
+        opt.classList.add('correct');
+    }
+    if (optOriginalIndex === selectedOption && !isCorrect) {
+        opt.classList.add('incorrect');
+    }
+  });
+  
+  // Update score and earnings
+  if (isCorrect) {
+    score++;
+    totalEarningsForClaim += REWARD_PER_QUESTION;
+    showNotification('success', 'Bonne réponse!', `Vous avez gagné ${REWARD_PER_QUESTION} FCFA pour cette question.`);
+  } else {
+    showNotification('error', 'Mauvaise réponse', `La bonne réponse était: ${question.options[question.correctAnswer]}`);
+  }
+  
+  // Automatically move to next question after 2 seconds
+  setTimeout(() => {
+    nextQuestion();
+  }, 2000);
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  
+  if (currentQuestionIndex < currentQuestions.length) {
+    loadQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  stopCountdown();
+  
+  // Apply 500 FCFA limit
+  if (totalEarningsForClaim > MAX_CLAIM_PER_DAY) {
+    totalEarningsForClaim = MAX_CLAIM_PER_DAY;
+  }
+
+  resultsScore.textContent = `${score}/${currentQuestions.length}`;
+  
+  if (score === currentQuestions.length) {
+    resultsMessage.textContent = 'Félicitations! Vous avez répondu correctement à toutes les questions!';
+  } else if (score > 0) {
+    resultsMessage.textContent = `Bon travail! Vous avez répondu correctement à ${score} questions.`;
+  } else {
+    resultsMessage.textContent = 'Pas de chance cette fois! Réessayez demain.';
+  }
+  
+  totalEarningsDisplay.textContent = `+${totalEarningsForClaim} FCFA`;
+  
+  // Update user data locally + store trivia counters (ces mises à jour ne touchent pas `solde`)
+  userData.triviaCompletedToday = (userData.triviaCompletedToday || 0) + 1;
+  userData.triviaEarningsToday = totalEarningsForClaim;
+  
+  saveUserData({ 
+    triviaCompletedToday: userData.triviaCompletedToday, 
+    triviaEarningsToday: userData.triviaEarningsToday
+  });
+  
+  // Update daily stats
+  quizzesCompletedToday = userData.triviaCompletedToday;
+  earningsToday = userData.triviaEarningsToday;
+  updateDailyStats();
+
+  // Show results
+  questionContainer.style.display = 'none';
+  resultsContainer.style.display = 'block';
+  
+  const today = getTodayString();
+  const isTodayClaimed = userData.lastTriviaClaimDate === today;
+
+  if (totalEarningsForClaim > 0 && !isTodayClaimed) {
+    claimRewardButton.disabled = false;
+    claimRewardButton.textContent = `Réclamer ${totalEarningsForClaim} FCFA`;
+  } else if (isTodayClaimed) {
+    claimRewardButton.disabled = true;
+    claimRewardButton.textContent = 'Récompense déjà réclamée!';
+  } else {
+    claimRewardButton.disabled = true;
+    claimRewardButton.textContent = 'Pas de gain à réclamer';
+  }
+  
+  nextQuizButton.style.display = 'inline-flex';
+}
+
+function updateDailyStats() {
+  quizzesCompleted.textContent = `${quizzesCompletedToday}/${MAX_QUIZ_PER_DAY}`;
+  earnedToday.textContent = `${earningsToday} FCFA`;
+}
+
+/******** Reward claim handling ********/
+claimRewardButton.addEventListener('click', async () => {
+  if (!currentUser) { 
+    showNotification('error','Non connecté','Veuillez vous connecter.'); 
+    return; 
+  }
+  if (totalEarningsForClaim <= 0) {
+    showNotification('info', 'Pas de gain', 'Il n\'y a pas de gain à réclamer.');
+    return;
+  }
+  
+  const today = getTodayString();
+  if (userData.lastTriviaClaimDate === today) {
+      showNotification('info', 'Déjà réclamé', 'Vous avez déjà réclamé les gains du quiz d\'aujourd\'hui.');
+      return;
+  }
+  
+  const REWARD_AMOUNT = totalEarningsForClaim;
+  const MAX_INCREMENT_PER_REQUEST = 500;
+
+  try {
+    const uid = currentUser.uid;
+    const userRef = db.collection('users').doc(uid);
+
+    /****************************************************************
+     * IMPORTANT: transaction **DOES NOT** modify 'solde' (intentionnel)
+     * Only updates: profit, triviaGains, triviaEarningsToday, lastTriviaClaimDate
+     * If you want `solde` to be incremented, call a Cloud Function / backend
+     * that uses Admin SDK (server-side) to update `solde` securely.
+     ****************************************************************/
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('Utilisateur introuvable.');
+
+      const doc = snap.data() || {};
+      let profitDoc = Number(doc.profit || 0);
+      let triviaGainsDoc = Number(doc.triviaGains || 0);
+
+      // Double-check claim date
+      if (doc.lastTriviaClaimDate === today) {
+        throw new Error('Réclamation du jour déjà effectuée.');
+      }
+
+      // Security check (client-side)
+      if (REWARD_AMOUNT <= 0 || REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) {
+        throw new Error('Montant de récompense invalide.');
+      }
+
+      // Calculate new amounts (note: solde NOT changed here)
+      const newProfit = profitDoc + REWARD_AMOUNT;
+      const newTriviaGains = triviaGainsDoc + REWARD_AMOUNT;
+
+      // Update transaction — **no solde field**
+      tx.update(userRef, {
+        profit: newProfit,
+        triviaGains: newTriviaGains,
+        triviaEarningsToday: REWARD_AMOUNT,
+        lastTriviaClaimDate: today
+      });
+    });
+
+    // Success — update local UI/data
+    userData.lastTriviaClaimDate = today;
+    claimRewardButton.disabled = true;
+    claimRewardButton.textContent = 'Récompense réclamée!';
+    // Message clair : solde non modifié côté client
+    showNotification('success', 'Récompense Ajoutée!', `${REWARD_AMOUNT} FCFA ont été enregistrés dans profit/triviaGains. (Le solde n'est pas modifié côté client.)`);
+
+    earningsToday = REWARD_AMOUNT;
+    updateDailyStats();
+
+    /************************************************************************
+     * Optionnel : si tu veux créditer le champ `solde`, appelle ici une
+     * Cloud Function sécurisée (Admin SDK) qui ajoutera REWARD_AMOUNT à solde.
+     * Exemple d'appel (si tu as déployé la function 'claimTriviaReward'):
+     *
+     * const claimFn = firebase.functions().httpsCallable('claimTriviaReward');
+     * await claimFn({ amount: REWARD_AMOUNT });
+     *
+     * (Je n'appelle rien ici automatiquement — c'est volontaire : tu as demandé
+     * que le client **ne modifie jamais** solde.)
+     ************************************************************************/
+
+  } catch (err) {
+    console.error('Erreur lors de la réclamation:', err);
+    const msg = err.message || 'Impossible d\'enregistrer la récompense. Réessayez.';
+    showNotification('error', 'Erreur de Réclamation', msg);
+  }
+});
+
+nextQuizButton.addEventListener('click', () => {
+  showNotification('info', 'À demain!', 'Vous avez complété votre quiz du jour. Rendez-vous demain!');
+});
+
+/******** User data management ********/
+async function saveUserData(dataToSave) {
+  if (!currentUser) return;
+  try {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    // merge:true pour ne pas écraser d'autres champs
+    await userRef.set(dataToSave, { merge: true });
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde des données :", error);
+    showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
+  }
+}
+
+async function loadUserData() {
+  if (!currentUser) throw new Error("Aucun utilisateur connecté.");
+  const userRef = db.collection('users').doc(currentUser.uid);
+  const doc = await userRef.get();
+  const today = getTodayString();
+
+  if (doc.exists) {
+      userData = doc.data() || {};
+  } else {
+    // IMPORTANT: NE PAS initialiser/écrire `solde` côté client.
+    // On initialise seulement les champs permis côté client.
+    userData = {
+      triviaCompletedToday: 0,
+      triviaEarningsToday: 0,
+      lastTriviaDate: null,
+      lastTriviaClaimDate: null,
+      profit: 0,
+      triviaGains: 0
     };
+    // Sauvegarde initiale — n'inclut PAS solde
+    await saveUserData(userData);
+  }
+  
+  // Reset daily stats if date changed
+  if (userData.lastTriviaDate !== today) {
+      userData.triviaCompletedToday = 0;
+      userData.triviaEarningsToday = 0;
+      userData.lastTriviaDate = today;
+  }
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    
-    /******** NEW: Thursday-only enforcement ********/
-    const ENFORCE_THURSDAY = false;
-    
-    /******** Financial settings with 500 FCFA limit ********/
-    const MAX_QUIZ_PER_DAY = 5; // 5 questions per day
-    const REWARD_PER_QUESTION = 100; // 100 FCFA per question = 500 FCFA max per day
-    const MAX_CLAIM_PER_DAY = 500; // 500 FCFA limit
+  return userData;
+}
 
-    /******** DOM Elements ********/
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const themeToggle = document.getElementById('themeToggle');
-    const userProfile = document.getElementById('userProfile');
-    const profileDropdown = document.getElementById('profileDropdown');
-    const languageSelector = document.getElementById('languageSelector');
-    const loader = document.getElementById('loader');
-    const sidebarUsername = document.getElementById('sidebarUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    // Trivia Challenge specific elements
-    const progressText = document.getElementById('progressText');
-    const progressFill = document.getElementById('progressFill');
-    const questionContainer = document.getElementById('questionContainer');
-    const questionText = document.getElementById('questionText');
-    const optionsContainer = document.getElementById('optionsContainer');
-    const nextButton = document.getElementById('nextButton');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const resultsScore = document.getElementById('resultsScore');
-    const resultsMessage = document.getElementById('resultsMessage');
-    const totalEarningsDisplay = document.getElementById('totalEarningsDisplay');
-    const claimRewardButton = document.getElementById('claimRewardButton');
-    const nextQuizButton = document.getElementById('nextQuizButton');
-    const quizzesCompleted = document.getElementById('quizzesCompleted');
-    const earnedToday = document.getElementById('earnedToday');
-    const difficultyBadge = document.getElementById('difficultyBadge');
-    
-    // NEW: Timer elements
-    const timerProgress = document.getElementById('timerProgress');
-    const timerText = document.getElementById('timerText');
-    
-    // NEW: Thursday alert elements
-    const thursdayAlert = document.getElementById('thursdayAlert');
-    const thursdayCountdown = document.getElementById('thursdayCountdown');
+function updateUserInfoUI(user, dbData = {}) {
+    const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
+    if (sidebarUsername) sidebarUsername.textContent = displayName;
+    if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
+}
 
-    /******** State variables ********/
-    let currentUser = null;
-    let userData = {};
-    let currentQuestions = [];
-    let currentQuestionIndex = 0;
-    let selectedOption = null;
-    let score = 0;
-    let quizzesCompletedToday = 0;
-    let earningsToday = 0;
-    let totalEarningsForClaim = 0;
-    let isClaimed = false;
-    
-    // NEW: Timer variables
-    let countdownInterval = null;
-    let timeLeft = 7;
-    
-    // NEW: Answer validation tracking
-    let questionAnswered = false;
+function applyTheme() {
+    const isDarkMode = userData.theme === 'dark';
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    themeToggle.innerHTML = isDarkMode 
+        ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
+        : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
+}
 
-    /******** Questions for Trivia Challenge ********/
-    const allQuestions = [
-      { question: "Quel fruit est jaune ?", options: ["Banane", "Pomme", "Orange", "Raisin"], correctAnswer: 0 },
-      { question: "Quelle est la capitale de la France ?", options: ["Lyon", "Paris", "Marseille", "Bordeaux"], correctAnswer: 1 },
-      { question: "Combien de côtés a un triangle ?", options: ["3", "4", "5", "6"], correctAnswer: 0 },
-      { question: "Quel animal dit 'meow' ?", options: ["Chien", "Chat", "Vache", "Oiseau"], correctAnswer: 1 },
-      { question: "Quelle planète est appelée la planète rouge ?", options: ["Terre", "Mars", "Jupiter", "Vénus"], correctAnswer: 1 },
-      { question: "Quel écrivain a écrit 'Les Misérables' ?", options: ["Émile Zola", "Gustave Flaubert", "Victor Hugo", "Albert Camus"], correctAnswer: 2 },
-      { question: "Quel est l'élément chimique avec le symbole 'Au' ?", options: ["Argent", "Platine", "Or", "Uranium"], correctAnswer: 2 },
-      { question: "Quel pays a la plus grande superficie au monde ?", options: ["Canada", "Chine", "États-Unis", "Russie"], correctAnswer: 3 },
-      { question: "Quel est le plus grand océan du monde ?", options: ["Océan Atlantique", "Océan Indien", "Océan Arctique", "Océan Pacifique"], correctAnswer: 3 },
-      { question: "Qui a peint 'La Nuit étoilée' ?", options: ["Pablo Picasso", "Claude Monet", "Salvador Dalí", "Vincent van Gogh"], correctAnswer: 3 }
-    ];
+/******** Main initialization ********/
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        try {
+            userData = await loadUserData();
 
-    /******** NEW: Thursday availability functions ********/
-    function isTodayThursday() {
-      try {
-        const formatter = new Intl.DateTimeFormat('en-US', { 
-          timeZone: 'Africa/Douala',
-          weekday: 'long' 
-        });
-        const dayName = formatter.format(new Date());
-        return dayName === 'Thursday';
-      } catch (error) {
-        console.warn('Timezone Africa/Douala non supporté, fallback local');
-        const d = new Date();
-        return d.getDay() === 4; // 4 = Thursday
-      }
-    }
-
-    function getNextThursdayCountdown() {
-      const now = new Date();
-      const currentDay = now.getDay();
-      let daysUntilThursday = (4 - currentDay + 7) % 7;
-      if (daysUntilThursday === 0) daysUntilThursday = 7;
-      const nextThursday = new Date(now);
-      nextThursday.setDate(now.getDate() + daysUntilThursday);
-      nextThursday.setHours(0, 0, 0, 0);
-      const diff = nextThursday - now;
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      return { days, hours, minutes, seconds };
-    }
-
-    function updateThursdayUI() {
-      const isThursday = isTodayThursday();
-      if (ENFORCE_THURSDAY && !isThursday) {
-        if (thursdayAlert) thursdayAlert.style.display = 'block';
-        if (countdownInterval) clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-          const countdown = getNextThursdayCountdown();
-          if (thursdayCountdown) thursdayCountdown.textContent = `Prochain jeudi dans: ${countdown.days}j ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`;
-          if (countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0 && countdown.seconds === 0) {
-            window.location.reload();
-          }
-        }, 1000);
-      } else {
-        if (thursdayAlert) thursdayAlert.style.display = 'none';
-        if (countdownInterval) clearInterval(countdownInterval);
-      }
-      return isThursday;
-    }
-
-    /******** Utility functions ********/
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function getTodayString() {
-      return new Date().toDateString();
-    }
-
-    /******** UI helpers ********/
-    function showNotification(type, title, message, duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
-      notification.innerHTML = `
-        <i class="fas ${icon}" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display: block; margin-bottom: 5px;">${title}</strong>
-          <span>${message}</span>
-        </div>
-      `;
-      container.appendChild(notification);
-      setTimeout(() => {
-        notification.style.animation = 'slideIn 0.3s ease reverse forwards';
-        setTimeout(() => { if (container.contains(notification)) container.removeChild(notification); }, 300);
-      }, duration);
-    }
-
-    /******** NEW: Countdown timer functions ********/
-    function startCountdown() {
-      timeLeft = 7;
-      updateTimerUI();
-      
-      if (countdownInterval) clearInterval(countdownInterval);
-      
-      countdownInterval = setInterval(() => {
-        timeLeft--;
-        updateTimerUI();
-        
-        if (timeLeft <= 0) {
-          clearInterval(countdownInterval);
-          if (!questionAnswered) {
-            handleTimeUp();
-          }
-        }
-      }, 1000);
-    }
-
-    function updateTimerUI() {
-      timerText.textContent = `${timeLeft}s`;
-      const progress = ((7 - timeLeft) / 7) * 360;
-      timerProgress.style.transform = `rotate(${progress}deg)`;
-    }
-
-    function handleTimeUp() {
-      questionAnswered = true;
-      const question = currentQuestions[currentQuestionIndex];
-      
-      // Show correct answer
-      document.querySelectorAll('.option').forEach(opt => {
-        const originalIndex = parseInt(opt.dataset.originalIndex);
-        if (originalIndex === question.correctAnswer) {
-          opt.classList.add('correct');
-        }
-      });
-      
-      showNotification('error', 'Temps écoulé!', `La bonne réponse était: ${question.options[question.correctAnswer]}`);
-      
-      // Disable all options
-      document.querySelectorAll('.option').forEach(opt => {
-        opt.style.pointerEvents = 'none';
-      });
-      
-      // Automatically move to next question after 2 seconds
-      setTimeout(() => {
-        nextQuestion();
-      }, 2000);
-    }
-
-    function stopCountdown() {
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
-    }
-
-    /******** Menu and theme management ********/
-    hamburgerBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        hamburgerBtn.classList.toggle('open');
-    });
-    
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburgerBtn.classList.remove('open');
-    });
-
-    userProfile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileDropdown.classList.toggle('active');
-    });
-    
-    document.addEventListener('click', (event) => {
-        if (!userProfile.contains(event.target)) {
-            profileDropdown.classList.remove('active');
-        }
-    });
-
-    themeToggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-        if(currentUser) saveUserData({ theme: isDarkMode ? 'dark' : 'light' });
-    });
-
-    /******** Quiz functions ********/
-    function initQuiz() {
-      const today = getTodayString();
-      const isThursday = updateThursdayUI();
-      
-      // Check if it's Thursday
-      if (ENFORCE_THURSDAY && !isThursday) {
-        showNotification('info', 'Non disponible', 'Le Trivia Challenge n\'est disponible que le jeudi.');
-        questionContainer.style.display = 'none';
-        resultsContainer.style.display = 'none';
-        return;
-      }
-
-      // Reset daily stats if date changed
-      if (userData.lastTriviaDate !== today) {
-        userData.triviaCompletedToday = 0;
-        userData.triviaEarningsToday = 0;
-        userData.triviaClaimedToday = false;
-        saveUserData({ 
-          lastTriviaDate: today, 
-          triviaCompletedToday: 0, 
-          triviaEarningsToday: 0,
-          triviaClaimedToday: false
-        });
-      }
-      
-      quizzesCompletedToday = userData.triviaCompletedToday || 0;
-      earningsToday = userData.triviaEarningsToday || 0;
-      isClaimed = userData.triviaClaimedToday || false;
-      
-      updateDailyStats();
-
-      // Check if user has completed today's quota
-      if (quizzesCompletedToday >= MAX_QUIZ_PER_DAY) {
-        showQuizUnavailableUI(isClaimed);
-        return;
-      }
-
-      // Select 5 random questions
-      currentQuestions = shuffleArray([...allQuestions]).slice(0, 5);
-      
-      startQuiz();
-    }
-
-    function showQuizUnavailableUI(claimed) {
-      questionContainer.style.display = 'none';
-      resultsContainer.style.display = 'block';
-      
-      resultsScore.textContent = `${MAX_QUIZ_PER_DAY}/${MAX_QUIZ_PER_DAY}`;
-      
-      if (claimed) {
-        resultsMessage.textContent = `Vous avez complété vos ${MAX_QUIZ_PER_DAY} questions d'aujourd'hui et réclamé ${earningsToday} FCFA. Revenez demain!`;
-        claimRewardButton.style.display = 'none';
-      } else {
-        resultsMessage.textContent = `Vous avez complété vos ${MAX_QUIZ_PER_DAY} questions d'aujourd'hui.`;
-        claimRewardButton.style.display = 'none';
-      }
-      totalEarningsDisplay.textContent = `+${earningsToday} FCFA`;
-      nextQuizButton.style.display = 'inline-flex';
-    }
-    
-    function startQuiz() {
-      currentQuestionIndex = 0;
-      score = 0;
-      selectedOption = null;
-      totalEarningsForClaim = 0;
-      questionAnswered = false;
-
-      resultsContainer.style.display = 'none';
-      questionContainer.style.display = 'block';
-      nextButton.style.display = 'none';
-      
-      loadQuestion();
-    }
-    
-    function loadQuestion() {
-      questionAnswered = false;
-      const question = currentQuestions[currentQuestionIndex];
-      const shuffledOptions = shuffleArray(question.options.map((opt, index) => ({ text: opt, originalIndex: index })));
-      
-      questionText.textContent = `Q${currentQuestionIndex + 1}: ${question.question}`;
-      
-      // Update progress
-      progressText.textContent = `Question ${currentQuestionIndex + 1}/${currentQuestions.length}`;
-      progressFill.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
-      
-      // Generate options
-      optionsContainer.innerHTML = '';
-      shuffledOptions.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'option';
-        optionElement.innerHTML = `<label class="option-label">${option.text}</label>`;
-        optionElement.dataset.originalIndex = option.originalIndex;
-        optionElement.addEventListener('click', () => selectOption(optionElement, option.originalIndex));
-        optionsContainer.appendChild(optionElement);
-      });
-      
-      // Start countdown timer
-      startCountdown();
-      
-      // Reset button states
-      nextButton.style.display = 'none';
-    }
-    
-    function selectOption(optionElement, originalIndex) {
-      if (questionAnswered) return;
-      
-      questionAnswered = true;
-      stopCountdown();
-      
-      // Deselect all options
-      document.querySelectorAll('.option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      
-      // Select clicked option
-      optionElement.classList.add('selected');
-      selectedOption = originalIndex;
-
-      const question = currentQuestions[currentQuestionIndex];
-      const allOptions = document.querySelectorAll('.option');
-      
-      // Disable all options
-      allOptions.forEach(opt => {
-        opt.style.pointerEvents = 'none';
-      });
-      
-      let isCorrect = (selectedOption === question.correctAnswer);
-
-      // Show correct/incorrect answers
-      allOptions.forEach(opt => {
-        const optOriginalIndex = parseInt(opt.dataset.originalIndex);
-        if (optOriginalIndex === question.correctAnswer) {
-            opt.classList.add('correct');
-        }
-        if (optOriginalIndex === selectedOption && !isCorrect) {
-            opt.classList.add('incorrect');
-        }
-      });
-      
-      // Update score and earnings
-      if (isCorrect) {
-        score++;
-        totalEarningsForClaim += REWARD_PER_QUESTION;
-        showNotification('success', 'Bonne réponse!', `Vous avez gagné ${REWARD_PER_QUESTION} FCFA pour cette question.`);
-      } else {
-        showNotification('error', 'Mauvaise réponse', `La bonne réponse était: ${question.options[question.correctAnswer]}`);
-      }
-      
-      // Automatically move to next question after 2 seconds
-      setTimeout(() => {
-        nextQuestion();
-      }, 2000);
-    }
-    
-    function nextQuestion() {
-      currentQuestionIndex++;
-      
-      if (currentQuestionIndex < currentQuestions.length) {
-        loadQuestion();
-      } else {
-        showResults();
-      }
-    }
-    
-    function showResults() {
-      stopCountdown();
-      
-      // Apply 500 FCFA limit
-      if (totalEarningsForClaim > MAX_CLAIM_PER_DAY) {
-        totalEarningsForClaim = MAX_CLAIM_PER_DAY;
-      }
-
-      resultsScore.textContent = `${score}/${currentQuestions.length}`;
-      
-      if (score === currentQuestions.length) {
-        resultsMessage.textContent = 'Félicitations! Vous avez répondu correctement à toutes les questions!';
-      } else if (score > 0) {
-        resultsMessage.textContent = `Bon travail! Vous avez répondu correctement à ${score} questions.`;
-      } else {
-        resultsMessage.textContent = 'Pas de chance cette fois! Réessayez demain.';
-      }
-      
-      totalEarningsDisplay.textContent = `+${totalEarningsForClaim} FCFA`;
-      
-      // Update user data
-      userData.triviaCompletedToday = (userData.triviaCompletedToday || 0) + 1;
-      userData.triviaEarningsToday = totalEarningsForClaim;
-      
-      saveUserData({ 
-        triviaCompletedToday: userData.triviaCompletedToday, 
-        triviaEarningsToday: userData.triviaEarningsToday
-      });
-      
-      // Update daily stats
-      quizzesCompletedToday = userData.triviaCompletedToday;
-      earningsToday = userData.triviaEarningsToday;
-      updateDailyStats();
-
-      // Show results
-      questionContainer.style.display = 'none';
-      resultsContainer.style.display = 'block';
-      
-      const today = getTodayString();
-      const isTodayClaimed = userData.lastTriviaClaimDate === today;
-
-      if (totalEarningsForClaim > 0 && !isTodayClaimed) {
-        claimRewardButton.disabled = false;
-        claimRewardButton.textContent = `Réclamer ${totalEarningsForClaim} FCFA`;
-      } else if (isTodayClaimed) {
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Récompense déjà réclamée!';
-      } else {
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Pas de gain à réclamer';
-      }
-      
-      nextQuizButton.style.display = 'inline-flex';
-    }
-
-    function updateDailyStats() {
-      quizzesCompleted.textContent = `${quizzesCompletedToday}/${MAX_QUIZ_PER_DAY}`;
-      earnedToday.textContent = `${earningsToday} FCFA`;
-    }
-
-    /******** Reward claim handling ********/
-    claimRewardButton.addEventListener('click', async () => {
-      if (!currentUser) { 
-        showNotification('error','Non connecté','Veuillez vous connecter.'); 
-        return; 
-      }
-      if (totalEarningsForClaim <= 0) {
-        showNotification('info', 'Pas de gain', 'Il n\'y a pas de gain à réclamer.');
-        return;
-      }
-      
-      const today = getTodayString();
-      if (userData.lastTriviaClaimDate === today) {
-          showNotification('info', 'Déjà réclamé', 'Vous avez déjà réclamé les gains du quiz d\'aujourd\'hui.');
-          return;
-      }
-      
-      const REWARD_AMOUNT = totalEarningsForClaim;
-      const MAX_INCREMENT_PER_REQUEST = 500;
-
-      try {
-        const uid = currentUser.uid;
-        const userRef = db.collection('users').doc(uid);
-
-        await db.runTransaction(async (tx) => {
-          const snap = await tx.get(userRef);
-          if (!snap.exists) throw new Error('Utilisateur introuvable.');
-
-          const doc = snap.data() || {};
-          let soldeDoc = Number(doc.solde || 0);
-          let profitDoc = Number(doc.profit || 0);
-          let triviaGainsDoc = Number(doc.triviaGains || 0);
-
-          // Double-check claim date
-          if (doc.lastTriviaClaimDate === today) {
-            throw new Error('Réclamation du jour déjà effectuée.');
-          }
-
-          // Security check
-          if (REWARD_AMOUNT <= 0 || REWARD_AMOUNT > MAX_INCREMENT_PER_REQUEST) {
-            throw new Error('Montant de récompense invalide.');
-          }
-
-          // Calculate new amounts
-          const newSolde = soldeDoc + REWARD_AMOUNT;
-          const newProfit = profitDoc + REWARD_AMOUNT;
-          const newTriviaGains = triviaGainsDoc + REWARD_AMOUNT;
-
-          // Update transaction
-          tx.update(userRef, {
-            solde: newSolde,
-            profit: newProfit,
-            triviaGains: newTriviaGains,
-            lastTriviaClaimDate: today
-          });
-        });
-
-        // Success
-        userData.lastTriviaClaimDate = today;
-        claimRewardButton.disabled = true;
-        claimRewardButton.textContent = 'Récompense réclamée!';
-        showNotification('success', 'Récompense Ajoutée!', `${REWARD_AMOUNT} FCFA ont été ajoutés à votre solde.`);
-
-        earningsToday = REWARD_AMOUNT;
-        updateDailyStats();
-
-      } catch (err) {
-        console.error('Erreur lors de la réclamation:', err);
-        const msg = err.message || 'Impossible d\'enregistrer la récompense. Réessayez.';
-        showNotification('error', 'Erreur de Réclamation', msg);
-      }
-    });
-
-    nextQuizButton.addEventListener('click', () => {
-      showNotification('info', 'À demain!', 'Vous avez complété votre quiz du jour. Rendez-vous demain!');
-    });
-
-    /******** User data management ********/
-    async function saveUserData(dataToSave) {
-      if (!currentUser) return;
-      try {
-        const userRef = db.collection('users').doc(currentUser.uid);
-        await userRef.set(dataToSave, { merge: true });
-      } catch (error) {
-        console.error("Erreur lors de la sauvegarde des données :", error);
-        showNotification('error', 'Erreur de sauvegarde', 'Impossible de sauvegarder vos données.');
-      }
-    }
-
-    async function loadUserData() {
-      if (!currentUser) throw new Error("Aucun utilisateur connecté.");
-      const userRef = db.collection('users').doc(currentUser.uid);
-      const doc = await userRef.get();
-      const today = getTodayString();
-
-      if (doc.exists) {
-          userData = doc.data() || {};
-      } else {
-        userData = {
-          triviaCompletedToday: 0,
-          triviaEarningsToday: 0,
-          lastTriviaDate: null,
-          lastTriviaClaimDate: null,
-          solde: 0,
-          profit: 0,
-          triviaGains: 0
-        };
-        await saveUserData(userData);
-      }
-      
-      // Reset daily stats if date changed
-      if (userData.lastTriviaDate !== today) {
-          userData.triviaCompletedToday = 0;
-          userData.triviaEarningsToday = 0;
-          userData.lastTriviaDate = today;
-      }
-
-      return userData;
-    }
-
-    function updateUserInfoUI(user, dbData = {}) {
-        const displayName = dbData.displayName || user.displayName || user.email.split('@')[0];
-        if (sidebarUsername) sidebarUsername.textContent = displayName;
-        if (userAvatar) userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    }
-    
-    function applyTheme() {
-        const isDarkMode = userData.theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.innerHTML = isDarkMode 
-            ? '<i class="fas fa-sun"></i><span>Mode jour</span>' 
-            : '<i class="fas fa-moon"></i><span>Mode nuit</span>';
-    }
-
-    /******** Main initialization ********/
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                userData = await loadUserData();
-
-                // Check payment status
-                const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
-                const validStatuses = ['paid', 'active'];
-                if (!validStatuses.includes(userStatus)) {
-                    showNotification('info','Action requise','Veuillez finaliser votre inscription.');
-                    setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
-                    return;
-                }
-                
-                updateUserInfoUI(user, userData);
-                applyTheme();
-                initQuiz();
-                
-                document.body.classList.add('loaded');
-                loader.classList.add('hidden');
-                
-                showNotification('success', 'Bienvenue!', 'Prêt pour le Trivia Challenge!');
-
-            } catch (error) {
-                console.error("Erreur critique lors de l'initialisation :", error);
-                showNotification('error', 'Erreur Critique', "Impossible de charger vos données.");
-                auth.signOut();
-                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+            // Check payment status
+            const userStatus = (userData.status || userData.statut || '').toString().toLowerCase().trim();
+            const validStatuses = ['paid', 'active'];
+            if (!validStatuses.includes(userStatus)) {
+                showNotification('info','Action requise','Veuillez finaliser votre inscription.');
+                setTimeout(() => { window.location.href = 'paiement.html'; }, 2000);
+                return;
             }
-        } else {
-            window.location.href = 'login.html';
+            
+            updateUserInfoUI(user, userData);
+            applyTheme();
+            initQuiz();
+            
+            document.body.classList.add('loaded');
+            loader.classList.add('hidden');
+            
+            showNotification('success', 'Bienvenue!', 'Prêt pour le Trivia Challenge!');
+
+        } catch (error) {
+            console.error("Erreur critique lors de l'initialisation :", error);
+            showNotification('error', 'Erreur Critique', "Impossible de charger vos données.");
+            auth.signOut();
+            setTimeout(() => { window.location.href = 'login.html'; }, 3000);
         }
-    });
-  </script>
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 </body>
 </html>
