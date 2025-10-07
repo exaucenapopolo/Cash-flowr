@@ -706,6 +706,48 @@
         font-size: 1.1rem;
     }
 
+    /* Style pour le CTA vers les tâches */
+    .cta-taches-card {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        max-width: 700px;
+        margin: 30px auto;
+        text-align: center;
+        animation: slideInUp 0.6s ease-out forwards;
+    }
+
+    .cta-taches-card p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .cta-taches-btn {
+        background-color: var(--success-color);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .cta-taches-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        background-color: #4CAF50; /* Vert légèrement plus foncé */
+    }
+
     @keyframes slideInUp {
       from { transform: translateY(50px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -1067,7 +1109,15 @@
         <p class="success-note">Vérifiez attentivement vos informations avant de soumettre. Le traitement peut prendre 24-48 heures.</p>
       </div>
 
-      <!-- HISTORIQUE DES RETRAITS -->
+      <div class="cta-taches-card">
+        <p>
+          Si vous souhaitez retirer de l'argent que vous avez gagné en effectuant des tâches sur **MULAFLOWR**, vous pouvez consulter les tâches disponibles et accumuler des gains.
+        </p>
+        <a href="taches.html" class="cta-taches-btn">
+          <i class="fas fa-tasks"></i> Aller aux Tâches
+        </a>
+      </div>
+
       <div class="historique-card">
         <h2>
           <i class="fas fa-history"></i>
@@ -1077,7 +1127,7 @@
         <div class="historique-table-container" id="historiqueContainer">
           <div class="empty-state">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Chargement de l'historique...</p>
+            <p>Chargement de l'historique en temps réel...</p>
           </div>
         </div>
       </div>
@@ -1132,7 +1182,7 @@
     const notificationContainer = document.getElementById('notificationContainer');
     const historiqueContainer = document.getElementById('historiqueContainer');
     
-    // Éléments d'information (UID retiré)
+    // Éléments d'information
     const infoUsername = document.getElementById('infoUsername');
     const infoEmail = document.getElementById('infoEmail');
     const infoPaymentStatus = document.getElementById('infoPaymentStatus');
@@ -1147,6 +1197,7 @@
     /******** Variables d'état ********/
     let currentUser = null;
     let userData = {};
+    let unsubscribeRetraits = null; // Pour gérer l'écoute en temps réel
 
     // Configuration des méthodes de retrait par pays
     const methodesParPays = {
@@ -1179,6 +1230,7 @@
     }
     
     function formatNumberSafe(n) { 
+        // Fonction pour formater les nombres en XAF (avec séparateur de milliers)
         return (typeof n === 'number' && !isNaN(n)) ? n.toLocaleString('fr-FR') : '0'; 
     }
 
@@ -1202,16 +1254,18 @@
     }
 
     function getStatusBadgeClass(statut) {
+      // Normaliser le statut pour l'affichage
       const s = (statut || 'en_attente').toLowerCase().replace(/\s+/g, '_');
-      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed') return 'approuve';
-      if (s === 'rejete' || s === 'rejeté' || s === 'rejected') return 'rejete';
+      if (s.includes('approuv') || s.includes('complete')) return 'approuve';
+      if (s.includes('rejet')) return 'rejete';
       return 'en_attente';
     }
 
     function getStatusText(statut) {
+      // Normaliser le statut pour l'affichage
       const s = (statut || 'en_attente').toLowerCase().replace(/\s+/g, '_');
-      if (s === 'approuve' || s === 'approuvé' || s === 'complete' || s === 'completed') return 'Approuvé';
-      if (s === 'rejete' || s === 'rejeté' || s === 'rejected') return 'Rejeté';
+      if (s.includes('approuv') || s.includes('complete')) return 'Approuvé';
+      if (s.includes('rejet')) return 'Rejeté';
       return 'En attente';
     }
 
@@ -1320,6 +1374,7 @@
 
     /******** Vérification du statut de paiement ********/
     function isUserPaidFromDoc(docData) {
+      // Logique pour déterminer si l'utilisateur a payé (inchangée)
       if (!docData) return false;
       const candidates = [
         docData.paid, docData.isPaid, docData.paiement, docData.paymentStatus,
@@ -1390,30 +1445,36 @@
         if (userAvatar) userAvatar.textContent = userData.username.charAt(0).toUpperCase();
         if (currentBalanceEl) currentBalanceEl.textContent = formatNumberSafe(userData.solde);
         
-        // Mettre à jour les informations utilisateur (UID RETIRÉ)
+        // Mettre à jour les informations utilisateur
         infoUsername.textContent = userData.username;
         infoEmail.textContent = userData.email;
         infoPaymentStatus.textContent = userData.paid ? '✅ Payé' : '❌ Non payé';
         infoPaymentStatus.style.color = userData.paid ? 'var(--success-color)' : 'var(--danger-color)';
     }
 
-    /******** CHARGEMENT DE L'HISTORIQUE DES RETRAITS ********/
-    async function loadHistoriqueRetraits() {
+    /******** CHARGEMENT ET ÉCOUTE EN TEMPS RÉEL DE L'HISTORIQUE DES RETRAITS (MODIFIÉ) ********/
+    function listenToRetraitHistorique() {
       if (!currentUser || !userData.uid) {
-        console.warn('Impossible de charger l\'historique: utilisateur non connecté');
+        console.warn('Impossible de démarrer l\'écoute: utilisateur non connecté ou UID manquant.');
         return;
       }
+      
+      // Si une écoute est déjà en place, on la désinscrit d'abord
+      if (unsubscribeRetraits) {
+          unsubscribeRetraits();
+      }
 
-      try {
-        console.log('📊 Chargement de l\'historique des retraits pour:', userData.uid);
-        
-        // Requête Firestore pour récupérer les retraits de l'utilisateur
-        const retraitsQuery = db.collection('retraits')
-          .where('userId', '==', userData.uid)
-          .orderBy('date', 'desc')
-          .limit(50);
-        
-        const snapshot = await retraitsQuery.get();
+      console.log('📡 Démarrage de l\'écoute en temps réel pour les retraits de:', userData.uid);
+      
+      // Requête Firestore pour écouter en temps réel
+      const retraitsQuery = db.collection('retraits')
+        .where('userId', '==', userData.uid)
+        .orderBy('date', 'desc')
+        .limit(50);
+      
+      // Utilisation de onSnapshot pour l'écoute en temps réel
+      unsubscribeRetraits = retraitsQuery.onSnapshot(snapshot => {
+        console.log('🔄 Mise à jour en temps réel de l\'historique reçue.');
         
         if (snapshot.empty) {
           historiqueContainer.innerHTML = `
@@ -1425,25 +1486,27 @@
           return;
         }
 
-        // Créer le tableau avec les données
+        // Construire le tableau avec les données à jour
         let tableHTML = `
-          <table class="historique-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Montant</th>
-                <th>Pays</th>
-                <th>Méthode</th>
-                <th>Numéro</th>
-                <th>Description</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div class="historique-table-container">
+            <table class="historique-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Pays</th>
+                  <th>Méthode</th>
+                  <th>Numéro</th>
+                  <th>Statut</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
         `;
 
         snapshot.forEach(doc => {
           const retrait = doc.data();
+          // Utiliser les fonctions de statut mises à jour
           const statusClass = getStatusBadgeClass(retrait.statut);
           const statusText = getStatusText(retrait.statut);
           
@@ -1454,29 +1517,36 @@
               <td>${retrait.pays || 'N/A'}</td>
               <td>${retrait.methode || 'N/A'}</td>
               <td>${retrait.numeroCompte || 'N/A'}</td>
-              <td>${retrait.description || 'N/A'}</td>
               <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+              <td>${retrait.description || 'N/A'}</td>
             </tr>
           `;
         });
 
         tableHTML += `
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         `;
 
         historiqueContainer.innerHTML = tableHTML;
-        console.log('✅ Historique chargé:', snapshot.size, 'retrait(s)');
+        console.log('✅ Historique des retraits mis à jour.');
         
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement de l\'historique:', error);
+      }, error => {
+        console.error('❌ Erreur lors de l\'écoute en temps réel de l\'historique:', error);
         historiqueContainer.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
-            <p>Erreur lors du chargement de l'historique.</p>
+            <p>Erreur lors du chargement de l'historique en temps réel.</p>
           </div>
         `;
-      }
+        // Afficher une notification d'erreur si l'écoute échoue
+        showNotification('error', 'Erreur Temps Réel', 'Impossible de mettre à jour l\'historique en temps réel.');
+      });
+      
+      // Stocker la fonction de désabonnement
+      // NOTE: L'écoute sera automatiquement désabonnée si l'utilisateur se déconnecte grâce à `auth.onAuthStateChanged`
+      // et la réaffectation de `unsubscribeRetraits = null` lors de la déconnexion, ou si on appelle explicitement `unsubscribeRetraits()`.
     }
 
     /******** Logique de retrait - COMMUNICATION AVEC LE SERVEUR ********/
@@ -1537,15 +1607,14 @@
             
             showNotification('success', 'Retrait réussi', 
                 `Votre demande de retrait de ${formatNumberSafe(montant)} XAF a été envoyée avec succès. ` +
-                `Méthode: ${methode} (${pays}). Le traitement peut prendre 24-48 heures.`);
+                `Méthode: ${methode} (${pays}). Elle est en attente de validation.`);
             
             // Réinitialiser le formulaire
             retraitForm.reset();
             methodeSelect.disabled = true;
             methodeSelect.innerHTML = '<option value="">Sélectionnez d\'abord le pays</option>';
             
-            // Recharger l'historique des retraits
-            await loadHistoriqueRetraits();
+            // L'historique sera mis à jour automatiquement par l'écoute en temps réel !
             
         } catch (error) {
             console.error("Erreur lors du retrait :", error);
@@ -1573,8 +1642,8 @@
                 updateUI();
                 applyTheme();
                 
-                // Charger l'historique des retraits
-                await loadHistoriqueRetraits();
+                // Démarrer l'écoute en temps réel de l'historique des retraits
+                listenToRetraitHistorique();
                 
                 document.body.classList.add('loaded');
                 loader.classList.add('hidden');
@@ -1588,6 +1657,11 @@
                 setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             }
         } else {
+             // S'assurer de désactiver l'écoute si l'utilisateur se déconnecte
+            if (unsubscribeRetraits) {
+                unsubscribeRetraits();
+                unsubscribeRetraits = null;
+            }
             window.location.href = 'login.html';
         }
     });
