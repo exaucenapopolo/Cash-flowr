@@ -1709,13 +1709,35 @@ claimButton.addEventListener('click', async () => {
 
 
 /******** Sauvegarde / chargement utilisateur (Firestore) ********/
+/*
+  IMPORTANT CHANGES:
+  - saveUserData will NEVER send the field "solde" (we remove it before sending).
+  - For safety we also avoid sending uid/email/createdAt from the client when calling saveUserData (these are set only at creation).
+  - loadUserData: if document does not exist we create a minimal document that complies with the rules (uid, email, username, createdAt).
+*/
+
 async function saveUserData(key = null, value = null) {
   if (!currentUser) return;
   try {
     const userRef = db.collection('users').doc(currentUser.uid);
-    const dataToSave = key ? { [key]: value } : userData;
+    let dataToSave;
+    if (key) {
+      // single-field update — safe
+      dataToSave = { [key]: value };
+    } else {
+      // copy userData but explicitly remove sensitive/forbidden fields before sending
+      dataToSave = Object.assign({}, userData);
+      // NEVER send solde from client
+      if ('solde' in dataToSave) delete dataToSave.solde;
+      // do not attempt to overwrite server-managed identity fields from client
+      if ('uid' in dataToSave) delete dataToSave.uid;
+      if ('email' in dataToSave) delete dataToSave.email;
+      if ('createdAt' in dataToSave) delete dataToSave.createdAt;
+    }
+    // Only send non-empty objects
+    if (Object.keys(dataToSave).length === 0) return;
     await userRef.set(dataToSave, { merge: true });
-    console.log('Données utilisateur enregistrées.');
+    console.log('Données utilisateur enregistrées (sans solde ni champs sensibles).');
   } catch (error) {
     console.error('Erreur sauvegarde:', error);
     showNotification('error','Erreur sauvegarde','Impossible de sauvegarder vos données.');
@@ -1729,8 +1751,24 @@ async function loadUserData() {
   if (doc.exists) {
     userData = doc.data() || {};
   } else {
-    userData = {};
-    await saveUserData();
+    // Document does not exist: create a minimal document that satisfies "create" rules
+    // We set uid, email, username and createdAt via serverTimestamp
+    const initialUsername = (currentUser.email && typeof currentUser.email === 'string') ? currentUser.email.split('@')[0] : 'Utilisateur';
+    const initialData = {
+      uid: currentUser.uid,
+      email: currentUser.email || '',
+      username: initialUsername,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+      await userRef.set(initialData);
+      // re-read after creation to have real createdAt value
+      const fresh = await userRef.get();
+      userData = fresh.exists ? (fresh.data() || {}) : initialData;
+    } catch (e) {
+      console.error('Erreur création doc utilisateur:', e);
+      throw e;
+    }
   }
   
   // 🟢 ADAPTATION: Charger les statistiques et les flags Instagram
