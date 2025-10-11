@@ -1237,8 +1237,11 @@
       transform: scale(1.05);
       animation: pulse 2s infinite;
     }
-
+    
+    /* MODIFICATION DEMANDÉE : Suppression des points verts */
     .calendar-date.has-task::after {
+      content: none !important; /* Neutralisation forcée du point vert */
+      /* Les styles originaux étaient:
       content: "";
       position: absolute;
       bottom: 5px;
@@ -1246,6 +1249,7 @@
       height: 6px;
       background-color: var(--success-color);
       border-radius: 50%;
+      */
     }
 
     .task-table {
@@ -1274,7 +1278,8 @@
       background-color: rgba(0, 0, 0, 0.03);
       transform: scale(1.01);
     }
-
+    
+    /* Le style .task-status n'est plus pertinent mais on le laisse pour le reste du code */
     .task-status {
       display: inline-block;
       padding: 3px 8px;
@@ -1969,62 +1974,45 @@
         <table class="task-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Day1</th>
-              <th>Day2</th>
-              <th>Status</th>
+              <th>JOUR</th>
+              <th>TÂCHE</th>
+              <th>BONUS</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>Youtube</td>
-              <td>Saturday</td>
-              <td>Sunday</td>
-              <td><span class="task-status">Active</span></td>
+              <td>LUNDI</td>
+              <td>Vidéos TikTok</td>
+              <td>Liste de contact gratuite, Booster, Visibilité, Spinwell</td>
             </tr>
             <tr>
-              <td>2</td>
-              <td>triviatz</td>
-              <td>Tuesday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Completed</span></td>
+              <td>MARDI</td>
+              <td>Vidéos YouTube</td>
+              <td>Liste de contact gratuite, Canva Pro, Connexion gratuite, Spinwell</td>
             </tr>
             <tr>
-              <td>3</td>
-              <td>Tiktok</td>
-              <td>Tuesday</td>
-              <td>Wednesday</td>
-              <td><span class="task-status">Completed</span></td>
+              <td>MERCREDI</td>
+              <td>Vidéos Instagram</td>
+              <td>Liste de contact gratuite, Booster, Visibilité, Canva Pro</td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>whatsapp</td>
-              <td>Monday</td>
-              <td>Wednesday</td>
-              <td><span class="task-status">Pending</span></td>
+              <td>JEUDI</td>
+              <td>Trivia Challenge</td>
+              <td>Liste de contact gratuite, Connexion gratuite, Spinwell</td>
             </tr>
             <tr>
-              <td>5</td>
-              <td>trivia</td>
-              <td>Tuesday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Completed</span></td>
+              <td>VENDREDI</td>
+              <td>Game Publicitaire</td>
+              <td>Booster, Visibilité, Canva Pro, Connexion gratuite</td>
             </tr>
             <tr>
-              <td>6</td>
-              <td>ads</td>
-              <td>Monday</td>
-              <td>Thursday</td>
-              <td><span class="task-status">Pending</span></td>
+              <td>SAMEDI</td>
+              <td>Gagner via WhatsApp</td>
+              <td>Liste de contact gratuite, Booster, Visibilité, Spinwell</td>
             </tr>
-            <tr>
-              <td>7</td>
-              <td>blogs</td>
-              <td>Monday</td>
-              <td>Friday</td>
-              <td><span class="task-status">Active</span></td>
+            <tr style="opacity: 0.7;"> <td>DIMANCHE</td>
+              <td>Aucune tâche (Repos)</td>
+              <td>Connexion gratuite, Spinwell</td>
             </tr>
           </tbody>
         </table>
@@ -2192,6 +2180,7 @@ function updateCalendar() {
     dateCell.textContent = day;
     const today = new Date();
     if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dateCell.classList.add('active');
+    // REMARQUE: La ligne ci-dessous ajoute la classe 'has-task' mais le CSS a été modifié pour masquer l'affichage du point.
     if (Math.random() > 0.7) dateCell.classList.add('has-task');
     calendarGrid.appendChild(dateCell);
   }
