@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page en Travail - MULAFLOWR Agency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <style>
+        /* Réinitialisation et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        /* Carte principale */
+        .main-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        /* En-tête et illustration */
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, #ff0080, #00ffcc, #ff0080);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shine 3s linear infinite;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .tagline {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.2rem;
+            color: #e0f7fa;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .illustration-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 0 auto 2rem;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 10px;
+            left: 30px;
+            background: radial-gradient(circle, #ff0080, transparent);
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 50px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #00ffcc, transparent);
+            animation-delay: -2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 20px;
+            left: 100px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffff00, transparent);
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Section du message */
+        .message-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8rem;
+            color: #fff;
+            text-shadow: 0 0 20px #ff0080, 0 0 30px #00ffcc;
+            margin-bottom: 1rem;
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .message-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #e0f7fa;
+            animation: colorChange 5s infinite alternate;
+        }
+
+        @keyframes colorChange {
+            0% { color: #e0f7fa; }
+            25% { color: #ffeb3b; }
+            50% { color: #00ffcc; }
+            75% { color: #ff0080; }
+            100% { color: #4fc3f7; }
+        }
+
+        .message-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            color: #fff;
+        }
+
+        .highlight {
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        }
+
+        /* Compte à rebours */
+        .countdown-section {
+            margin: 2rem 0;
+        }
+
+        .countdown-title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #e0f7fa;
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem 1rem;
+            min-width: 100px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: bounce 2s infinite;
+        }
+
+        .countdown-box:nth-child(1) { animation-delay: 0.1s; }
+        .countdown-box:nth-child(2) { animation-delay: 0.2s; }
+        .countdown-box:nth-child(3) { animation-delay: 0.3s; }
+        .countdown-box:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .countdown-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+            display: block;
+        }
+
+        .countdown-label {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            color: #e0f7fa;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        /* Barre de progression */
+        .progress-section {
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+
+        .progress-text {
+            font-family: 'Roboto Mono', monospace;
+            margin-bottom: 0.5rem;
+            color: #e0f7fa;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0080, #00ffcc);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+            animation: progressPulse 2s infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { box-shadow: 0 0 10px #ff0080; }
+            50% { box-shadow: 0 0 20px #00ffcc; }
+        }
+
+        /* Équipe */
+        .team-section {
+            margin-top: 2rem;
+        }
+
+        .team-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            color: #e0f7fa;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Icônes animées */
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .animated-icon {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .animated-icon:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .animated-icon:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo { font-size: 2.5rem; }
+            .message-section h1 { font-size: 5rem; }
+            .message-section h2 { font-size: 1.8rem; }
+            .countdown-box { min-width: 80px; padding: 1rem 0.5rem; }
+            .countdown-value { font-size: 2rem; }
+            .illustration-container { width: 250px; height: 150px; }
+        }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 2rem; }
+            .message-section h1 { font-size: 4rem; }
+            .message-section h2 { font-size: 1.5rem; }
+            .countdown-container { gap: 0.8rem; }
+            .countdown-box { min-width: 70px; }
+            .countdown-value { font-size: 1.5rem; }
+            .container { padding: 1rem; }
+            .main-card { padding: 2rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <!-- En-tête avec logo et illustration -->
+            <header class="header-section">
+                <h1 class="logo">MULAFLOWR</h1>
+                <p class="tagline">A G E N C Y</p>
+                <div class="illustration-container">
+                    <div class="floating-element"></div>
+                    <div class="floating-element"></div>
+                    <div class="floating-element"></div>
+                </div>
+            </header>
+
+            <!-- Message principal -->
+            <section class="message-section">
+                <h1>404</h1>
+                <h2>Oups ! Page Non Trouvée</h2>
+                <p class="message-text">
+                    Notre équipe <span class="highlight">Social Boost Horizon</span> est en pleine création ! Nous travaillons avec passion pour vous offrir une expérience <span class="highlight">exceptionnelle</span>. Revenez dans <span class="highlight">10 jours</span> pour découvrir des résultats époustouflants.
+                </p>
+            </section>
+
+            <!-- Icônes animées -->
+            <div class="icon-container">
+                <lord-icon
+                    src="https://cdn.lordicon.com/urhcgqxz.json"
+                    trigger="loop"
+                    colors="primary:#ffffff,secondary:#e0f7fa"
+                    class="animated-icon">
+                </lord-icon>
+                <lord-icon
+                    src="https://cdn.lordicon.com/gqdnbwtp.json"
+                    trigger="loop"
+                    colors="primary:#ffffff,secondary:#ffeb3b"
+                    class="animated-icon">
+                </lord-icon>
+                <lord-icon
+                    src="https://cdn.lordicon.com/puvaffet.json"
+                    trigger="loop"
+                    colors="primary:#ffffff,secondary:#00ffcc"
+                    class="animated-icon">
+                </lord-icon>
+            </div>
+
+            <!-- Compte à rebours -->
+            <section class="countdown-section">
+                <h3 class="countdown-title">Dévoilement dans :</h3>
+                <div class="countdown-container">
+                    <div class="countdown-box">
+                        <span class="countdown-value" id="days">00</span>
+                        <span class="countdown-label">Jours</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Heures</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Secondes</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Barre de progression -->
+            <section class="progress-section">
+                <p class="progress-text">Avancement du projet :</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </section>
+
+            <!-- Section équipe -->
+            <section class="team-section">
+                <div class="team-badge">
+                    Développé par Social Boost Horizon
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Configuration du compte à rebours de 10 jours
+        const countdownDate = new Date();
+        countdownDate.setDate(countdownDate.getDate() + 10);
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = countdownDate - now;
+
+            if (distance < 0) {
+                document.getElementById("days").innerText = "00";
+                document.getElementById("hours").innerText = "00";
+                document.getElementById("minutes").innerText = "00";
+                document.getElementById("seconds").innerText = "00";
+                document.getElementById("progressFill").style.width = "100%";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+
+            // Mise à jour de la barre de progression
+            const totalDuration = 10 * 24 * 60 * 60 * 1000;
+            const timePassed = totalDuration - distance;
+            const progressPercentage = Math.min(100, (timePassed / totalDuration) * 100);
+            document.getElementById("progressFill").style.width = progressPercentage + "%";
+        }
+
+        // Mettre à jour le compte à rebours toutes les secondes
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Appel initial
+    </script>
+</body>
+</html>
